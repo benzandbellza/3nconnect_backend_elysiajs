@@ -1,15 +1,46 @@
 {
-  "name": "3nconnect_backend_elysiajs",
+  "name": "elysia-ws",
   "version": "1.0.50",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "bun run --watch src/index.ts"
   },
   "dependencies": {
-    "elysia": "latest"
+    "@apollo/server": "^4.13.0",
+    "@elysiajs/apollo": "^0.2.1",
+    "@elysiajs/bearer": "^1.4.4",
+    "@elysiajs/cors": "^1.4.2",
+    "@elysiajs/jwt": "^1.4.2",
+    "@elysiajs/openapi": "^1.4.15",
+    "@elysiajs/opentelemetry": "^1.4.11",
+    "@influxdata/influxdb-client": "^1.35.0",
+    "@opentelemetry/exporter-trace-otlp-proto": "^0.200.0",
+    "@opentelemetry/sdk-trace-base": "^2.7.1",
+    "@prisma/adapter-mssql": "^7.8.0",
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "@types/dotenv": "^8.2.3",
+    "@types/mssql": "^9.1.11",
+    "dotenv": "^17.4.2",
+    "elysia": "^1.4.28",
+    "graphql": "^16.14.0",
+    "influx": "^5.12.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.6.1",
+    "mssql": "^11.0.1",
+    "nodemailer": "^7.0.13",
+    "prismabox": "^1.1.26",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
   },
   "devDependencies": {
-    "bun-types": "latest"
+    "@types/node": "^25.6.2",
+    "@types/nodemailer": "^7.0.11",
+    "bun-types": "latest",
+    "prisma": "^7.8.0"
   },
-  "module": "src/index.js"
+  "module": "src/index.js",
+  "overrides": {
+    "hono": "^4.12.2"
+  }
 }
