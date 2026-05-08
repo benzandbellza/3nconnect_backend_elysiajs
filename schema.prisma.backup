@@ -1,0 +1,30 @@
+model public_users {
+  id                                   String              @id @unique @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name                                 String              @unique
+  avatar_url                           String?
+  is_online                            Boolean?            @default(false)
+  sharepoint_id                        BigInt?
+  person_id                            String?
+  email                                String?
+  line_id                              String?
+  planetone_id                         String?
+  tel                                  String?
+  position                             String?
+  team                                 String?
+  manager                              String?             @db.Uuid
+  manager2                             String?             @db.Uuid
+  address                              String?
+  authid                               String?             @unique @db.Uuid
+  last_online                          String?
+  fcm_token                            String?
+  salesupport                          String?             @db.Uuid
+  role                                 String?             @default("user")
+  pdpa_accepted                        Boolean?
+  pdpa_accepted_at                     DateTime?           @db.Timestamptz(6)
+  pdpa_version                         String?
+  department                           BigInt?
+  company                              BigInt?
+
+  @@map("users")
+  @@schema("public")
+}
