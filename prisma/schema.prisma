@@ -16,6 +16,29 @@ datasource db {
   schemas  = ["3nconnect"]
 }
 
+/// Hierarchical product categories using Parent Reference + Ancestors Array pattern.
+/// ancestors (TEXT[]) is GIN-indexed – use: WHERE 'cat_003' = ANY(ancestors)
+model categories {
+  id         String       @id
+  name       String
+  slug       String       @unique
+  parent_id  String?
+  parent     categories?  @relation("CategoryTree", fields: [parent_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  children   categories[] @relation("CategoryTree")
+  ancestors  String[]     @default([])
+  level      Int          @default(0) @db.SmallInt
+  sort_order Int          @default(0) @db.SmallInt
+  image_url  String?
+  is_active  Boolean      @default(true)
+  created_at DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at DateTime?    @db.Timestamptz(6)
+
+  @@index([parent_id])
+  @@index([level])
+  @@index([is_active])
+  @@schema("3nconnect")
+}
+
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model brands {
   id          Int        @id @default(autoincrement())

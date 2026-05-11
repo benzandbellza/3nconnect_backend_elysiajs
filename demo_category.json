@@ -1,0 +1,1004 @@
+[
+  {
+    "_id": "cat_001",
+    "name": "Biosafety Cabinet / CleanBench / Hood",
+    "slug": "biosafety-cabinet-cleanbench-hood",
+    "parent_id": null,
+    "ancestors": [],
+    "level": 0,
+    "sort_order": 1,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_002",
+    "name": "Cell Culture",
+    "slug": "cell-culture",
+    "parent_id": null,
+    "ancestors": [],
+    "level": 0,
+    "sort_order": 2,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_003",
+    "name": "Equipment & Instrument",
+    "slug": "equipment-instrument",
+    "parent_id": null,
+    "ancestors": [],
+    "level": 0,
+    "sort_order": 3,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_004",
+    "name": "Filtration",
+    "slug": "filtration",
+    "parent_id": null,
+    "ancestors": [],
+    "level": 0,
+    "sort_order": 4,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_005",
+    "name": "Health & Aesthetics",
+    "slug": "health-aesthetics",
+    "parent_id": null,
+    "ancestors": [],
+    "level": 0,
+    "sort_order": 5,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_006",
+    "name": "Hygiene & Cuisine",
+    "slug": "hygiene-cuisine",
+    "parent_id": null,
+    "ancestors": [],
+    "level": 0,
+    "sort_order": 6,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_007",
+    "name": "Microbiology",
+    "slug": "microbiology",
+    "parent_id": null,
+    "ancestors": [],
+    "level": 0,
+    "sort_order": 7,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_008",
+    "name": "Plasticware & Supplies",
+    "slug": "plasticware-supplies",
+    "parent_id": null,
+    "ancestors": [],
+    "level": 0,
+    "sort_order": 8,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_009",
+    "name": "Protein & Cell Analysis",
+    "slug": "protein-cell-analysis",
+    "parent_id": null,
+    "ancestors": [],
+    "level": 0,
+    "sort_order": 9,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_011",
+    "name": "Biosafety Cabinet (BSC)",
+    "slug": "biosafety-cabinet-bsc",
+    "parent_id": "cat_001",
+    "ancestors": [
+      "cat_001"
+    ],
+    "level": 1,
+    "sort_order": 1,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_031",
+    "name": "Liquid Handling",
+    "slug": "liquid-handling",
+    "parent_id": "cat_003",
+    "ancestors": [
+      "cat_003"
+    ],
+    "level": 1,
+    "sort_order": 1,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_032",
+    "name": "Centrifuge",
+    "slug": "centrifuge",
+    "parent_id": "cat_003",
+    "ancestors": [
+      "cat_003"
+    ],
+    "level": 1,
+    "sort_order": 2,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_033",
+    "name": "Water Bath / Circulator",
+    "slug": "water-bath-circulator",
+    "parent_id": "cat_003",
+    "ancestors": [
+      "cat_003"
+    ],
+    "level": 1,
+    "sort_order": 3,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_034",
+    "name": "Mixing Device",
+    "slug": "mixing-device",
+    "parent_id": "cat_003",
+    "ancestors": [
+      "cat_003"
+    ],
+    "level": 1,
+    "sort_order": 4,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_035",
+    "name": "Spectrophotometer & Elisa",
+    "slug": "spectrophotometer-elisa",
+    "parent_id": "cat_003",
+    "ancestors": [
+      "cat_003"
+    ],
+    "level": 1,
+    "sort_order": 5,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_036",
+    "name": "Incubator",
+    "slug": "incubator",
+    "parent_id": "cat_003",
+    "ancestors": [
+      "cat_003"
+    ],
+    "level": 1,
+    "sort_order": 6,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_037",
+    "name": "Homogenizer / Overhead Stirrer",
+    "slug": "homogenizer-overhead-stirrer",
+    "parent_id": "cat_003",
+    "ancestors": [
+      "cat_003"
+    ],
+    "level": 1,
+    "sort_order": 7,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_038",
+    "name": "Shaker",
+    "slug": "shaker",
+    "parent_id": "cat_003",
+    "ancestors": [
+      "cat_003"
+    ],
+    "level": 1,
+    "sort_order": 8,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_039",
+    "name": "Desiccator",
+    "slug": "desiccator",
+    "parent_id": "cat_003",
+    "ancestors": [
+      "cat_003"
+    ],
+    "level": 1,
+    "sort_order": 9,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_040",
+    "name": "Liquid Nitrogen Storage",
+    "slug": "liquid-nitrogen-storage",
+    "parent_id": "cat_003",
+    "ancestors": [
+      "cat_003"
+    ],
+    "level": 1,
+    "sort_order": 10,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_041",
+    "name": "Molecular Biology Equipment",
+    "slug": "molecular-biology-equipment",
+    "parent_id": "cat_003",
+    "ancestors": [
+      "cat_003"
+    ],
+    "level": 1,
+    "sort_order": 11,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_042",
+    "name": "Transport Box",
+    "slug": "transport-box",
+    "parent_id": "cat_003",
+    "ancestors": [
+      "cat_003"
+    ],
+    "level": 1,
+    "sort_order": 12,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_043",
+    "name": "Lab Support Equipment",
+    "slug": "lab-support-equipment",
+    "parent_id": "cat_003",
+    "ancestors": [
+      "cat_003"
+    ],
+    "level": 1,
+    "sort_order": 13,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_044",
+    "name": "Peristaltic Pump",
+    "slug": "peristaltic-pump",
+    "parent_id": "cat_004",
+    "ancestors": [
+      "cat_004"
+    ],
+    "level": 1,
+    "sort_order": 1,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_045",
+    "name": "Vacuum Pump",
+    "slug": "vacuum-pump",
+    "parent_id": "cat_004",
+    "ancestors": [
+      "cat_004"
+    ],
+    "level": 1,
+    "sort_order": 2,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_051",
+    "name": "Dermatology Equipment",
+    "slug": "dermatology-equipment",
+    "parent_id": "cat_005",
+    "ancestors": [
+      "cat_005"
+    ],
+    "level": 1,
+    "sort_order": 1,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_061",
+    "name": "Cryogenic Cooking",
+    "slug": "cryogenic-cooking",
+    "parent_id": "cat_006",
+    "ancestors": [
+      "cat_006"
+    ],
+    "level": 1,
+    "sort_order": 1,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_071",
+    "name": "Stomacher",
+    "slug": "stomacher",
+    "parent_id": "cat_007",
+    "ancestors": [
+      "cat_007"
+    ],
+    "level": 1,
+    "sort_order": 1,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_081",
+    "name": "Tubes",
+    "slug": "tubes",
+    "parent_id": "cat_008",
+    "ancestors": [
+      "cat_008"
+    ],
+    "level": 1,
+    "sort_order": 1,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_082",
+    "name": "Boxes & Racks",
+    "slug": "boxes-racks",
+    "parent_id": "cat_008",
+    "ancestors": [
+      "cat_008"
+    ],
+    "level": 1,
+    "sort_order": 2,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_083",
+    "name": "Containers",
+    "slug": "containers",
+    "parent_id": "cat_008",
+    "ancestors": [
+      "cat_008"
+    ],
+    "level": 1,
+    "sort_order": 3,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_084",
+    "name": "Pipette Tips",
+    "slug": "pipette-tips",
+    "parent_id": "cat_008",
+    "ancestors": [
+      "cat_008"
+    ],
+    "level": 1,
+    "sort_order": 4,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_085",
+    "name": "Disposable Pipette",
+    "slug": "disposable-pipette",
+    "parent_id": "cat_008",
+    "ancestors": [
+      "cat_008"
+    ],
+    "level": 1,
+    "sort_order": 5,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_086",
+    "name": "PPE / Safety Wear",
+    "slug": "ppe-safety-wear",
+    "parent_id": "cat_008",
+    "ancestors": [
+      "cat_008"
+    ],
+    "level": 1,
+    "sort_order": 6,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_087",
+    "name": "Storage & Organization",
+    "slug": "storage-organization",
+    "parent_id": "cat_008",
+    "ancestors": [
+      "cat_008"
+    ],
+    "level": 1,
+    "sort_order": 7,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_091",
+    "name": "Automate Cell Counter",
+    "slug": "automate-cell-counter",
+    "parent_id": "cat_009",
+    "ancestors": [
+      "cat_009"
+    ],
+    "level": 1,
+    "sort_order": 1,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_311",
+    "name": "Auto Pipette",
+    "slug": "auto-pipette",
+    "parent_id": "cat_031",
+    "ancestors": [
+      "cat_003",
+      "cat_031"
+    ],
+    "level": 2,
+    "sort_order": 1,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_312",
+    "name": "Dispensor",
+    "slug": "dispensor",
+    "parent_id": "cat_031",
+    "ancestors": [
+      "cat_003",
+      "cat_031"
+    ],
+    "level": 2,
+    "sort_order": 2,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_321",
+    "name": "Low Speed Centrifuge",
+    "slug": "low-speed-centrifuge",
+    "parent_id": "cat_032",
+    "ancestors": [
+      "cat_003",
+      "cat_032"
+    ],
+    "level": 2,
+    "sort_order": 1,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_322",
+    "name": "High Speed Centrifuge",
+    "slug": "high-speed-centrifuge",
+    "parent_id": "cat_032",
+    "ancestors": [
+      "cat_003",
+      "cat_032"
+    ],
+    "level": 2,
+    "sort_order": 2,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_323",
+    "name": "Rotor & Accessories",
+    "slug": "rotor-accessories",
+    "parent_id": "cat_032",
+    "ancestors": [
+      "cat_003",
+      "cat_032"
+    ],
+    "level": 2,
+    "sort_order": 3,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_324",
+    "name": "Immunohematology Centrifuge",
+    "slug": "immunohematology-centrifuge",
+    "parent_id": "cat_032",
+    "ancestors": [
+      "cat_003",
+      "cat_032"
+    ],
+    "level": 2,
+    "sort_order": 4,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_325",
+    "name": "PRP Centrifuge",
+    "slug": "prp-centrifuge",
+    "parent_id": "cat_032",
+    "ancestors": [
+      "cat_003",
+      "cat_032"
+    ],
+    "level": 2,
+    "sort_order": 5,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_331",
+    "name": "Bead Bath",
+    "slug": "bead-bath",
+    "parent_id": "cat_033",
+    "ancestors": [
+      "cat_003",
+      "cat_033"
+    ],
+    "level": 2,
+    "sort_order": 1,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_341",
+    "name": "Vortex Mixer",
+    "slug": "vortex-mixer",
+    "parent_id": "cat_034",
+    "ancestors": [
+      "cat_003",
+      "cat_034"
+    ],
+    "level": 2,
+    "sort_order": 1,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_351",
+    "name": "UV/Visible Spectrophotometer",
+    "slug": "uv-visible-spectrophotometer",
+    "parent_id": "cat_035",
+    "ancestors": [
+      "cat_003",
+      "cat_035"
+    ],
+    "level": 2,
+    "sort_order": 1,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_352",
+    "name": "Elisa Reader",
+    "slug": "elisa-reader",
+    "parent_id": "cat_035",
+    "ancestors": [
+      "cat_003",
+      "cat_035"
+    ],
+    "level": 2,
+    "sort_order": 2,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_353",
+    "name": "NIR Spectrophotometer",
+    "slug": "nir-spectrophotometer",
+    "parent_id": "cat_035",
+    "ancestors": [
+      "cat_003",
+      "cat_035"
+    ],
+    "level": 2,
+    "sort_order": 3,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_354",
+    "name": "Fluorometer",
+    "slug": "fluorometer",
+    "parent_id": "cat_035",
+    "ancestors": [
+      "cat_003",
+      "cat_035"
+    ],
+    "level": 2,
+    "sort_order": 4,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_361",
+    "name": "General Incubator",
+    "slug": "general-incubator",
+    "parent_id": "cat_036",
+    "ancestors": [
+      "cat_003",
+      "cat_036"
+    ],
+    "level": 2,
+    "sort_order": 1,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_362",
+    "name": "Biochemical Incubator",
+    "slug": "biochemical-incubator",
+    "parent_id": "cat_036",
+    "ancestors": [
+      "cat_003",
+      "cat_036"
+    ],
+    "level": 2,
+    "sort_order": 2,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_371",
+    "name": "Homogenizer",
+    "slug": "homogenizer",
+    "parent_id": "cat_037",
+    "ancestors": [
+      "cat_003",
+      "cat_037"
+    ],
+    "level": 2,
+    "sort_order": 1,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_381",
+    "name": "Microplate Shaker",
+    "slug": "microplate-shaker",
+    "parent_id": "cat_038",
+    "ancestors": [
+      "cat_003",
+      "cat_038"
+    ],
+    "level": 2,
+    "sort_order": 1,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_401",
+    "name": "Liquid Nitrogen Accessories",
+    "slug": "liquid-nitrogen-accessories",
+    "parent_id": "cat_040",
+    "ancestors": [
+      "cat_003",
+      "cat_040"
+    ],
+    "level": 2,
+    "sort_order": 1,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_402",
+    "name": "Liquid Nitrogen Tank",
+    "slug": "liquid-nitrogen-tank",
+    "parent_id": "cat_040",
+    "ancestors": [
+      "cat_003",
+      "cat_040"
+    ],
+    "level": 2,
+    "sort_order": 2,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_411",
+    "name": "Gel Electrophoresis",
+    "slug": "gel-electrophoresis",
+    "parent_id": "cat_041",
+    "ancestors": [
+      "cat_003",
+      "cat_041"
+    ],
+    "level": 2,
+    "sort_order": 1,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_412",
+    "name": "Automated Nucleic Acid Extraction System",
+    "slug": "automated-nucleic-acid-extraction-system",
+    "parent_id": "cat_041",
+    "ancestors": [
+      "cat_003",
+      "cat_041"
+    ],
+    "level": 2,
+    "sort_order": 2,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_431",
+    "name": "Clamps & Stands",
+    "slug": "clamps-stands",
+    "parent_id": "cat_043",
+    "ancestors": [
+      "cat_003",
+      "cat_043"
+    ],
+    "level": 2,
+    "sort_order": 1,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_811",
+    "name": "Cryovial",
+    "slug": "cryovial",
+    "parent_id": "cat_081",
+    "ancestors": [
+      "cat_008",
+      "cat_081"
+    ],
+    "level": 2,
+    "sort_order": 1,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_812",
+    "name": "Conical Tube",
+    "slug": "conical-tube",
+    "parent_id": "cat_081",
+    "ancestors": [
+      "cat_008",
+      "cat_081"
+    ],
+    "level": 2,
+    "sort_order": 2,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_821",
+    "name": "Tube Rack",
+    "slug": "tube-rack",
+    "parent_id": "cat_082",
+    "ancestors": [
+      "cat_008",
+      "cat_082"
+    ],
+    "level": 2,
+    "sort_order": 1,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_822",
+    "name": "Freezer Box",
+    "slug": "freezer-box",
+    "parent_id": "cat_082",
+    "ancestors": [
+      "cat_008",
+      "cat_082"
+    ],
+    "level": 2,
+    "sort_order": 2,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_823",
+    "name": "Tip Box",
+    "slug": "tip-box",
+    "parent_id": "cat_082",
+    "ancestors": [
+      "cat_008",
+      "cat_082"
+    ],
+    "level": 2,
+    "sort_order": 3,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_831",
+    "name": "Staining Containers",
+    "slug": "staining-containers",
+    "parent_id": "cat_083",
+    "ancestors": [
+      "cat_008",
+      "cat_083"
+    ],
+    "level": 2,
+    "sort_order": 1,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_851",
+    "name": "Dropper",
+    "slug": "dropper",
+    "parent_id": "cat_085",
+    "ancestors": [
+      "cat_008",
+      "cat_085"
+    ],
+    "level": 2,
+    "sort_order": 1,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  },
+  {
+    "_id": "cat_871",
+    "name": "Slide Storage / Slide Box",
+    "slug": "slide-storage-slide-box",
+    "parent_id": "cat_087",
+    "ancestors": [
+      "cat_008",
+      "cat_087"
+    ],
+    "level": 2,
+    "sort_order": 1,
+    "image_url": null,
+    "is_active": true,
+    "created_at": "2026-05-11T00:00:00.000Z",
+    "updated_at": "2026-05-11T00:00:00.000Z"
+  }
+]
