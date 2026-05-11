@@ -21,10 +21,8 @@ datasource db {
 model categories {
   id         String       @id
   name       String
-  slug       String       @unique
+  slug       String       @unique(map: "categories_slug_unique")
   parent_id  String?
-  parent     categories?  @relation("CategoryTree", fields: [parent_id], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  children   categories[] @relation("CategoryTree")
   ancestors  String[]     @default([])
   level      Int          @default(0) @db.SmallInt
   sort_order Int          @default(0) @db.SmallInt
@@ -32,10 +30,15 @@ model categories {
   is_active  Boolean      @default(true)
   created_at DateTime     @default(now()) @db.Timestamptz(6)
   updated_at DateTime?    @db.Timestamptz(6)
+  parent     categories?  @relation("CategoryTree", fields: [parent_id], references: [id], onUpdate: NoAction)
+  children   categories[] @relation("CategoryTree")
+  products   products[]
 
-  @@index([parent_id])
-  @@index([level])
-  @@index([is_active])
+  @@index([ancestors], map: "idx_categories_ancestors", type: Gin)
+  @@index([is_active], map: "idx_categories_is_active")
+  @@index([level], map: "idx_categories_level")
+  @@index([parent_id], map: "idx_categories_parent_id")
+  @@index([sort_order], map: "idx_categories_sort_order")
   @@schema("3nconnect")
 }
 
@@ -82,70 +85,39 @@ model countries {
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model product_type_one {
-  id               Int                @id(map: "product_type_pkey") @default(autoincrement())
-  type_name        String?
-  created_at       DateTime           @default(now()) @db.Timestamptz(6)
-  updated_at       DateTime?          @db.Timestamptz(6)
-  is_active        Boolean
-  product_type_two product_type_two[]
-  products         products[]
-
-  @@schema("3nconnect")
-}
-
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model product_type_three {
-  id                  Int              @id(map: "product_type_three_duplicate_pkey") @default(autoincrement())
-  type_name           String?
+model products {
+  id                  Int              @id @default(autoincrement())
+  product_name        String?
+  product_description String?
+  mat_identity        String?
+  company_id          Int?
+  brand_id            Int?
+  min_price           Float?
+  online_price        Float?
   created_at          DateTime         @default(now()) @db.Timestamptz(6)
   updated_at          DateTime?        @db.Timestamptz(6)
-  is_active           Boolean
-  product_type_two_id Int
-  product_type_two    product_type_two @relation(fields: [product_type_two_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  products            products[]
-
-  @@schema("3nconnect")
-}
-
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model product_type_two {
-  id                  Int                  @id @default(autoincrement())
-  type_name           String?
-  created_at          DateTime             @default(now()) @db.Timestamptz(6)
-  updated_at          DateTime?            @db.Timestamptz(6)
-  is_active           Boolean
-  product_type_one_id Int
-  product_type_three  product_type_three[]
-  product_type_one    product_type_one     @relation(fields: [product_type_one_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  products            products[]
+  is_active           Boolean?
+  category_hierarchy  String[]
+  mat_unit_identity   String?
+  unit                String?
+  is_online_active    Boolean?
+  category_id         String?
+  product_images      product_images[]
+  brands              brands?          @relation(fields: [brand_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  categories          categories?      @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  companies           companies?       @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@schema("3nconnect")
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model products {
-  id                    Int                 @id @default(autoincrement())
-  product_name          String?
-  product_description   String?
-  mat_identity          String?
-  company_id            Int?
-  brand_id              Int?
-  min_price             Float?
-  online_price          Float?
-  product_type_one_id   Int?
-  product_type_two_id   Int?
-  product_type_three_id Int?
-  created_at            DateTime            @default(now()) @db.Timestamptz(6)
-  updated_at            DateTime?           @db.Timestamptz(6)
-  is_active             Boolean?
-  brands                brands?             @relation(fields: [brand_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  companies             companies?          @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  product_type_one      product_type_one?   @relation(fields: [product_type_one_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  product_type_three    product_type_three? @relation(fields: [product_type_three_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  product_type_two      product_type_two?   @relation(fields: [product_type_two_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+model product_images {
+  id         Int       @id @default(autoincrement())
+  product_id Int?
+  url_image  String?
+  is_show    Boolean?
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+  products   products? @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("3nconnect")
 }
