@@ -236,7 +236,71 @@ export const ecommerceRoute = new Elysia({
     "/product-categories",
     async ({ headers, set }) => {
       try {
-        const response = await prisma.categories.findMany({
+        const response = await prisma.product_categories.findMany({
+          where : {
+            level: 0,
+          },
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            other_product_categories: {
+              where: {
+                level: 1,
+              },
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+                other_product_categories: {
+                  where: {
+                    level: 2,
+                  },
+                  select: {
+                    id: true,
+                    name: true,
+                    slug: true,
+                  },
+                },
+              },
+            }
+          },
+          orderBy: {
+            id: "asc",
+          }
+        });
+
+        if (!response) {
+          set.status = 404;
+          return { message: "No valid product categories found" };
+        }
+        return response;
+      } catch (error) {
+        set.status = 500;
+        return { message: "Internal server error" };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Product Categories - Find All",
+        description: `
+          This endpoint retrieves all valid product categories in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
+  .get(
+    "/product-categories/active",
+    async ({ headers, set }) => {
+      try {
+        const response = await prisma.product_categories.findMany({
           where : {
             is_active : true,
             level: 0,
@@ -245,7 +309,7 @@ export const ecommerceRoute = new Elysia({
             id: true,
             name: true,
             slug: true,
-            children: {
+            other_product_categories: {
               where: {
                 is_active: true,
                 level: 1,
@@ -254,7 +318,7 @@ export const ecommerceRoute = new Elysia({
                 id: true,
                 name: true,
                 slug: true,
-                children: {
+                other_product_categories: {
                   where: {
                     is_active: true,
                     level: 2,
@@ -307,13 +371,13 @@ export const ecommerceRoute = new Elysia({
 
         if(!parent_id){
           // Added new category with level 0
-          const countLevel = await prisma.categories.count({
+          const countLevel = await prisma.product_categories.count({
             where : {
               level : 0,
             }
           });
 
-          await prisma.categories.create({
+          await prisma.product_categories.create({
             data: {
               id : `cat_00${countLevel + 1}`,
               name : name,
@@ -325,7 +389,7 @@ export const ecommerceRoute = new Elysia({
           });
         }else{
           // Added new category with level 1 or level 2
-          const parentCategory = await prisma.categories.findUnique({
+          const parentCategory = await prisma.product_categories.findUnique({
             where: {
               id: parent_id,
             },
@@ -337,13 +401,13 @@ export const ecommerceRoute = new Elysia({
           }
 
           const level = parentCategory.level + 1;
-          const countLevel = await prisma.categories.count({
+          const countLevel = await prisma.product_categories.count({
             where : {
               level : level,
             }
           });
 
-          await prisma.categories.create({
+          await prisma.product_categories.create({
             data: {
               id : `cat_${level}1${countLevel + 1}`,
               name : name,
@@ -391,7 +455,7 @@ export const ecommerceRoute = new Elysia({
         const { category_id } = params;
         const { name, slug, parent_id, is_active } = body;
 
-        const category = await prisma.categories.findUnique({
+        const category = await prisma.product_categories.findUnique({
           where: {
             id: category_id,
           },
@@ -402,7 +466,7 @@ export const ecommerceRoute = new Elysia({
           return { message: "Product category not found" };
         }
 
-        await prisma.categories.update({
+        await prisma.product_categories.update({
           where: {
             id: category_id,
           },
@@ -452,7 +516,7 @@ export const ecommerceRoute = new Elysia({
       try {
         const { category_id } = params;
 
-        const category = await prisma.categories.findUnique({
+        const category = await prisma.product_categories.findUnique({
           where: {
             id: category_id,
           },
@@ -463,7 +527,7 @@ export const ecommerceRoute = new Elysia({
           return { message: "Product category not found" };
         }
 
-        await prisma.categories.delete({
+        await prisma.product_categories.delete({
           where: {
             id: category_id,
           },
@@ -1015,7 +1079,7 @@ export const ecommerceRoute = new Elysia({
       try {
         const { product_name, product_description, online_price, brand_id, category_id, company_id, images, is_active, is_online_active, mat_identity, mat_unit_identity, min_price, unit } = body;
 
-        const get_category = await prisma.categories.findUnique({
+        const get_category = await prisma.product_categories.findUnique({
           where: {
             id: category_id,
           },
@@ -1116,7 +1180,7 @@ export const ecommerceRoute = new Elysia({
         const { product_id } = params;
         const { product_name, product_description, online_price, brand_id, category_id, company_id, images, is_active, is_online_active, mat_identity, mat_unit_identity, min_price, unit } = body;
 
-        const get_category = await prisma.categories.findUnique({
+        const get_category = await prisma.product_categories.findUnique({
           where: {
             id: category_id,
           },
@@ -1265,5 +1329,335 @@ export const ecommerceRoute = new Elysia({
         // you can also add `deprecated`, `security`, etc.
       },
     },
+  )
+  .get(
+    "/event-categories",
+    async ({ headers, set }) => {
+      try {
+        const response = await prisma.event_categories.findMany({
+          orderBy: {
+            event_cate_name: "asc",
+          }
+        });
+
+        if (!response) {
+          set.status = 404;
+          return { message: "No valid event categories found" };
+        }
+        return response;
+      } catch (error) {
+        set.status = 500;
+        return { message: "Internal server error" };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Event Categories - Find All",
+        description: `
+          This endpoint retrieves all valid event categories in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
+  .get(
+    "/event-categories/active",
+    async ({ headers, set }) => {
+      try {
+        const response = await prisma.event_categories.findMany({
+          where : {
+            is_active : true,
+          },
+          orderBy: {
+            event_cate_name: "asc",
+          },
+          select : {
+            id: true,
+            event_cate_name: true,
+          }
+        });
+
+        if (!response) {
+          set.status = 404;
+          return { message: "No valid event categories found" };
+        }
+        return response;
+      } catch (error) {
+        set.status = 500;
+        return { message: "Internal server error" };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Event Categories - Find All",
+        description: `
+          This endpoint retrieves all valid event categories in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
+  .post(
+    "/event-categories",
+    async ({ headers, body, set }) => {
+      try {
+        const { event_cate_name } = body;
+
+        const response = await prisma.event_categories.create({
+          data: {
+            event_cate_name : event_cate_name,
+            is_active : true,
+            created_at : now,
+          },
+        });
+        
+        if (!response) {
+          set.status = 400;
+          return { message: "Failed to create event category" };
+        }
+
+        return response;
+      } catch (error) {
+        set.status = 500;
+        return { message: "Internal server error" };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        event_cate_name: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Event Categories - Create",
+        description: `
+          This endpoint creates a new event category in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
+  .get(
+    "/events",
+    async ({ headers, set }) => {
+      try {
+        const response = await prisma.events.findMany({
+          select: {
+            id: true,
+            event_image: true,
+            event_name: true,
+            event_detail: true,
+            event_startdate: true,
+            event_enddate: true,
+            location_name: true,
+            preregister_date: true,
+            register_date: true,
+            ref_url: true,
+            tier_preregister: true,
+            tier_register: true,
+            is_active: true,
+            event_category_id: true,
+            event_categories: {
+              select: {
+                event_cate_name: true,
+              }
+            }
+          },
+          orderBy: {
+            event_name: "asc",
+          }
+        });
+
+        if (!response) {
+          set.status = 404;
+          return { message: "No valid events found" };
+        }
+        return response;
+      } catch (error) {
+        set.status = 500;
+        return { message: "Internal server error" };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Events - Find All",
+        description: `
+          This endpoint retrieves all valid events in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
+  .post(
+    "/events",
+    async ({ headers, body, set }) => {
+      try {
+        const { event_category_id, event_detail, event_enddate, event_image, event_name, event_startdate, location_name, preregister_date, ref_url, register_date, tier_preregister, tier_register } = body;
+        const response = await prisma.events.create({
+          data: {
+            event_name : event_name,
+            event_category_id : event_category_id,
+            event_detail : event_detail,
+            event_enddate : event_enddate,
+            event_image : event_image,
+            event_startdate : event_startdate,
+            location_name : location_name,
+            preregister_date : preregister_date || null,
+            ref_url : ref_url,
+            register_date : register_date || null,
+            tier_preregister : tier_preregister,
+            tier_register : tier_register,
+            is_active : true,
+            created_at : now,
+          },
+        });
+        
+        if (!response) {
+          set.status = 400;
+          return { message: "Failed to create event" };
+        }
+
+        return { message: "Event created successfully" };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        console.error("Error creating event:", errorMessage);
+        set.status = 500;
+        return { message: "Internal server error" };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        event_category_id: t.Number(),
+        event_detail: t.String(),
+        event_enddate: t.Date(),
+        event_image: t.String(),
+        event_name: t.String(),
+        event_startdate: t.Date(),
+        location_name: t.String(),
+        preregister_date: t.Any(),
+        ref_url: t.Any(),
+        register_date: t.Any(),
+        tier_preregister: t.Array(
+          t.Any()
+        ),
+        tier_register: t.Array(
+          t.Any()
+        ),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Events - Create",
+        description: `
+          This endpoint creates a new event in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
+  .put(
+    "/events/:event_id",
+    async ({ headers, params, body, set }) => {
+      try {
+        const { event_id } = params;
+        const { event_category_id, event_detail, event_enddate, event_image, event_name, event_startdate, location_name, preregister_date, ref_url, register_date, tier_preregister, tier_register, is_active } = body;
+        const response = await prisma.events.update({
+          where: {
+            id: Number(event_id),
+          },
+          data: {
+            event_name : event_name,
+            event_category_id : event_category_id,
+            event_detail : event_detail,
+            event_enddate : event_enddate,
+            event_image : event_image,
+            event_startdate : event_startdate,
+            location_name : location_name,
+            preregister_date : preregister_date || null,
+            ref_url : ref_url,
+            register_date : register_date || null,
+            tier_preregister : tier_preregister,
+            tier_register : tier_register,
+            is_active : is_active,
+            updated_at : now,
+          },
+        });
+
+        if (!response) {
+          set.status = 400;
+          return { message: "Failed to update event" };
+        }
+
+        return { message: "Event updated successfully" };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        console.error("Error updating event:", errorMessage);
+        set.status = 500;
+        return { message: "Internal server error" };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),  
+      }),
+      params: t.Object({
+        event_id: t.String(),
+      }),
+      body: t.Object({
+        event_category_id: t.Number(),
+        event_detail: t.String(),
+        event_enddate: t.Date(),
+        event_image: t.String(),
+        event_name: t.String(),
+        event_startdate: t.Date(),
+        location_name: t.String(),
+        preregister_date: t.Any(),
+        ref_url: t.Any(),
+        register_date: t.Any(),
+        tier_preregister: t.Array(
+          t.Any()
+        ),
+        tier_register: t.Array(
+          t.Any()
+        ),
+        is_active: t.Boolean(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Events - Update",
+        description: `
+          This endpoint updates an event in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      }
+    }
   )
 
