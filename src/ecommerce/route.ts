@@ -89,14 +89,14 @@ export const ecommerceRoute = new Elysia({
     "/brands",
     async ({ headers, body, set }) => {
       try {
-        const { brand_image, url_image, brand_name, country_id, is_active } = body;
+        const { brand_image, url_image, brand_name, country_id } = body;
         const response = await prisma.brands.create({
           data: {
             brand_image : brand_image,
             url_image : url_image,
             brand_name : brand_name,
             country_id : country_id,
-            is_active : is_active,
+            is_active : true,
             created_at : now,
           },
         });
@@ -121,7 +121,6 @@ export const ecommerceRoute = new Elysia({
         url_image: t.Any(),
         brand_name: t.String(),
         country_id: t.Any(),
-        is_active: t.Boolean(),
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
@@ -234,7 +233,7 @@ export const ecommerceRoute = new Elysia({
     },
   )
   .get(
-    "/categories",
+    "/product-categories",
     async ({ headers, set }) => {
       try {
         const response = await prisma.categories.findMany({
@@ -276,7 +275,7 @@ export const ecommerceRoute = new Elysia({
 
         if (!response) {
           set.status = 404;
-          return { message: "No valid categories found" };
+          return { message: "No valid product categories found" };
         }
         return response;
       } catch (error) {
@@ -290,9 +289,9 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Categories - Find All",
+        summary: "Product Categories - Find All",
         description: `
-          This endpoint retrieves all valid categories in the 3NConnect.
+          This endpoint retrieves all valid product categories in the 3NConnect.
         `.trim(),
         security: [{ bearerAuth: [] }],
         tags: ["3NConnect"],
@@ -301,7 +300,7 @@ export const ecommerceRoute = new Elysia({
     },
   )
   .post(
-    "/categories",
+    "/product-categories",
     async ({ headers, body, set }) => {
       try {
         const { name, slug, parent_id } = body;
@@ -334,7 +333,7 @@ export const ecommerceRoute = new Elysia({
 
           if (!parentCategory) {
             set.status = 400;
-            return { message: "Parent category not found" };
+            return { message: "Parent productcategory not found" };
           }
 
           const level = parentCategory.level + 1;
@@ -358,7 +357,7 @@ export const ecommerceRoute = new Elysia({
           });
         }
 
-        return { message: "Category created successfully" };
+        return { message: "Product category created successfully" };
       } catch (error) {
         set.status = 500;
         return { message: "Internal server error" };
@@ -375,9 +374,9 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Categories - Create",
+        summary: "Product Categories - Create",
         description: `
-          This endpoint creates a new category in the 3NConnect.
+          This endpoint creates a new product category in the 3NConnect.
         `.trim(),
         security: [{ bearerAuth: [] }],
         tags: ["3NConnect"],
@@ -386,7 +385,7 @@ export const ecommerceRoute = new Elysia({
     },
   )
   .put(
-    "/categories/:category_id",
+    "/product-categories/:category_id",
     async ({ headers, params, body, set }) => {
       try {
         const { category_id } = params;
@@ -400,7 +399,7 @@ export const ecommerceRoute = new Elysia({
 
         if (!category) {
           set.status = 404;
-          return { message: "Category not found" };
+          return { message: "Product category not found" };
         }
 
         await prisma.categories.update({
@@ -416,7 +415,7 @@ export const ecommerceRoute = new Elysia({
           },
         });
 
-        return { message: "Category updated successfully" };
+        return { message: "Product category updated successfully" };
       } catch (error) {
         set.status = 500;
         return { message: "Internal server error" };
@@ -437,18 +436,18 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Categories - Update",
+        summary: "Product Categories - Update",
         description: `
-          This endpoint updates a category in the 3NConnect.
+          This endpoint updates a product category in the 3NConnect.
         `.trim(),
         security: [{ bearerAuth: [] }],
         tags: ["3NConnect"],
         // you can also add `deprecated`, `security`, etc.
-      }
+      },
     },
   )
   .delete(
-    "/categories/:category_id",
+    "/product-categories/:category_id",
     async ({ headers, params, set }) => {
       try {
         const { category_id } = params;
@@ -461,7 +460,7 @@ export const ecommerceRoute = new Elysia({
 
         if (!category) {
           set.status = 404;
-          return { message: "Category not found" };
+          return { message: "Product category not found" };
         }
 
         await prisma.categories.delete({
@@ -470,7 +469,7 @@ export const ecommerceRoute = new Elysia({
           },
         });
 
-        return { message: "Category deleted successfully" };
+        return { message: "Product category deleted successfully" };
       } catch (error) {
         set.status = 500;
         return { message: "Internal server error" };
@@ -485,9 +484,9 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Categories - Delete",
+        summary: "Product Categories - Delete",
         description: `
-          This endpoint deletes a category in the 3NConnect.
+          This endpoint deletes a product category in the 3NConnect.
         `.trim(),
         security: [{ bearerAuth: [] }],
         tags: ["3NConnect"],
@@ -718,6 +717,226 @@ export const ecommerceRoute = new Elysia({
       },
     },
   )
+
+  .get(
+    '/countries',
+    async ({ headers, set }) => {
+      try {
+        const response = await prisma.countries.findMany({
+          orderBy:{
+            country_name: "asc",
+          }
+        });
+
+        if (!response) {
+          set.status = 404;
+          return { message: "No valid countries found" };
+        }
+        return response;
+      } catch (error) {
+        set.status = 500;
+        return { message: "Internal server error" };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Countries - Find All",
+        description: `
+          This endpoint retrieves all valid countries in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
+  .get(
+    '/countries/active',
+    async ({ headers, set }) => {
+      try {
+        const response = await prisma.countries.findMany({
+          where: {
+            is_active: true,
+          },
+          select: {
+            id: true,
+            country_name: true,
+            short_name: true,
+          },
+          orderBy:{
+            country_name: "asc",
+          }
+        });
+
+        if (!response) {
+          set.status = 404;
+          return { message: "No valid countries found" };
+        }
+        return response;
+      } catch (error) {
+        set.status = 500;
+        return { message: "Internal server error" };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Countries - Find Active",
+        description: `
+          This endpoint retrieves all active countries in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
+  .post(
+    "/countries",
+    async ({ headers, body, set }) => {
+      try {
+        const { country_name, short_name } = body;
+        const response = await prisma.countries.create({
+          data: {
+            country_name : country_name,
+            short_name : short_name ||null,
+            is_active : true,
+            created_at : now,
+          },
+        });
+        
+        if (!response) {
+          set.status = 400;
+          return { message: "Failed to create country" };
+        }
+
+        return response;
+      } catch (error) {
+        set.status = 500;
+        return { message: "Internal server error" };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        country_name: t.String(),
+        short_name: t.Any(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Countries - Create",
+        description: `
+          This endpoint creates a new country in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
+  .put(
+    "/countries/:country_id",
+    async ({ headers, params, body, set }) => {
+      try {
+        const { country_id } = params;
+        const { country_name, short_name, is_active } = body;
+        const response = await prisma.countries.update({
+          where: {
+            id: Number(country_id),
+          },
+          data: {
+            country_name : country_name,
+            short_name : short_name || null,
+            is_active : is_active,
+            updated_at : now,
+          },
+        });
+
+        if (!response) {
+          set.status = 400;
+          return { message: "Failed to update country" };
+        }
+
+        return response;
+      } catch (error) {
+        set.status = 500;
+        return { message: "Internal server error" };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),  
+      }),
+      params: t.Object({
+        country_id: t.String(),
+      }),
+      body: t.Object({
+        country_name: t.String(),
+        short_name: t.Any(),
+        is_active: t.Boolean(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Countries - Update",
+        description: `
+          This endpoint updates a country in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      }
+    }
+  )
+  .delete(
+    "/countries/:country_id",
+    async ({ headers, params, set }) => {
+      try {
+        const { country_id } = params;
+        const response = await prisma.countries.delete({
+          where: {
+            id: Number(country_id),
+          },
+        });
+
+        if (!response) {
+          set.status = 404;
+          return { message: "Country not found" };
+        }
+
+        return response;
+      } catch (error) {
+        set.status = 500;
+        return { message: "Internal server error" };
+      } 
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      params: t.Object({
+        country_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Countries - Delete",
+        description: `
+          This endpoint deletes a country in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
   .get(
     "/products",
     async ({ headers, set }) => {
@@ -825,7 +1044,7 @@ export const ecommerceRoute = new Elysia({
             is_active : is_active,
             is_online_active : is_online_active,
             mat_identity : mat_identity,
-            mat_unit_identity : mat_unit_identity,
+            mat_unit_identity : mat_unit_identity || null,
             min_price : min_price || 0,
             unit : unit,
             created_at : now,
@@ -840,16 +1059,18 @@ export const ecommerceRoute = new Elysia({
           return { message: "Failed to create product" };
         }
 
-        await Promise.all(images.map((image: { image_url: string; is_main: boolean }) => {
-          return prisma.product_images.create({
-            data: {
-              product_id: response.id,
-              url_image: image.image_url,
-              is_show: image.is_main,
-              created_at: now,
-            },
-          });
-        }));
+        if (images && images.length > 0) {
+          await Promise.all(images.map((image: { image_url: string; is_main: boolean }) => {
+            return prisma.product_images.create({
+              data: {
+                product_id: response.id,
+                url_image: image.image_url,
+                is_show: image.is_main,
+                created_at: now,
+              },
+            });
+          }));
+        }
 
         return { message: "Product created successfully" };
       } catch (error) {
@@ -865,16 +1086,11 @@ export const ecommerceRoute = new Elysia({
         brand_id: t.Number(),
         category_id: t.String(),
         company_id: t.Number(),
-        images: t.Array(
-          t.Object({
-            image_url : t.String(),
-            is_main: t.Boolean(),
-          })
-        ),
+        images: t.Any(),
         is_active: t.Boolean(),
         is_online_active: t.Boolean(),
         mat_identity: t.String(),
-        mat_unit_identity: t.String(),
+        mat_unit_identity: t.Any(),
         min_price: t.Any(),
         online_price: t.Number(),
         product_description: t.String(),
@@ -950,16 +1166,18 @@ export const ecommerceRoute = new Elysia({
           },
         });
 
-        await Promise.all(images.map((image: { image_url: string; is_main: boolean }) => {
-          return prisma.product_images.create({
-            data: {
-              product_id: Number(product_id),
-              url_image: image.image_url,
-              is_show: image.is_main,
-              created_at: now,
-            },
-          });
-        }));
+        if(images && images.length > 0){
+          await Promise.all(images.map((image: { image_url: string; is_main: boolean }) => {
+            return prisma.product_images.create({
+              data: {
+                product_id: Number(product_id),
+                url_image: image.image_url,
+                is_show: image.is_main,
+                created_at: now,
+              },
+            });
+          }));
+        }
 
         return { message: "Product updated successfully" };
       } catch (error) {
@@ -978,16 +1196,11 @@ export const ecommerceRoute = new Elysia({
         brand_id: t.Number(),
         category_id: t.String(),
         company_id: t.Number(),
-        images: t.Array(
-          t.Object({
-            image_url : t.String(),
-            is_main: t.Boolean(),
-          })
-        ),
+        images: t.Any(),
         is_active: t.Boolean(),
         is_online_active: t.Boolean(),
         mat_identity: t.String(),
-        mat_unit_identity: t.String(),
+        mat_unit_identity: t.Any(),
         min_price: t.Any(),
         online_price: t.Number(),
         product_description: t.String(),
