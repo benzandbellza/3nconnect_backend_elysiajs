@@ -9,7 +9,7 @@ const app = new Elysia()
     openapi({
       documentation: {
         info: {
-          title: "3NConnect with ElysiaJS",
+          title: "3NConnect - APIs Endpoint",
           version: "1.0.0",
           description: "3NConnect APIs built with ElysiaJS framework",
         },
