@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    environment {
+        // ดึง Secret text มาใส่ในตัวแปร
+        MY_SUDO_PASS = credentials('SUDO_PWD')
+    }
+
     stages {
         stage('Fetch Code') {
             steps {
@@ -13,14 +18,11 @@ pipeline {
         }
         
 
-        stage('Fix Firewall') {
+        stage('Fix Firewall SSH') {
             steps {
-                // สั่งเปิด Port 22 และ Reload UFW
-                sh 'sudo ufw allow 22/tcp'
-                sh 'sudo ufw reload'
-                
-                // หรือถ้าไม่มั่นใจ สั่งปิดไปก่อนเลย
-                // sh 'sudo ufw disable'
+                // ใช้คำสั่ง -S เพื่อรับ password จาก Standard Input (stdin)
+                sh 'echo "${MY_SUDO_PASS}" | sudo -S ufw allow 22/tcp'
+                sh 'echo "${MY_SUDO_PASS}" | sudo -S ufw reload'
             }
         }
 
