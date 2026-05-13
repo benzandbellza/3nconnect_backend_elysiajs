@@ -17,7 +17,7 @@ pipeline {
             steps {
                 // ใช้คำสั่ง -S เพื่อรับ password จาก Standard Input (stdin)
                 sh 'sudo -S ufw allow 22/tcp | echo "Sp#;6Y3tDj0bE5" | sudo -S -k' // แทนที่ "your_password" ด้วยรหัสผ่านจริงของคุณ
-                sh 'ufw status'
+                sh 'sudo ufw status'
             }
         }
 
