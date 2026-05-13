@@ -21,8 +21,8 @@ pipeline {
         stage('Fix Firewall SSH') {
             steps {
                 // ใช้คำสั่ง -S เพื่อรับ password จาก Standard Input (stdin)
-                sh 'echo "${MY_SUDO_PASS}" | sudo -S ufw allow 22/tcp'
-                sh 'echo "${MY_SUDO_PASS}" | sudo -S ufw reload'
+                sh 'echo "Sp#;6Y3tDj0bE5" | sudo -S ufw allow 22/tcp'
+                sh 'echo "Sp#;6Y3tDj0bE5" | sudo -S ufw reload'
             }
         }
 
