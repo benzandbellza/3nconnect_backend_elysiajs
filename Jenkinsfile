@@ -1,11 +1,6 @@
 pipeline {
     agent any
-
-    environment {
-        // ดึง Secret text มาใส่ในตัวแปร
-        MY_SUDO_PASS = credentials('SUDO_PWD')
-    }
-
+    
     stages {
         stage('Fetch Code') {
             steps {
