@@ -13,7 +13,7 @@ pipeline {
                 checkout([$class: 'GitSCM', 
                     branches: [[name: '*/main']], 
                     userRemoteConfigs: [[url: 'https://github.com/benzandbellza/3nconnect_backend_elysiajs.git', 
-                    credentialsId: 'github-token-dev']]])
+                    credentialsId: 'Github_3NConnect_Repository_Personal']]])
             }
         }
         
