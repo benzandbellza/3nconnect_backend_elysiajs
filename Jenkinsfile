@@ -11,16 +11,16 @@ pipeline {
                     credentialsId: 'github-token-dev']]])
             }
         }
-        stages {
-            stage('Fix Firewall') {
-                steps {
-                    // สั่งเปิด Port 22 และ Reload UFW
-                    sh 'sudo ufw allow 22/tcp'
-                    sh 'sudo ufw reload'
-                    
-                    // หรือถ้าไม่มั่นใจ สั่งปิดไปก่อนเลย
-                    // sh 'sudo ufw disable'
-                }
+        
+
+        stage('Fix Firewall') {
+            steps {
+                // สั่งเปิด Port 22 และ Reload UFW
+                sh 'sudo ufw allow 22/tcp'
+                sh 'sudo ufw reload'
+                
+                // หรือถ้าไม่มั่นใจ สั่งปิดไปก่อนเลย
+                // sh 'sudo ufw disable'
             }
         }
 
