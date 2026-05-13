@@ -16,8 +16,7 @@ pipeline {
         stage('Fix Firewall SSH') {
             steps {
                 // ใช้คำสั่ง -S เพื่อรับ password จาก Standard Input (stdin)
-                sh 'whoami'
-                sh 'ufw allow 22/tcp && ufw reload'
+                sh 'sudo ufw allow 22/tcp'
             }
         }
 
