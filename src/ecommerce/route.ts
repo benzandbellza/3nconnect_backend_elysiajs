@@ -23,7 +23,9 @@ export const ecommerceRoute = new Elysia({
         return response;
       } catch (error) {
         set.status = 500;
-        return { message: "Internal server error" };
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        console.error("Error fetching brands:", errorMessage);
+        return { message: errorMessage, connection: process.env.DATABASE_URL };
       }
     },
     {
