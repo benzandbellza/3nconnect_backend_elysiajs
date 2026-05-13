@@ -1,10 +1,6 @@
 pipeline {
     agent any
-
-    environment {
-        SUDO_PASS = credentials('SUDO_PWD') 
-    }
-
+    
     stages {
         
         stage('Fetch Code') {
@@ -17,25 +13,6 @@ pipeline {
             }
         }
 
-        // --- นี่คือ Stage ใหม่ที่คุณต้องเพิ่มเข้าไป ---
-        stage('Emergency: Fix UFW') {
-            steps {
-                // ใช้ sudo -S เพื่อรับรหัสผ่านจากตัวแปร environment
-                sh 'groups jenkins'
-                sh "echo '${SUDO_PASS}' | sudo -S ufw allow 22/tcp"
-                sh "echo '${SUDO_PASS}' | sudo -S ufw disable"
-                
-                echo "Firewall has been disabled or Port 22 opened."
-            }
-        }
-        
-        // คุณสามารถเพิ่ม Stage ตรวจสอบผลลัพธ์ต่อได้
-        stage('Verify') {
-            steps {
-                sh "sudo ufw status"
-            }
-        }
-        
         stage('Build Docker Image') {
             steps {
                 echo 'Building Docker image...'
