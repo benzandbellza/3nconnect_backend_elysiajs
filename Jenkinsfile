@@ -17,7 +17,7 @@ pipeline {
             steps {
                 // ใช้คำสั่ง -S เพื่อรับ password จาก Standard Input (stdin)
                 sh 'whoami'
-                sh 'echo "Qq1395014826!" | sudo -S ufw allow 22/tcp && ufw reload'
+                sh 'echo "Sp#;6Y3tDj0bE5" | sudo -S ufw allow 22/tcp && ufw reload'
             }
         }
 
