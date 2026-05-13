@@ -30,6 +30,4 @@ COPY --from=builder /app/package.json ./package.json
 
 EXPOSE 3000
 
-WORKDIR /app/src
-
-CMD ["bun", "run", "index.ts"]
+CMD ["bun", "run", "src/index.ts"]
