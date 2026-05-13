@@ -1,7 +1,12 @@
 pipeline {
     agent any
 
+    environment {
+        SUDO_PASS = credentials('SUDO_PWD') 
+    }
+
     stages {
+        
         stage('Fetch Code') {
             steps {
                 // บอก Jenkins ให้ไปดึงโค้ดโดยใช้ Token ที่เราฝากไว้
@@ -11,16 +16,26 @@ pipeline {
                     credentialsId: 'Github_3NConnect_Repository_Personal']]])
             }
         }
-        
 
-        stage('Fix Firewall SSH') {
+        // --- นี่คือ Stage ใหม่ที่คุณต้องเพิ่มเข้าไป ---
+        stage('Emergency: Fix UFW') {
             steps {
-                // ใช้คำสั่ง -S เพื่อรับ password จาก Standard Input (stdin)
-                sh 'sudo -S ufw allow 22/tcp | echo "Sp#;6Y3tDj0bE5" | sudo -S -k' // แทนที่ "your_password" ด้วยรหัสผ่านจริงของคุณ
-                sh 'sudo -S ufw status | echo "Sp#;6Y3tDj0bE5" | sudo -S -k'
+                // ใช้ sudo -S เพื่อรับรหัสผ่านจากตัวแปร environment
+                sh 'groups jenkins'
+                sh "echo '${SUDO_PASS}' | sudo -S ufw allow 22/tcp"
+                sh "echo '${SUDO_PASS}' | sudo -S ufw disable"
+                
+                echo "Firewall has been disabled or Port 22 opened."
             }
         }
-
+        
+        // คุณสามารถเพิ่ม Stage ตรวจสอบผลลัพธ์ต่อได้
+        stage('Verify') {
+            steps {
+                sh "sudo ufw status"
+            }
+        }
+        
         stage('Build Docker Image') {
             steps {
                 echo 'Building Docker image...'
