@@ -16,6 +16,7 @@ RUN bunx prisma generate
 # --- Stage 2: Runner Stage (Production) ---
 FROM oven/bun:1-alpine AS runner
 WORKDIR /app
+RUN apk add --no-cache ca-certificates openssl
 
 ENV NODE_ENV=production
 
