@@ -1073,6 +1073,74 @@ export const ecommerceRoute = new Elysia({
       },
     },
   )
+  .get(
+    "/products/active",
+    async ({ headers, set }) => {
+      try {
+        const response = await prisma.products.findMany({
+          where: {
+            is_active: true,
+            is_online_active: true,
+          },
+          select : {
+            id: true,
+            product_name: true,
+            product_description: true,
+            online_price: true,
+            mat_identity: true,
+            unit: true,
+            brands: {
+              select: {
+                brand_name: true,
+              }
+            },
+            categories: {
+              select: {
+                name: true,
+              }
+            },
+            companies: {
+              select: {
+                company_name: true,
+              }
+            },
+            product_images: {
+              select: {
+                url_image: true,
+              },
+              where :{
+                is_show: true,
+              }
+            },
+          }
+        });
+
+        if (!response) {
+          set.status = 404;
+          return { message: "No valid products found" };
+        }
+        return response;
+      } catch (error) {
+        set.status = 500;
+        return { message: "Internal server error" };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Products - Find All",
+        description: `
+          This endpoint retrieves all valid products in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
   .post(
     "/products",
     async ({ headers, body, set }) => {
