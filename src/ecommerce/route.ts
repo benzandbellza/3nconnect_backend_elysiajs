@@ -1281,7 +1281,7 @@ export const ecommerceRoute = new Elysia({
 
         const response = await prisma.products.update({
           where: {
-            id: Number(product_id),
+            id: product_id,
           },
           data: {
             product_name : product_name,
@@ -1339,7 +1339,7 @@ export const ecommerceRoute = new Elysia({
         authorization: t.String(),  
       }),
       params: t.Object({
-        product_id: t.String(),
+        product_id: t.Number(),
       }),
       body: t.Object({
         brand_id: t.Number(),
@@ -1364,6 +1364,81 @@ export const ecommerceRoute = new Elysia({
         summary: "Products - Update",
         description: `
           This endpoint updates a product in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      }
+    }
+  )
+  .put(
+    "/products/bulks/:product_id",
+    async ({ headers, params, body, set }) => {
+      try {
+        const { product_id } = params;
+        const { is_online_active, online_price, brand_id, company_id, category_id } = body;
+        const get_category = await prisma.product_categories.findUnique({
+          where: {
+            id: category_id,
+          },
+          select: {
+            id: true,
+            ancestors: true,
+          }
+        });
+
+        if (!get_category) {
+          set.status = 400;
+          return { message: "Category not found" };
+        }
+
+        const category_hierarchy = get_category.ancestors ? [...get_category.ancestors, get_category.id] : [get_category.id];
+
+        const response = await prisma.products.update({
+          where: {
+            id: product_id,
+          },
+          data: {
+            is_online_active : is_online_active,
+            online_price : online_price,
+            brand_id : brand_id,
+            category_hierarchy: category_hierarchy,
+            category_id: category_id,
+            company_id : company_id,
+            updated_at : now,
+          },
+        });
+
+        if (!response) {
+          set.status = 400;
+          return { message: "Failed to update product" };
+        }
+
+        return { message: "Product updated successfully" };
+      } catch (error) {
+        set.status = 500;
+        return { message: "Internal server error" };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),  
+      }),
+      params: t.Object({
+        product_id: t.Number(),
+      }),
+      body: t.Object({
+        is_online_active: t.Boolean(),
+        online_price: t.Number(),
+        brand_id: t.Number(),
+        company_id: t.Number(),
+        category_id: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Products - Bulk Update",
+        description: `
+          This endpoint bulk updates a product in the 3NConnect.
         `.trim(),
         security: [{ bearerAuth: [] }],
         tags: ["3NConnect"],
