@@ -2,6 +2,7 @@ import { Elysia, t } from "elysia";
 import { prisma } from './prisma_connection'
 import { auth } from "../plugins/auth";
 import "dotenv/config";
+import { linkSymbols } from "bun:ffi";
 
 const now: Date = new Date();
 // const utc7: Date = new Date(now.getTime() + 7 * 60 * 60 * 1000);
@@ -1822,5 +1823,53 @@ export const ecommerceRoute = new Elysia({
         // you can also add `deprecated`, `security`, etc.
       }
     }
+  )
+  .post(
+    "/search-product/in-stock",
+    async ({ headers, body, set }) => {
+      try {
+        const { search_text } = body;
+        const response = await prisma.vw_planetone_stock.findMany({
+          where: {
+            MATUnit: {
+              contains: search_text,
+              mode: "insensitive",
+            }
+          },
+          select: {
+            MATUnit: true,
+            grandqty: true,
+            company: true,
+          },
+        });
+
+        if (!response) {
+          set.status = 404;
+          return { message: "No products in stock found" };
+        }
+        return response;
+      } catch (error) {
+        set.status = 500;
+        return { message: "Internal server error" };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        search_text: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Search Product - In Stock",
+        description: `
+          This endpoint searches for products in stock based on the search term provided in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
   )
 

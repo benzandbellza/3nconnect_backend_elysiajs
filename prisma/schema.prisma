@@ -1,6 +1,6 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["partialIndexes"]
+  previewFeatures = ["partialIndexes", "views"]
 }
 
 generator prismabox {
@@ -178,6 +178,14 @@ model customer_user {
   preferred_contact     String[]
   fcm_token             String?
   line_id               String?
+
+  @@schema("3nconnect")
+}
+
+view vw_planetone_stock {
+  MATUnit  String?
+  grandqty Decimal? @db.Decimal
+  company  String?
 
   @@schema("3nconnect")
 }
