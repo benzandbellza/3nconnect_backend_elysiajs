@@ -1019,7 +1019,6 @@ export const ecommerceRoute = new Elysia({
             is_active: true,
             is_online_active: true,
             mat_identity: true,
-            mat_unit_identity: true,
             min_price: true,
             unit: true,
             created_at: true,
@@ -1046,6 +1045,10 @@ export const ecommerceRoute = new Elysia({
                 is_show: true,
               }
             },
+            video_product: true,
+            condition_description: true,
+            warranty_description: true,
+            youtube_url: true,
           }
         });
 
@@ -1056,7 +1059,7 @@ export const ecommerceRoute = new Elysia({
         return response;
       } catch (error) {
         set.status = 500;
-        return { message: "Internal server error" };
+        return { message: "Internal server error"};
       }
     },
     {
@@ -1114,6 +1117,10 @@ export const ecommerceRoute = new Elysia({
                 is_show: true,
               }
             },
+            video_product: true,
+            condition_description: true,
+            warranty_description: true,
+            youtube_url: true,
           }
         });
 
@@ -1147,7 +1154,7 @@ export const ecommerceRoute = new Elysia({
     "/products",
     async ({ headers, body, set }) => {
       try {
-        const { product_name, product_description, online_price, brand_id, category_id, company_id, images, is_active, is_online_active, mat_identity, mat_unit_identity, min_price, unit } = body;
+        const { product_name, product_description, online_price, brand_id, category_id, company_id, images, is_active, is_online_active, mat_identity, min_price, unit, video_product, condition_description, warranty_description, youtube_url } = body;
 
         const get_category = await prisma.product_categories.findUnique({
           where: {
@@ -1178,9 +1185,12 @@ export const ecommerceRoute = new Elysia({
             is_active : is_active,
             is_online_active : is_online_active,
             mat_identity : mat_identity,
-            mat_unit_identity : mat_unit_identity || null,
             min_price : min_price || 0,
             unit : unit,
+            video_product : video_product,
+            condition_description : condition_description,
+            warranty_description : warranty_description,
+            youtube_url : youtube_url,
             created_at : now,
           },
           select: {
@@ -1224,12 +1234,15 @@ export const ecommerceRoute = new Elysia({
         is_active: t.Boolean(),
         is_online_active: t.Boolean(),
         mat_identity: t.String(),
-        mat_unit_identity: t.Any(),
         min_price: t.Any(),
         online_price: t.Number(),
         product_description: t.String(),
         product_name: t.String(),
         unit: t.String(),
+        video_product: t.Any(),
+        condition_description: t.Any(),
+        warranty_description: t.Any(),
+        youtube_url: t.Any(),
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
@@ -1248,8 +1261,7 @@ export const ecommerceRoute = new Elysia({
     async ({ headers, params, body, set }) => {
       try {
         const { product_id } = params;
-        const { product_name, product_description, online_price, brand_id, category_id, company_id, images, is_active, is_online_active, mat_identity, mat_unit_identity, min_price, unit } = body;
-
+        const { product_name, product_description, online_price, brand_id, category_id, company_id, images, is_active, is_online_active, mat_identity, min_price, unit, video_product, condition_description, warranty_description, youtube_url} = body;
         const get_category = await prisma.product_categories.findUnique({
           where: {
             id: category_id,
@@ -1282,9 +1294,12 @@ export const ecommerceRoute = new Elysia({
             is_active : is_active,
             is_online_active : is_online_active,
             mat_identity : mat_identity,
-            mat_unit_identity : mat_unit_identity,
             min_price : min_price || 0,
             unit : unit,
+            video_product : video_product,
+            condition_description : condition_description,
+            warranty_description : warranty_description,
+            youtube_url : youtube_url,
             updated_at : now,
           },
         });
@@ -1334,12 +1349,15 @@ export const ecommerceRoute = new Elysia({
         is_active: t.Boolean(),
         is_online_active: t.Boolean(),
         mat_identity: t.String(),
-        mat_unit_identity: t.Any(),
         min_price: t.Any(),
         online_price: t.Number(),
         product_description: t.String(),
         product_name: t.String(),
         unit: t.String(),
+        video_product: t.Any(),
+        condition_description: t.Any(),
+        warranty_description: t.Any(),
+        youtube_url: t.Any(),
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
