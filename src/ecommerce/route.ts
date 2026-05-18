@@ -3,6 +3,7 @@ import { prisma } from "./prisma_connection";
 import { auth } from "../plugins/auth";
 import "dotenv/config";
 import { linkSymbols } from "bun:ffi";
+import { dmmfToRuntimeDataModel } from "@prisma/client/runtime/client";
 
 const now: Date = new Date();
 // const utc7: Date = new Date(now.getTime() + 7 * 60 * 60 * 1000);
@@ -1053,15 +1054,14 @@ export const ecommerceRoute = new Elysia({
           select: {
             id: true,
             product_name: true,
-            product_description: true,
-            brand_id: true,
-            category_id: true,
-            company_id: true,
             is_active: true,
             is_online_active: true,
             unit: true,
             created_at: true,
             updated_at: true,
+            brand_id: true,
+            company_id: true,
+            category_id: true,
             brands: {
               select: {
                 brand_name: true,
@@ -1084,10 +1084,6 @@ export const ecommerceRoute = new Elysia({
                 is_show: true,
               },
             },
-            video_product: true,
-            condition_description: true,
-            warranty_description: true,
-            youtube_url: true,
             is_pre_order: true,
             is_custom_options: true,
             product_options: {
@@ -1111,6 +1107,9 @@ export const ecommerceRoute = new Elysia({
               },
             },
           },
+          orderBy : {
+            product_name: "asc"
+          }
         });
 
         if (!response) {
@@ -1344,6 +1343,25 @@ export const ecommerceRoute = new Elysia({
           youtube_url,
         } = body;
 
+        // TODO : check options.mat_id do not repeat in company
+        const count = await prisma.products.count({
+          where: {
+            company_id: company_id,
+            product_options: {
+              some: {
+                mat_identity: {
+                  in: options.map((option) => option.mat_id),
+                },
+              },
+            },
+          },
+        });
+
+        if (count > 0) {
+          set.status = 400;
+          return { message: "Product with same mat_id already exists" };
+        }
+
         const get_category = await prisma.product_categories.findUnique({
           where: {
             id: category_id,
@@ -1518,6 +1536,28 @@ export const ecommerceRoute = new Elysia({
           warranty_description,
           youtube_url,
         } = body;
+
+        // TODO : check options.mat_id do not repeat in company not self
+        const count = await prisma.products.count({
+          where: {
+            company_id: company_id,
+            id: {
+              not: product_id,
+            },
+            product_options: {
+              some: {
+                mat_identity: {
+                  in: options.map((option) => option.mat_id),
+                },
+              },
+            },
+          },
+        });
+
+        if (count > 0) {
+          set.status = 400;
+          return { message: "Product with same mat_id already exists" };
+        }
 
         const get_category = await prisma.product_categories.findUnique({
           where: {
@@ -1751,16 +1791,70 @@ export const ecommerceRoute = new Elysia({
     },
   )
   .put(
+    "/products/:product_id/options-price/:product_options_id",
+    async ({ headers, params, body, set }) => {
+      try {
+        const { product_id, product_options_id } = params;
+        const { online_price, min_price } = body;
+        
+        const response = await prisma.product_options.update({
+          where: {
+            id: product_options_id,
+          },
+          data: {
+            online_price: online_price,
+            min_price: min_price,
+          },
+        });
+
+        if (!response) {
+          set.status = 400;
+          return { message: "Failed to update product price option" };
+        }
+
+        return { message: "Product price option updated successfully" };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error updating product price option:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      params: t.Object({
+        product_id: t.Number(),
+        product_options_id: t.Number(),
+      }),
+      body: t.Object({
+        online_price: t.Number(),
+        min_price: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Products - Update Price Option",
+        description: `
+          This endpoint updates a product price option in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
+  .put(
     "/products/bulks/:product_id",
     async ({ headers, params, body, set }) => {
       try {
         const { product_id } = params;
         const {
-          is_online_active,
-          online_price,
           brand_id,
-          company_id,
           category_id,
+          company_id,
+          is_online_active,
+          payment_methods
         } = body;
         const get_category = await prisma.product_categories.findUnique({
           where: {
@@ -1787,19 +1881,33 @@ export const ecommerceRoute = new Elysia({
           },
           data: {
             is_online_active: is_online_active,
-            online_price: online_price,
             brand_id: brand_id,
             category_hierarchy: category_hierarchy,
             category_id: category_id,
             company_id: company_id,
             updated_at: now,
           },
+          select : {
+            id : true
+          }
         });
 
         if (!response) {
           set.status = 400;
           return { message: "Failed to update product" };
         }
+
+        await prisma.product_payment_method.updateMany({
+          where : {
+            product_id: response.id
+          },
+          data : {
+            qr_code_promptpay: payment_methods.qr_code_promptpay,
+            visa_card: payment_methods.visa_card,
+            mobile_banking: payment_methods.mobile_banking,
+            credit_terms: payment_methods.credit_terms,
+          }
+        })
 
         return { message: "Product updated successfully" };
       } catch (error) {
@@ -1817,11 +1925,16 @@ export const ecommerceRoute = new Elysia({
         product_id: t.Number(),
       }),
       body: t.Object({
-        is_online_active: t.Boolean(),
-        online_price: t.Number(),
         brand_id: t.Number(),
-        company_id: t.Number(),
         category_id: t.String(),
+        company_id: t.Number(),
+        is_online_active: t.Boolean(),
+        payment_methods: t.Object({
+          qr_code_promptpay: t.Boolean(),
+          visa_card: t.Boolean(),
+          mobile_banking: t.Boolean(),
+          credit_terms: t.Boolean(),
+        }),
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],

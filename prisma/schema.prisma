@@ -190,8 +190,8 @@ model product_options {
   product_id   Int?
   mat_identity String?
   option_name  String?
-  online_price Float?    @db.Real
-  min_price    Float?    @db.Real
+  online_price Float?
+  min_price    Float?
   created_at   DateTime  @default(now()) @db.Timestamptz(6)
   row_no       Int?
   updated_at   DateTime? @db.Timestamptz(6)
