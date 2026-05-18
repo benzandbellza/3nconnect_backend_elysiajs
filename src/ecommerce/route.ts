@@ -1,5 +1,5 @@
 import { Elysia, t } from "elysia";
-import { prisma } from './prisma_connection'
+import { prisma } from "./prisma_connection";
 import { auth } from "../plugins/auth";
 import "dotenv/config";
 import { linkSymbols } from "bun:ffi";
@@ -8,7 +8,7 @@ const now: Date = new Date();
 // const utc7: Date = new Date(now.getTime() + 7 * 60 * 60 * 1000);
 
 export const ecommerceRoute = new Elysia({
-    prefix: "/api/ecommerce",
+  prefix: "/api/ecommerce",
 })
   .use(auth())
   .get(
@@ -23,10 +23,10 @@ export const ecommerceRoute = new Elysia({
         }
         return response;
       } catch (error) {
-        set.status = 500;
         const errorMessage = error instanceof Error ? error.message : "Unknown error";
-        console.error("Error fetching brands:", errorMessage);
-        return { message: errorMessage, connection: process.env.DATABASE_URL };
+        set.status = 500;
+        console.error("Error fetching brands:", error);
+        return { message: errorMessage };
       }
     },
     {
@@ -57,9 +57,9 @@ export const ecommerceRoute = new Elysia({
             id: true,
             brand_name: true,
           },
-          orderBy:{
+          orderBy: {
             brand_name: "asc",
-          }
+          },
         });
 
         if (!response) {
@@ -68,8 +68,10 @@ export const ecommerceRoute = new Elysia({
         }
         return response;
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        return { message: "Internal server error" };
+        console.error("Error fetching brands:", error);
+        return { message: errorMessage };
       }
     },
     {
@@ -95,15 +97,15 @@ export const ecommerceRoute = new Elysia({
         const { brand_image, url_image, brand_name, country_id } = body;
         const response = await prisma.brands.create({
           data: {
-            brand_image : brand_image,
-            url_image : url_image,
-            brand_name : brand_name,
-            country_id : country_id,
-            is_active : true,
-            created_at : now,
+            brand_image: brand_image,
+            url_image: url_image,
+            brand_name: brand_name,
+            country_id: country_id,
+            is_active: true,
+            created_at: now,
           },
         });
-        
+
         if (!response) {
           set.status = 400;
           return { message: "Failed to create brand" };
@@ -111,8 +113,10 @@ export const ecommerceRoute = new Elysia({
 
         return response;
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        return { message: "Internal server error" };
+        console.error("Error creating brand:", error);
+        return { message: errorMessage };
       }
     },
     {
@@ -142,18 +146,19 @@ export const ecommerceRoute = new Elysia({
     async ({ headers, params, body, set }) => {
       try {
         const { brand_id } = params;
-        const { brand_image, url_image, brand_name, country_id, is_active } = body;
+        const { brand_image, url_image, brand_name, country_id, is_active } =
+          body;
         const response = await prisma.brands.update({
           where: {
             id: Number(brand_id),
           },
           data: {
-            brand_image : brand_image,
-            url_image : url_image,
-            brand_name : brand_name,
-            country_id : country_id,
-            is_active : is_active,
-            updated_at : now,
+            brand_image: brand_image,
+            url_image: url_image,
+            brand_name: brand_name,
+            country_id: country_id,
+            is_active: is_active,
+            updated_at: now,
           },
         });
 
@@ -164,13 +169,15 @@ export const ecommerceRoute = new Elysia({
 
         return response;
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        return { message: "Internal server error" };
+        console.error("Error updating brand:", error);
+        return { message: errorMessage };
       }
     },
     {
       headers: t.Object({
-        authorization: t.String(),  
+        authorization: t.String(),
       }),
       params: t.Object({
         brand_id: t.String(),
@@ -191,8 +198,8 @@ export const ecommerceRoute = new Elysia({
         security: [{ bearerAuth: [] }],
         tags: ["3NConnect"],
         // you can also add `deprecated`, `security`, etc.
-      }
-    }
+      },
+    },
   )
   .delete(
     "/brands/:brand_id",
@@ -212,9 +219,11 @@ export const ecommerceRoute = new Elysia({
 
         return response;
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        return { message: "Internal server error" };
-      } 
+        console.error("Error deleting brand:", error);
+        return { message: errorMessage };
+      }
     },
     {
       headers: t.Object({
@@ -240,7 +249,7 @@ export const ecommerceRoute = new Elysia({
     async ({ headers, set }) => {
       try {
         const response = await prisma.product_categories.findMany({
-          where : {
+          where: {
             level: 0,
           },
           select: {
@@ -266,11 +275,11 @@ export const ecommerceRoute = new Elysia({
                   },
                 },
               },
-            }
+            },
           },
           orderBy: {
             id: "asc",
-          }
+          },
         });
 
         if (!response) {
@@ -279,8 +288,10 @@ export const ecommerceRoute = new Elysia({
         }
         return response;
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        return { message: "Internal server error" };
+        console.error("Error fetching product categories:", error);
+        return { message: errorMessage };
       }
     },
     {
@@ -304,8 +315,8 @@ export const ecommerceRoute = new Elysia({
     async ({ headers, set }) => {
       try {
         const response = await prisma.product_categories.findMany({
-          where : {
-            is_active : true,
+          where: {
+            is_active: true,
             level: 0,
           },
           select: {
@@ -333,11 +344,11 @@ export const ecommerceRoute = new Elysia({
                   },
                 },
               },
-            }
+            },
           },
           orderBy: {
             id: "asc",
-          }
+          },
         });
 
         if (!response) {
@@ -346,8 +357,10 @@ export const ecommerceRoute = new Elysia({
         }
         return response;
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        return { message: "Internal server error" };
+        console.error("Error fetching product categories:", error);
+        return { message: errorMessage };
       }
     },
     {
@@ -372,25 +385,25 @@ export const ecommerceRoute = new Elysia({
       try {
         const { name, slug, parent_id } = body;
 
-        if(!parent_id){
+        if (!parent_id) {
           // Added new category with level 0
           const countLevel = await prisma.product_categories.count({
-            where : {
-              level : 0,
-            }
+            where: {
+              level: 0,
+            },
           });
 
           await prisma.product_categories.create({
             data: {
-              id : `cat_00${countLevel + 1}`,
-              name : name,
-              slug : slug,
-              level : 0,
-              is_active : true,
-              created_at : now,
+              id: `cat_00${countLevel + 1}`,
+              name: name,
+              slug: slug,
+              level: 0,
+              is_active: true,
+              created_at: now,
             },
           });
-        }else{
+        } else {
           // Added new category with level 1 or level 2
           const parentCategory = await prisma.product_categories.findUnique({
             where: {
@@ -405,29 +418,33 @@ export const ecommerceRoute = new Elysia({
 
           const level = parentCategory.level + 1;
           const countLevel = await prisma.product_categories.count({
-            where : {
-              level : level,
-            }
+            where: {
+              level: level,
+            },
           });
 
           await prisma.product_categories.create({
             data: {
-              id : `cat_${level}1${countLevel + 1}`,
-              name : name,
-              slug : slug,
-              parent_id : parent_id,
-              ancestors: parentCategory.ancestors ? [...parentCategory.ancestors, parent_id] : [parent_id],
-              level : level,
-              is_active : true,
-              created_at : now,
+              id: `cat_${level}1${countLevel + 1}`,
+              name: name,
+              slug: slug,
+              parent_id: parent_id,
+              ancestors: parentCategory.ancestors
+                ? [...parentCategory.ancestors, parent_id]
+                : [parent_id],
+              level: level,
+              is_active: true,
+              created_at: now,
             },
           });
         }
 
         return { message: "Product category created successfully" };
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        return { message: "Internal server error" };
+        console.error("Error creating product category:", error);
+        return { message: errorMessage };
       }
     },
     {
@@ -474,23 +491,25 @@ export const ecommerceRoute = new Elysia({
             id: category_id,
           },
           data: {
-            name : name,
-            slug : slug,
-            parent_id : parent_id,
-            is_active : is_active,
-            updated_at : now,
+            name: name,
+            slug: slug,
+            parent_id: parent_id,
+            is_active: is_active,
+            updated_at: now,
           },
         });
 
         return { message: "Product category updated successfully" };
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        return { message: "Internal server error" };
+        console.error("Error updating product category:", error);
+        return { message: errorMessage };
       }
     },
     {
       headers: t.Object({
-        authorization: t.String(),  
+        authorization: t.String(),
       }),
       params: t.Object({
         category_id: t.String(),
@@ -538,9 +557,11 @@ export const ecommerceRoute = new Elysia({
 
         return { message: "Product category deleted successfully" };
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        return { message: "Internal server error" };
-      } 
+        console.error("Error deleting product category:", error);
+        return { message: errorMessage };
+      }
     },
     {
       headers: t.Object({
@@ -562,13 +583,13 @@ export const ecommerceRoute = new Elysia({
     },
   )
   .get(
-    '/companies',
+    "/companies",
     async ({ headers, set }) => {
       try {
         const response = await prisma.companies.findMany({
-          orderBy:{
+          orderBy: {
             company_name: "asc",
-          }
+          },
         });
 
         if (!response) {
@@ -577,8 +598,10 @@ export const ecommerceRoute = new Elysia({
         }
         return response;
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        return { message: "Internal server error" };
+        console.error("Error fetching companies:", error);
+        return { message: errorMessage };
       }
     },
     {
@@ -598,7 +621,7 @@ export const ecommerceRoute = new Elysia({
     },
   )
   .get(
-    '/companies/active',
+    "/companies/active",
     async ({ headers, set }) => {
       try {
         const response = await prisma.companies.findMany({
@@ -609,9 +632,9 @@ export const ecommerceRoute = new Elysia({
             id: true,
             company_name: true,
           },
-          orderBy:{
+          orderBy: {
             company_name: "asc",
-          }
+          },
         });
 
         if (!response) {
@@ -620,8 +643,10 @@ export const ecommerceRoute = new Elysia({
         }
         return response;
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        return { message: "Internal server error" };
+        console.error("Error fetching companies:", error);
+        return { message: errorMessage };
       }
     },
     {
@@ -647,14 +672,14 @@ export const ecommerceRoute = new Elysia({
         const { company_image, url_image, company_name, is_active } = body;
         const response = await prisma.companies.create({
           data: {
-            company_image : company_image,
-            url_image : url_image,
-            company_name : company_name,
-            is_active : is_active,
-            created_at : now,
+            company_image: company_image,
+            url_image: url_image,
+            company_name: company_name,
+            is_active: is_active,
+            created_at: now,
           },
         });
-        
+
         if (!response) {
           set.status = 400;
           return { message: "Failed to create company" };
@@ -662,8 +687,10 @@ export const ecommerceRoute = new Elysia({
 
         return response;
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        return { message: "Internal server error" };
+        console.error("Error creating company:", error);
+        return { message: errorMessage };
       }
     },
     {
@@ -699,11 +726,11 @@ export const ecommerceRoute = new Elysia({
             id: Number(company_id),
           },
           data: {
-            company_image : company_image,
-            url_image : url_image,
-            company_name : company_name,
-            is_active : is_active,
-            updated_at : now,
+            company_image: company_image,
+            url_image: url_image,
+            company_name: company_name,
+            is_active: is_active,
+            updated_at: now,
           },
         });
 
@@ -714,13 +741,15 @@ export const ecommerceRoute = new Elysia({
 
         return response;
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        return { message: "Internal server error" };
+        console.error("Error updating company:", error);
+        return { message: errorMessage };
       }
     },
     {
       headers: t.Object({
-        authorization: t.String(),  
+        authorization: t.String(),
       }),
       params: t.Object({
         company_id: t.String(),
@@ -740,8 +769,8 @@ export const ecommerceRoute = new Elysia({
         security: [{ bearerAuth: [] }],
         tags: ["3NConnect"],
         // you can also add `deprecated`, `security`, etc.
-      }
-    }
+      },
+    },
   )
   .delete(
     "/companies/:company_id",
@@ -761,9 +790,11 @@ export const ecommerceRoute = new Elysia({
 
         return response;
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        return { message: "Internal server error" };
-      } 
+        console.error("Error deleting company:", error);
+        return { message: errorMessage };
+      }
     },
     {
       headers: t.Object({
@@ -786,13 +817,13 @@ export const ecommerceRoute = new Elysia({
   )
 
   .get(
-    '/countries',
+    "/countries",
     async ({ headers, set }) => {
       try {
         const response = await prisma.countries.findMany({
-          orderBy:{
+          orderBy: {
             country_name: "asc",
-          }
+          },
         });
 
         if (!response) {
@@ -801,8 +832,10 @@ export const ecommerceRoute = new Elysia({
         }
         return response;
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        return { message: "Internal server error" };
+        console.error("Error fetching countries:", error);
+        return { message: errorMessage };
       }
     },
     {
@@ -822,7 +855,7 @@ export const ecommerceRoute = new Elysia({
     },
   )
   .get(
-    '/countries/active',
+    "/countries/active",
     async ({ headers, set }) => {
       try {
         const response = await prisma.countries.findMany({
@@ -834,9 +867,9 @@ export const ecommerceRoute = new Elysia({
             country_name: true,
             short_name: true,
           },
-          orderBy:{
+          orderBy: {
             country_name: "asc",
-          }
+          },
         });
 
         if (!response) {
@@ -845,8 +878,10 @@ export const ecommerceRoute = new Elysia({
         }
         return response;
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        return { message: "Internal server error" };
+        console.error("Error fetching countries:", error);
+        return { message: errorMessage };
       }
     },
     {
@@ -872,13 +907,13 @@ export const ecommerceRoute = new Elysia({
         const { country_name, short_name } = body;
         const response = await prisma.countries.create({
           data: {
-            country_name : country_name,
-            short_name : short_name ||null,
-            is_active : true,
-            created_at : now,
+            country_name: country_name,
+            short_name: short_name || null,
+            is_active: true,
+            created_at: now,
           },
         });
-        
+
         if (!response) {
           set.status = 400;
           return { message: "Failed to create country" };
@@ -886,8 +921,10 @@ export const ecommerceRoute = new Elysia({
 
         return response;
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        return { message: "Internal server error" };
+        console.error("Error creating country:", error);
+        return { message: errorMessage };
       }
     },
     {
@@ -921,10 +958,10 @@ export const ecommerceRoute = new Elysia({
             id: Number(country_id),
           },
           data: {
-            country_name : country_name,
-            short_name : short_name || null,
-            is_active : is_active,
-            updated_at : now,
+            country_name: country_name,
+            short_name: short_name || null,
+            is_active: is_active,
+            updated_at: now,
           },
         });
 
@@ -935,13 +972,15 @@ export const ecommerceRoute = new Elysia({
 
         return response;
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        return { message: "Internal server error" };
+        console.error("Error updating country:", error);
+        return { message: errorMessage };
       }
     },
     {
       headers: t.Object({
-        authorization: t.String(),  
+        authorization: t.String(),
       }),
       params: t.Object({
         country_id: t.String(),
@@ -960,8 +999,8 @@ export const ecommerceRoute = new Elysia({
         security: [{ bearerAuth: [] }],
         tags: ["3NConnect"],
         // you can also add `deprecated`, `security`, etc.
-      }
-    }
+      },
+    },
   )
   .delete(
     "/countries/:country_id",
@@ -981,9 +1020,11 @@ export const ecommerceRoute = new Elysia({
 
         return response;
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        return { message: "Internal server error" };
-      } 
+        console.error("Error deleting country:", error);
+        return { message: errorMessage };
+      }
     },
     {
       headers: t.Object({
@@ -1009,48 +1050,67 @@ export const ecommerceRoute = new Elysia({
     async ({ headers, set }) => {
       try {
         const response = await prisma.products.findMany({
-          select : {
+          select: {
             id: true,
             product_name: true,
             product_description: true,
-            online_price: true,
             brand_id: true,
             category_id: true,
             company_id: true,
             is_active: true,
             is_online_active: true,
-            mat_identity: true,
-            min_price: true,
             unit: true,
             created_at: true,
             updated_at: true,
             brands: {
               select: {
                 brand_name: true,
-              }
+              },
             },
             categories: {
               select: {
                 name: true,
-              }
+              },
             },
             companies: {
               select: {
                 company_name: true,
-              }
+              },
             },
             product_images: {
               select: {
                 id: true,
                 url_image: true,
                 is_show: true,
-              }
+              },
             },
             video_product: true,
             condition_description: true,
             warranty_description: true,
             youtube_url: true,
-          }
+            is_pre_order: true,
+            is_custom_options: true,
+            product_options: {
+              select: {
+                id: true,
+                mat_identity: true,
+                option_name: true,
+                online_price: true,
+                min_price: true,
+              },
+              orderBy: {
+                row_no: "asc",
+              },
+            },
+            product_payment_method: {
+              select: {
+                qr_code_promptpay: true,
+                visa_card: true,
+                mobile_banking: true,
+                credit_terms: true,
+              },
+            },
+          },
         });
 
         if (!response) {
@@ -1059,8 +1119,10 @@ export const ecommerceRoute = new Elysia({
         }
         return response;
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        return { message: "Internal server error"};
+        console.error("Error fetching products:", error);
+        return { message: errorMessage };
       }
     },
     {
@@ -1088,41 +1150,61 @@ export const ecommerceRoute = new Elysia({
             is_active: true,
             is_online_active: true,
           },
-          select : {
+          select: {
             id: true,
             product_name: true,
             product_description: true,
-            online_price: true,
-            mat_identity: true,
             unit: true,
             brands: {
               select: {
                 brand_name: true,
-              }
+              },
             },
             categories: {
               select: {
                 name: true,
-              }
+              },
             },
             companies: {
               select: {
                 company_name: true,
-              }
+              },
             },
             product_images: {
               select: {
                 url_image: true,
               },
-              where :{
+              where: {
                 is_show: true,
-              }
+              },
             },
             video_product: true,
             condition_description: true,
             warranty_description: true,
             youtube_url: true,
-          }
+            is_pre_order: true,
+            is_custom_options: true,
+            product_options: {
+              select: {
+                id: true,
+                mat_identity: true,
+                option_name: true,
+                online_price: true,
+                min_price: true,
+              },
+              orderBy: {
+                row_no: "asc",
+              },
+            },
+            product_payment_method: {
+              select: {
+                qr_code_promptpay: true,
+                visa_card: true,
+                mobile_banking: true,
+                credit_terms: true,
+              },
+            },
+          },
         });
 
         if (!response) {
@@ -1131,8 +1213,10 @@ export const ecommerceRoute = new Elysia({
         }
         return response;
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        return { message: "Internal server error" };
+        console.error("Error fetching products:", error);
+        return { message: errorMessage };
       }
     },
     {
@@ -1151,11 +1235,114 @@ export const ecommerceRoute = new Elysia({
       },
     },
   )
+  .get(
+    "/products/:product_id",
+    async ({ headers, params, set }) => {
+      try {
+        const response = await prisma.products.findFirst({
+          where: {
+            id: params.product_id,
+          },
+          select: {
+            id: true,
+            product_name: true,
+            product_description: true,
+            unit: true,
+            brand_id: true,
+            company_id: true,
+            category_id: true,
+            product_images: {
+              select: {
+                id: true,
+                url_image: true,
+                is_show: true,
+              },
+            },
+            video_product: true,
+            condition_description: true,
+            warranty_description: true,
+            youtube_url: true,
+            is_active: true,
+            is_online_active: true,
+            is_pre_order: true,
+            is_custom_options: true,
+            product_options: {
+              select: {
+                id: true,
+                mat_identity: true,
+                option_name: true,
+                online_price: true,
+                min_price: true,
+              },
+              orderBy: {
+                row_no: "asc",
+              },
+            },
+            product_payment_method: {
+              select: {
+                qr_code_promptpay: true,
+                visa_card: true,
+                mobile_banking: true,
+                credit_terms: true,
+              },
+            },
+          },
+        });
+
+        if (!response) {
+          set.status = 404;
+          return { message: "No valid products found" };
+        }
+        return response;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching product:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      params: t.Object({
+        product_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Products - Find All",
+        description: `
+          This endpoint retrieves all valid products in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
   .post(
     "/products",
     async ({ headers, body, set }) => {
       try {
-        const { product_name, product_description, online_price, brand_id, category_id, company_id, images, is_active, is_online_active, mat_identity, min_price, unit, video_product, condition_description, warranty_description, youtube_url } = body;
+        const {
+          brand_id,
+          category_id,
+          company_id,
+          images,
+          is_active,
+          is_custom_options,
+          is_online_active,
+          is_pre_order,
+          options,
+          payment_methods,
+          product_description,
+          product_name,
+          unit,
+          video_product,
+          condition_description,
+          warranty_description,
+          youtube_url,
+        } = body;
 
         const get_category = await prisma.product_categories.findUnique({
           where: {
@@ -1164,7 +1351,7 @@ export const ecommerceRoute = new Elysia({
           select: {
             id: true,
             ancestors: true,
-          }
+          },
         });
 
         if (!get_category) {
@@ -1172,55 +1359,91 @@ export const ecommerceRoute = new Elysia({
           return { message: "Category not found" };
         }
 
-        const category_hierarchy = get_category.ancestors ? [...get_category.ancestors, get_category.id] : [get_category.id];
+        const category_hierarchy = get_category.ancestors
+          ? [...get_category.ancestors, get_category.id]
+          : [get_category.id];
 
         const response = await prisma.products.create({
           data: {
-            product_name : product_name,
-            product_description : product_description,
-            online_price : online_price || 0,
-            brand_id : brand_id,
+            brand_id: brand_id,
             category_id: category_id,
-            category_hierarchy : category_hierarchy,
-            company_id : company_id,
-            is_active : is_active,
-            is_online_active : is_online_active,
-            mat_identity : mat_identity,
-            min_price : min_price || 0,
-            unit : unit,
-            video_product : video_product,
-            condition_description : condition_description,
-            warranty_description : warranty_description,
-            youtube_url : youtube_url,
-            created_at : now,
+            company_id: company_id,
+            condition_description: condition_description,
+            is_active: is_active,
+            is_custom_options: is_custom_options,
+            is_online_active: is_online_active,
+            is_pre_order: is_pre_order,
+            product_description: product_description,
+            product_name: product_name,
+            unit: unit,
+            video_product: video_product,
+            warranty_description: warranty_description,
+            youtube_url: youtube_url,
+            category_hierarchy: category_hierarchy,
+            created_at: now,
           },
           select: {
             id: true,
-          }
+          },
         });
-        
+
         if (!response) {
           set.status = 400;
           return { message: "Failed to create product" };
         }
 
         if (images && images.length > 0) {
-          await Promise.all(images.map((image: { image_url: string; is_main: boolean }) => {
-            return prisma.product_images.create({
-              data: {
-                product_id: response.id,
-                url_image: image.image_url,
-                is_show: image.is_main,
-                created_at: now,
-              },
-            });
-          }));
+          await Promise.all(
+            images.map((image: { image_url: string; is_main: boolean }) => {
+              return prisma.product_images.create({
+                data: {
+                  product_id: response.id,
+                  url_image: image.image_url,
+                  is_show: image.is_main,
+                  created_at: now,
+                },
+              });
+            }),
+          );
+        }
+
+        if (options && options.length > 0) {
+          await Promise.all(
+            options.map((option: any) => {
+              return prisma.product_options.create({
+                data: {
+                  product_id: response.id,
+                  row_no: option.row_no,
+                  mat_identity: option.mat_id,
+                  option_name: option.option_name,
+                  online_price: option.online_price,
+                  min_price: option.min_price,
+                  created_at: now,
+                },
+              });
+            }),
+          );
+        }
+
+        if (payment_methods) {
+          await prisma.product_payment_method.create({
+            data: {
+              product_id: response.id,
+              qr_code_promptpay: payment_methods.qr_promptpay,
+              visa_card: payment_methods.visa_card,
+              mobile_banking: payment_methods.mobile_banking,
+              credit_terms: payment_methods.credit_terms,
+              created_at: now,
+            },
+          });
         }
 
         return { message: "Product created successfully" };
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        return { message: "Internal server error" };
+        console.error("Error creating product:", error);
+        return { message: errorMessage };
       }
     },
     {
@@ -1233,10 +1456,24 @@ export const ecommerceRoute = new Elysia({
         company_id: t.Number(),
         images: t.Any(),
         is_active: t.Boolean(),
+        is_custom_options: t.Boolean(),
         is_online_active: t.Boolean(),
-        mat_identity: t.String(),
-        min_price: t.Any(),
-        online_price: t.Number(),
+        is_pre_order: t.Boolean(),
+        options: t.Array(
+          t.Object({
+            row_no: t.Number(),
+            mat_id: t.String(),
+            option_name: t.Any(),
+            online_price: t.Any(),
+            min_price: t.Any(),
+          }),
+        ),
+        payment_methods: t.Object({
+          qr_promptpay: t.Boolean(),
+          visa_card: t.Boolean(),
+          mobile_banking: t.Boolean(),
+          credit_terms: t.Boolean(),
+        }),
         product_description: t.String(),
         product_name: t.String(),
         unit: t.String(),
@@ -1262,7 +1499,26 @@ export const ecommerceRoute = new Elysia({
     async ({ headers, params, body, set }) => {
       try {
         const { product_id } = params;
-        const { product_name, product_description, online_price, brand_id, category_id, company_id, images, is_active, is_online_active, mat_identity, min_price, unit, video_product, condition_description, warranty_description, youtube_url} = body;
+        const {
+          brand_id,
+          category_id,
+          company_id,
+          condition_description,
+          images,
+          is_active,
+          is_custom_options,
+          is_online_active,
+          is_pre_order,
+          options,
+          payment_methods,
+          product_description,
+          product_name,
+          unit,
+          video_product,
+          warranty_description,
+          youtube_url,
+        } = body;
+
         const get_category = await prisma.product_categories.findUnique({
           where: {
             id: category_id,
@@ -1270,7 +1526,7 @@ export const ecommerceRoute = new Elysia({
           select: {
             id: true,
             ancestors: true,
-          }
+          },
         });
 
         if (!get_category) {
@@ -1278,30 +1534,31 @@ export const ecommerceRoute = new Elysia({
           return { message: "Category not found" };
         }
 
-        const category_hierarchy = get_category.ancestors ? [...get_category.ancestors, get_category.id] : [get_category.id];
+        const category_hierarchy = get_category.ancestors
+          ? [...get_category.ancestors, get_category.id]
+          : [get_category.id];
 
         const response = await prisma.products.update({
           where: {
             id: product_id,
           },
           data: {
-            product_name : product_name,
-            product_description : product_description,
-            online_price : online_price,
-            brand_id : brand_id,
+            brand_id: brand_id,
             category_id: category_id,
-            category_hierarchy : category_hierarchy,
-            company_id : company_id,
-            is_active : is_active,
-            is_online_active : is_online_active,
-            mat_identity : mat_identity,
-            min_price : min_price || 0,
-            unit : unit,
-            video_product : video_product,
-            condition_description : condition_description,
-            warranty_description : warranty_description,
-            youtube_url : youtube_url,
-            updated_at : now,
+            category_hierarchy: category_hierarchy,
+            company_id: company_id,
+            condition_description: condition_description,
+            is_active: is_active,
+            is_custom_options: is_custom_options,
+            is_online_active: is_online_active,
+            is_pre_order: is_pre_order,
+            product_description: product_description,
+            product_name: product_name,
+            unit: unit,
+            video_product: video_product,
+            warranty_description: warranty_description,
+            youtube_url: youtube_url,
+            updated_at: now,
           },
         });
 
@@ -1310,34 +1567,140 @@ export const ecommerceRoute = new Elysia({
           return { message: "Failed to update product" };
         }
 
-        await prisma.product_images.deleteMany({
-          where: {
-            product_id: Number(product_id),
-          },
-        });
+        if (images && images.length > 0) {
+          const existingImages = await prisma.product_images.findMany({
+            where: { product_id: product_id },
+            select: { id: true, url_image: true, is_show: true },
+          });
 
-        if(images && images.length > 0){
-          await Promise.all(images.map((image: { image_url: string; is_main: boolean }) => {
-            return prisma.product_images.create({
-              data: {
-                product_id: Number(product_id),
-                url_image: image.image_url,
-                is_show: image.is_main,
-                created_at: now,
+          const imagesToAdd = images.filter((img: any) => !img.id);
+          const imagesToUpdate = images.filter((img: any) => img.id);
+          const imagesToDelete = existingImages.filter(
+            (existing) => !images.some((img: any) => img.id === existing.id)
+          );
+
+          if (imagesToAdd.length > 0) {
+            await Promise.all(
+              imagesToAdd.map((image: { image_url: string; is_main: boolean }) =>
+                prisma.product_images.create({
+                  data: {
+                    product_id: product_id,
+                    url_image: image.image_url,
+                    is_show: image.is_main,
+                    created_at: now,
+                  },
+                })
+              )
+            );
+          }
+
+          if (imagesToUpdate.length > 0) {
+            await Promise.all(
+              imagesToUpdate.map((image: { id: number; image_url: string; is_main: boolean }) =>
+                prisma.product_images.update({
+                  where: { id: image.id },
+                  data: {
+                    url_image: image.image_url,
+                    is_show: image.is_main,
+                    updated_at: now,
+                  },
+                })
+              )
+            );
+          }
+
+          if (imagesToDelete.length > 0) {
+            await prisma.product_images.deleteMany({
+              where: {
+                id: { in: imagesToDelete.map(img => img.id) },
               },
             });
-          }));
+          }
+                    
         }
+
+        // TODO : compare with existing product options and update/delete/add
+        if (options && options.length > 0) {
+          const existingOptions = await prisma.product_options.findMany({
+            where: { product_id: product_id },
+            select: { id: true, row_no: true, mat_identity: true, option_name: true, online_price: true, min_price: true },
+          });
+
+          const optionsToAdd = options.filter((opt: any) => !opt.id);
+          const optionsToUpdate = options.filter((opt: any) => opt.id);
+          const optionsToDelete = existingOptions.filter(
+            (existing) => !options.some((opt: any) => opt.id === existing.id)
+          );
+
+          if (optionsToAdd.length > 0) {
+            await Promise.all(
+              optionsToAdd.map((option: any) =>
+                prisma.product_options.create({
+                  data: {
+                    product_id: product_id,
+                    row_no: option.row_no,
+                    mat_identity: option.mat_id,
+                    option_name: option.option_name,
+                    online_price: option.online_price,
+                    min_price: option.min_price,
+                    created_at: now,
+                  },
+                })
+              )
+            );
+          }
+
+          if (optionsToUpdate.length > 0) {
+            await Promise.all(
+              optionsToUpdate.map((option: any) =>
+                prisma.product_options.update({
+                  where: { id: option.id },
+                  data: {
+                    row_no: option.row_no,
+                    mat_identity: option.mat_id,
+                    option_name: option.option_name,
+                    online_price: option.online_price,
+                    min_price: option.min_price,
+                    updated_at: now,
+                  },
+                })
+              )
+            );
+          }
+
+          if (optionsToDelete.length > 0) {
+            await prisma.product_options.deleteMany({
+              where: {
+                id: { in: optionsToDelete.map(opt => opt.id) },
+              },
+            });
+          }
+        }
+
+        await prisma.product_payment_method.updateMany({
+          where: {
+            product_id: product_id,
+          },
+          data: {
+            qr_code_promptpay: payment_methods.qr_promptpay,
+            visa_card: payment_methods.visa_card,
+            mobile_banking: payment_methods.mobile_banking,
+            credit_terms: payment_methods.credit_terms,
+            updated_at: now,
+          },
+        })
 
         return { message: "Product updated successfully" };
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        return { message: "Internal server error" };
+        console.error("Error updating product:", error);
+        return { message: errorMessage };
       }
     },
     {
       headers: t.Object({
-        authorization: t.String(),  
+        authorization: t.String(),
       }),
       params: t.Object({
         product_id: t.Number(),
@@ -1346,17 +1709,32 @@ export const ecommerceRoute = new Elysia({
         brand_id: t.Number(),
         category_id: t.String(),
         company_id: t.Number(),
+        condition_description: t.Any(),
         images: t.Any(),
         is_active: t.Boolean(),
+        is_custom_options: t.Boolean(),
         is_online_active: t.Boolean(),
-        mat_identity: t.String(),
-        min_price: t.Any(),
-        online_price: t.Number(),
+        is_pre_order: t.Boolean(),
+        options: t.Array(
+          t.Object({
+            id: t.Number(),
+            row_no: t.Number(),
+            mat_id: t.String(),
+            option_name: t.Any(),
+            online_price: t.Any(),
+            min_price: t.Any(),
+          })
+        ),
+        payment_methods: t.Object({
+          credit_terms: t.Boolean(),
+          mobile_banking: t.Boolean(),
+          qr_promptpay: t.Boolean(),
+          visa_card: t.Boolean(),
+        }),
         product_description: t.String(),
         product_name: t.String(),
         unit: t.String(),
         video_product: t.Any(),
-        condition_description: t.Any(),
         warranty_description: t.Any(),
         youtube_url: t.Any(),
       }),
@@ -1369,15 +1747,21 @@ export const ecommerceRoute = new Elysia({
         security: [{ bearerAuth: [] }],
         tags: ["3NConnect"],
         // you can also add `deprecated`, `security`, etc.
-      }
-    }
+      },
+    },
   )
   .put(
     "/products/bulks/:product_id",
     async ({ headers, params, body, set }) => {
       try {
         const { product_id } = params;
-        const { is_online_active, online_price, brand_id, company_id, category_id } = body;
+        const {
+          is_online_active,
+          online_price,
+          brand_id,
+          company_id,
+          category_id,
+        } = body;
         const get_category = await prisma.product_categories.findUnique({
           where: {
             id: category_id,
@@ -1385,7 +1769,7 @@ export const ecommerceRoute = new Elysia({
           select: {
             id: true,
             ancestors: true,
-          }
+          },
         });
 
         if (!get_category) {
@@ -1393,20 +1777,22 @@ export const ecommerceRoute = new Elysia({
           return { message: "Category not found" };
         }
 
-        const category_hierarchy = get_category.ancestors ? [...get_category.ancestors, get_category.id] : [get_category.id];
+        const category_hierarchy = get_category.ancestors
+          ? [...get_category.ancestors, get_category.id]
+          : [get_category.id];
 
         const response = await prisma.products.update({
           where: {
             id: product_id,
           },
           data: {
-            is_online_active : is_online_active,
-            online_price : online_price,
-            brand_id : brand_id,
+            is_online_active: is_online_active,
+            online_price: online_price,
+            brand_id: brand_id,
             category_hierarchy: category_hierarchy,
             category_id: category_id,
-            company_id : company_id,
-            updated_at : now,
+            company_id: company_id,
+            updated_at: now,
           },
         });
 
@@ -1417,13 +1803,15 @@ export const ecommerceRoute = new Elysia({
 
         return { message: "Product updated successfully" };
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        return { message: "Internal server error" };
+        console.error("Error updating product:", error);
+        return { message: errorMessage };
       }
     },
     {
       headers: t.Object({
-        authorization: t.String(),  
+        authorization: t.String(),
       }),
       params: t.Object({
         product_id: t.Number(),
@@ -1444,8 +1832,8 @@ export const ecommerceRoute = new Elysia({
         security: [{ bearerAuth: [] }],
         tags: ["3NConnect"],
         // you can also add `deprecated`, `security`, etc.
-      }
-    }
+      },
+    },
   )
   .delete(
     "/products/:product_id",
@@ -1471,9 +1859,11 @@ export const ecommerceRoute = new Elysia({
 
         return response;
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        return { message: "Internal server error" };
-      } 
+        console.error("Error deleting product:", error);
+        return { message: errorMessage };
+      }
     },
     {
       headers: t.Object({
@@ -1501,7 +1891,7 @@ export const ecommerceRoute = new Elysia({
         const response = await prisma.event_categories.findMany({
           orderBy: {
             event_cate_name: "asc",
-          }
+          },
         });
 
         if (!response) {
@@ -1510,8 +1900,10 @@ export const ecommerceRoute = new Elysia({
         }
         return response;
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        return { message: "Internal server error" };
+        console.error("Error fetching event categories:", error);
+        return { message: errorMessage };
       }
     },
     {
@@ -1535,16 +1927,16 @@ export const ecommerceRoute = new Elysia({
     async ({ headers, set }) => {
       try {
         const response = await prisma.event_categories.findMany({
-          where : {
-            is_active : true,
+          where: {
+            is_active: true,
           },
           orderBy: {
             event_cate_name: "asc",
           },
-          select : {
+          select: {
             id: true,
             event_cate_name: true,
-          }
+          },
         });
 
         if (!response) {
@@ -1553,8 +1945,10 @@ export const ecommerceRoute = new Elysia({
         }
         return response;
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        return { message: "Internal server error" };
+        console.error("Error fetching event categories:", error);
+        return { message: errorMessage };
       }
     },
     {
@@ -1581,12 +1975,12 @@ export const ecommerceRoute = new Elysia({
 
         const response = await prisma.event_categories.create({
           data: {
-            event_cate_name : event_cate_name,
-            is_active : true,
-            created_at : now,
+            event_cate_name: event_cate_name,
+            is_active: true,
+            created_at: now,
           },
         });
-        
+
         if (!response) {
           set.status = 400;
           return { message: "Failed to create event category" };
@@ -1594,8 +1988,10 @@ export const ecommerceRoute = new Elysia({
 
         return response;
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        return { message: "Internal server error" };
+        console.error("Error creating event category:", error);
+        return { message: errorMessage };
       }
     },
     {
@@ -1640,12 +2036,12 @@ export const ecommerceRoute = new Elysia({
             event_categories: {
               select: {
                 event_cate_name: true,
-              }
-            }
+              },
+            },
           },
           orderBy: {
             event_name: "asc",
-          }
+          },
         });
 
         if (!response) {
@@ -1654,8 +2050,10 @@ export const ecommerceRoute = new Elysia({
         }
         return response;
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        return { message: "Internal server error" };
+        console.error("Error fetching events:", error);
+        return { message: errorMessage };
       }
     },
     {
@@ -1678,26 +2076,39 @@ export const ecommerceRoute = new Elysia({
     "/events",
     async ({ headers, body, set }) => {
       try {
-        const { event_category_id, event_detail, event_enddate, event_image, event_name, event_startdate, location_name, preregister_date, ref_url, register_date, tier_preregister, tier_register } = body;
+        const {
+          event_category_id,
+          event_detail,
+          event_enddate,
+          event_image,
+          event_name,
+          event_startdate,
+          location_name,
+          preregister_date,
+          ref_url,
+          register_date,
+          tier_preregister,
+          tier_register,
+        } = body;
         const response = await prisma.events.create({
           data: {
-            event_name : event_name,
-            event_category_id : event_category_id,
-            event_detail : event_detail,
-            event_enddate : event_enddate,
-            event_image : event_image,
-            event_startdate : event_startdate,
-            location_name : location_name,
-            preregister_date : preregister_date || null,
-            ref_url : ref_url,
-            register_date : register_date || null,
-            tier_preregister : tier_preregister,
-            tier_register : tier_register,
-            is_active : true,
-            created_at : now,
+            event_name: event_name,
+            event_category_id: event_category_id,
+            event_detail: event_detail,
+            event_enddate: event_enddate,
+            event_image: event_image,
+            event_startdate: event_startdate,
+            location_name: location_name,
+            preregister_date: preregister_date || null,
+            ref_url: ref_url,
+            register_date: register_date || null,
+            tier_preregister: tier_preregister,
+            tier_register: tier_register,
+            is_active: true,
+            created_at: now,
           },
         });
-        
+
         if (!response) {
           set.status = 400;
           return { message: "Failed to create event" };
@@ -1705,7 +2116,8 @@ export const ecommerceRoute = new Elysia({
 
         return { message: "Event created successfully" };
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
         console.error("Error creating event:", errorMessage);
         set.status = 500;
         return { message: "Internal server error" };
@@ -1726,12 +2138,8 @@ export const ecommerceRoute = new Elysia({
         preregister_date: t.Any(),
         ref_url: t.Any(),
         register_date: t.Any(),
-        tier_preregister: t.Array(
-          t.Any()
-        ),
-        tier_register: t.Array(
-          t.Any()
-        ),
+        tier_preregister: t.Array(t.Any()),
+        tier_register: t.Array(t.Any()),
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
@@ -1750,26 +2158,40 @@ export const ecommerceRoute = new Elysia({
     async ({ headers, params, body, set }) => {
       try {
         const { event_id } = params;
-        const { event_category_id, event_detail, event_enddate, event_image, event_name, event_startdate, location_name, preregister_date, ref_url, register_date, tier_preregister, tier_register, is_active } = body;
+        const {
+          event_category_id,
+          event_detail,
+          event_enddate,
+          event_image,
+          event_name,
+          event_startdate,
+          location_name,
+          preregister_date,
+          ref_url,
+          register_date,
+          tier_preregister,
+          tier_register,
+          is_active,
+        } = body;
         const response = await prisma.events.update({
           where: {
             id: Number(event_id),
           },
           data: {
-            event_name : event_name,
-            event_category_id : event_category_id,
-            event_detail : event_detail,
-            event_enddate : event_enddate,
-            event_image : event_image,
-            event_startdate : event_startdate,
-            location_name : location_name,
-            preregister_date : preregister_date || null,
-            ref_url : ref_url,
-            register_date : register_date || null,
-            tier_preregister : tier_preregister,
-            tier_register : tier_register,
-            is_active : is_active,
-            updated_at : now,
+            event_name: event_name,
+            event_category_id: event_category_id,
+            event_detail: event_detail,
+            event_enddate: event_enddate,
+            event_image: event_image,
+            event_startdate: event_startdate,
+            location_name: location_name,
+            preregister_date: preregister_date || null,
+            ref_url: ref_url,
+            register_date: register_date || null,
+            tier_preregister: tier_preregister,
+            tier_register: tier_register,
+            is_active: is_active,
+            updated_at: now,
           },
         });
 
@@ -1780,7 +2202,8 @@ export const ecommerceRoute = new Elysia({
 
         return { message: "Event updated successfully" };
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
         console.error("Error updating event:", errorMessage);
         set.status = 500;
         return { message: "Internal server error" };
@@ -1788,7 +2211,7 @@ export const ecommerceRoute = new Elysia({
     },
     {
       headers: t.Object({
-        authorization: t.String(),  
+        authorization: t.String(),
       }),
       params: t.Object({
         event_id: t.String(),
@@ -1804,12 +2227,8 @@ export const ecommerceRoute = new Elysia({
         preregister_date: t.Any(),
         ref_url: t.Any(),
         register_date: t.Any(),
-        tier_preregister: t.Array(
-          t.Any()
-        ),
-        tier_register: t.Array(
-          t.Any()
-        ),
+        tier_preregister: t.Array(t.Any()),
+        tier_register: t.Array(t.Any()),
         is_active: t.Boolean(),
       }),
       detail: {
@@ -1821,8 +2240,8 @@ export const ecommerceRoute = new Elysia({
         security: [{ bearerAuth: [] }],
         tags: ["3NConnect"],
         // you can also add `deprecated`, `security`, etc.
-      }
-    }
+      },
+    },
   )
   .post(
     "/search-product/in-stock",
@@ -1834,12 +2253,15 @@ export const ecommerceRoute = new Elysia({
             MATUnit: {
               contains: search_text,
               mode: "insensitive",
-            }
+            },
           },
           select: {
             MATUnit: true,
             grandqty: true,
             company: true,
+          },
+          orderBy: {
+            MATUnit: "asc",
           },
         });
 
@@ -1849,8 +2271,10 @@ export const ecommerceRoute = new Elysia({
         }
         return response;
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        return { message: "Internal server error" };
+        console.error("Error searching products in stock:", error);
+        return { message: errorMessage };
       }
     },
     {
@@ -1871,5 +2295,4 @@ export const ecommerceRoute = new Elysia({
         // you can also add `deprecated`, `security`, etc.
       },
     },
-  )
-
+  );
