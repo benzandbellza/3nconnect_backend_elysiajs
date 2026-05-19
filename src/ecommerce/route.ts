@@ -2410,7 +2410,7 @@ export const ecommerceRoute = new Elysia({
     },
   )
   .get(
-    "/inventory-stocks",
+    "/stock-inventory",
     async ({ headers, set }) => {
       try {
         const response = await prisma.vw_planetone_stocks.findMany();
