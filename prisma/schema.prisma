@@ -58,44 +58,26 @@ model countries {
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model products {
-  id                     Int                      @id @default(autoincrement())
-  product_name           String?
-  product_description    String?
-  company_id             Int?
-  brand_id               Int?
-  created_at             DateTime                 @default(now()) @db.Timestamptz(6)
-  updated_at             DateTime?                @db.Timestamptz(6)
-  is_active              Boolean?
-  category_hierarchy     String[]
-  unit                   String?
-  is_online_active       Boolean?
-  category_id            String?
-  video_product          String?
-  condition_description  String?
-  warranty_description   String?
-  youtube_url            String?
-  is_pre_order           Boolean?
-  is_custom_options      Boolean?
-  product_images         product_images[]
-  product_options        product_options[]
-  product_payment_method product_payment_method[]
-  brands                 brands?                  @relation(fields: [brand_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  categories             product_categories?      @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  companies              companies?               @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-
-  @@schema("3nconnect")
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model product_images {
-  id         Int       @id @default(autoincrement())
-  product_id Int?
-  url_image  String?
-  is_show    Boolean?
-  created_at DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at DateTime? @db.Timestamptz(6)
-  products   products? @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+model customer_user {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  authid                String?   @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  member_no             String?
+  created_at            DateTime  @default(now()) @db.Timestamptz(6)
+  avatar_url            String?
+  gender                String?
+  prefix_name_th        String?
+  name_th               String?
+  prefix_name_en        String?
+  name_en               String?
+  email                 String?
+  phone_no              String?
+  birthday_date         DateTime? @db.Date
+  pdpa_accepted         Boolean?
+  pdpa_accepted_version String?
+  pdpa_accepted_at      DateTime? @db.Timestamptz(6)
+  preferred_contact     String[]
+  fcm_token             String?
+  line_id               String?
 
   @@schema("3nconnect")
 }
@@ -109,30 +91,6 @@ model event_categories {
   is_active       Boolean?
   events          events[]
 
-  @@schema("3nconnect")
-}
-
-model product_categories {
-  id                       String               @id(map: "categories_pkey")
-  name                     String
-  slug                     String               @unique(map: "categories_slug_unique")
-  parent_id                String?
-  ancestors                String[]             @default([])
-  level                    Int                  @default(0) @db.SmallInt
-  sort_order               Int                  @default(0) @db.SmallInt
-  image_url                String?
-  is_active                Boolean              @default(true)
-  created_at               DateTime             @default(now()) @db.Timestamptz(6)
-  updated_at               DateTime?            @db.Timestamptz(6)
-  product_categories       product_categories?  @relation("product_categoriesToproduct_categories", fields: [parent_id], references: [id], onUpdate: NoAction, map: "categories_parent_id_fkey")
-  other_product_categories product_categories[] @relation("product_categoriesToproduct_categories")
-  products                 products[]
-
-  @@index([ancestors], map: "idx_categories_ancestors", type: Gin)
-  @@index([is_active], map: "idx_categories_is_active")
-  @@index([level], map: "idx_categories_level")
-  @@index([parent_id], map: "idx_categories_parent_id")
-  @@index([sort_order], map: "idx_categories_sort_order")
   @@schema("3nconnect")
 }
 
@@ -160,26 +118,39 @@ model events {
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model customer_user {
-  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  authid                String?   @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  member_no             String?
-  created_at            DateTime  @default(now()) @db.Timestamptz(6)
-  avatar_url            String?
-  gender                String?
-  prefix_name_th        String?
-  name_th               String?
-  prefix_name_en        String?
-  name_en               String?
-  email                 String?
-  phone_no              String?
-  birthday_date         DateTime? @db.Date
-  pdpa_accepted         Boolean?
-  pdpa_accepted_version String?
-  pdpa_accepted_at      DateTime? @db.Timestamptz(6)
-  preferred_contact     String[]
-  fcm_token             String?
-  line_id               String?
+model product_categories {
+  id                       String               @id(map: "categories_pkey")
+  name                     String
+  slug                     String               @unique(map: "categories_slug_unique")
+  parent_id                String?
+  ancestors                String[]             @default([])
+  level                    Int                  @default(0) @db.SmallInt
+  sort_order               Int                  @default(0) @db.SmallInt
+  image_url                String?
+  is_active                Boolean              @default(true)
+  created_at               DateTime             @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime?            @db.Timestamptz(6)
+  product_categories       product_categories?  @relation("product_categoriesToproduct_categories", fields: [parent_id], references: [id], onUpdate: NoAction, map: "categories_parent_id_fkey")
+  other_product_categories product_categories[] @relation("product_categoriesToproduct_categories")
+  products                 products[]
+
+  @@index([ancestors], map: "idx_categories_ancestors", type: Gin)
+  @@index([is_active], map: "idx_categories_is_active")
+  @@index([level], map: "idx_categories_level")
+  @@index([parent_id], map: "idx_categories_parent_id")
+  @@index([sort_order], map: "idx_categories_sort_order")
+  @@schema("3nconnect")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model product_images {
+  id         Int       @id @default(autoincrement())
+  product_id Int?
+  url_image  String?
+  is_show    Boolean?
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @db.Timestamptz(6)
+  products   products? @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("3nconnect")
 }
@@ -215,10 +186,58 @@ model product_payment_method {
   @@schema("3nconnect")
 }
 
-view vw_planetone_stock {
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model products {
+  id                     Int                      @id @default(autoincrement())
+  product_name           String?
+  product_description    String?
+  company_id             Int?
+  brand_id               Int?
+  created_at             DateTime                 @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime?                @db.Timestamptz(6)
+  is_active              Boolean?
+  category_hierarchy     String[]
+  unit                   String?
+  is_online_active       Boolean?
+  category_id            String?
+  video_product          String?
+  condition_description  String?
+  warranty_description   String?
+  youtube_url            String?
+  is_pre_order           Boolean?
+  is_custom_options      Boolean?
+  product_images         product_images[]
+  product_options        product_options[]
+  product_payment_method product_payment_method[]
+  brands                 brands?                  @relation(fields: [brand_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  product_categories     product_categories?      @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  companies              companies?               @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@schema("3nconnect")
+}
+
+view vw_planetone_grouping_stock {
   MATUnit  String?
-  grandqty Decimal? @db.Decimal
+  grandqty Int?
   company  String?
+
+  @@schema("3nconnect")
+}
+
+view vw_planetone_stocks {
+  company_name   String?
+  MATUnit        String?
+  Lot            String?
+  location_id    String?
+  qty_balance    Int?
+  qty_ready      Int?
+  qty_pn_out     Int?
+  qty_total      Int?
+  unit           String?
+  expired        String?
+  available_life Int?
+  unitcost       Float?
+  costbalance    Float?
 
   @@schema("3nconnect")
 }

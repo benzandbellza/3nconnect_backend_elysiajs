@@ -1067,7 +1067,7 @@ export const ecommerceRoute = new Elysia({
                 brand_name: true,
               },
             },
-            categories: {
+            product_categories: {
               select: {
                 name: true,
               },
@@ -2361,7 +2361,7 @@ export const ecommerceRoute = new Elysia({
     async ({ headers, body, set }) => {
       try {
         const { search_text } = body;
-        const response = await prisma.vw_planetone_stock.findMany({
+        const response = await prisma.vw_planetone_grouping_stock.findMany({
           where: {
             MATUnit: {
               contains: search_text,
@@ -2408,4 +2408,38 @@ export const ecommerceRoute = new Elysia({
         // you can also add `deprecated`, `security`, etc.
       },
     },
-  );
+  )
+  .get(
+    "/inventory-stocks",
+    async ({ headers, set }) => {
+      try {
+        const response = await prisma.vw_planetone_stocks.findMany();
+
+        if (!response) {
+          set.status = 404;
+          return { message: "No inventory stock found" };
+        }
+        return response;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching inventory stocks:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Inventory Stocks - Find All",
+        description: `
+          This endpoint retrieves all inventory stocks in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
