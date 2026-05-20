@@ -41,6 +41,4 @@ FROM
       )
     )
     JOIN "3nconnect".companies com ON ((p.company_id = com.id))
-  )
-WHERE
-  (product_ecommerce.mat_identity IS NOT NULL);
+  );

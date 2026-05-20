@@ -1331,6 +1331,7 @@ export const ecommerceRoute = new Elysia({
                 credit_terms: true,
               },
             },
+            attributes_hierarchy: true,
           },
         });
 
@@ -1387,6 +1388,7 @@ export const ecommerceRoute = new Elysia({
           condition_description,
           warranty_description,
           youtube_url,
+          attributes_hierarchy,
         } = body;
 
         // TODO : check options.mat_id do not repeat in company
@@ -1444,6 +1446,7 @@ export const ecommerceRoute = new Elysia({
             warranty_description: warranty_description,
             youtube_url: youtube_url,
             category_hierarchy: category_hierarchy,
+            attributes_hierarchy: attributes_hierarchy && attributes_hierarchy.length > 0 ? attributes_hierarchy : [],
             created_at: now,
           },
           select: {
@@ -1545,6 +1548,7 @@ export const ecommerceRoute = new Elysia({
         condition_description: t.Any(),
         warranty_description: t.Any(),
         youtube_url: t.Any(),
+        attributes_hierarchy: t.Any(),
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
@@ -1581,6 +1585,7 @@ export const ecommerceRoute = new Elysia({
           video_product,
           warranty_description,
           youtube_url,
+          attributes_hierarchy,
         } = body;
 
         // TODO : check options.mat_id do not repeat in company not self
@@ -1644,6 +1649,7 @@ export const ecommerceRoute = new Elysia({
             video_product: video_product,
             warranty_description: warranty_description,
             youtube_url: youtube_url,
+            attributes_hierarchy: attributes_hierarchy && attributes_hierarchy.length > 0 ? attributes_hierarchy : [],
             updated_at: now,
           },
         });
@@ -1823,6 +1829,7 @@ export const ecommerceRoute = new Elysia({
         video_product: t.Any(),
         warranty_description: t.Any(),
         youtube_url: t.Any(),
+        attributes_hierarchy: t.Any(),
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
@@ -2482,6 +2489,410 @@ export const ecommerceRoute = new Elysia({
         summary: "Inventory Stocks - Find All",
         description: `
           This endpoint retrieves all inventory stocks in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
+  .get(
+    "/attribute-groups",
+    async ({ headers, set }) => {
+      try {
+        const response = await prisma.attribute_groups.findMany({
+          select : {
+            id: true,
+            attr_group_name: true,
+            attr_group_description: true,
+            is_active: true,
+            attributes: {
+              select: {
+                id: true,
+                attr_name: true,
+                attr_description: true,
+                is_active: true
+              }
+            }
+          },
+          orderBy: {
+            attr_group_name: "asc",
+          }
+        });
+
+        if (!response) {
+          set.status = 404;
+          return { message: "No attribute groups found" };
+        }
+        return response;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching attribute groups:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Attribute Groups - Find All",
+        description: `
+          This endpoint retrieves all attribute groups in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
+  .post(
+    "/attribute-groups",
+    async ({ headers, body,set }) => {
+      try {
+        const { attr_group_name, attr_group_description } = body;
+
+        const response = await prisma.attribute_groups.create({
+          data: {
+            attr_group_name: attr_group_name,
+            attr_group_description: attr_group_description,
+            is_active: true,
+            created_at: now,
+          },
+        });
+
+        if (!response) {
+          set.status = 404;
+          return { message: "No attribute groups found" };
+        }
+
+        return { message: "Attribute group created successfully" };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error creating attribute groups:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        attr_group_name: t.String(),
+        attr_group_description: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Attribute Groups - Create",
+        description: `
+          This endpoint creates a new attribute group in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
+  .get(
+    "/attribute-parents/active",
+    async ({ headers, set }) => {
+      try {
+        
+        const response = await prisma.attribute_groups.findMany({
+          where: {
+            is_active: true,
+          },
+          select : {
+            attr_group_name: true,
+            attr_group_description: true,
+            attributes: {
+              where : {
+                is_active: true
+              },
+              select: {
+                id: true,
+                attr_name: true,
+                attr_description: true,
+              }
+            }
+          },
+          orderBy: {
+            attr_group_name: "asc",
+          }
+        });
+
+        if (!response) {
+          set.status = 404;
+          return { message: "No attribute groups found" };
+        }
+        return response;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching attribute groups:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Attribute Groups - Find Parents Active",
+        description: `
+          This endpoint retrieves all active attribute groups in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
+  .put(
+    "/attribute-groups/:attr_group_id",
+    async ({ headers, body, params, set }) => {
+      try {
+        const { attr_group_name, attr_group_description, is_active } = body;
+        const { attr_group_id } = params;
+
+        const response = await prisma.attribute_groups.update({
+          where: {
+            id: attr_group_id
+          },
+          data: {
+            attr_group_name: attr_group_name,
+            attr_group_description: attr_group_description,
+            is_active: is_active
+          }
+        });
+
+        if (!response) {
+          set.status = 404;
+          return { message: "No attribute groups found" };
+        }
+
+        return { message: "Attribute group updated successfully" };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error updating attribute groups:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        attr_group_name: t.String(),
+        attr_group_description: t.String(),
+        is_active: t.Boolean(),
+      }),
+      params: t.Object({
+        attr_group_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Attribute Groups - Update",
+        description: `
+          This endpoint updates an existing attribute group in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
+  .delete(
+    "/attribute-groups/:attr_group_id",
+    async ({ headers, params, set }) => {
+      try {
+        const { attr_group_id } = params;
+
+        const response = await prisma.attribute_groups.delete({
+          where: {
+            id: attr_group_id
+          }
+        });
+
+        if (!response) {
+          set.status = 404;
+          return { message: "No attribute groups found" };
+        }
+
+        return { message: "Attribute group deleted successfully" };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error deleting attribute groups:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      params: t.Object({
+        attr_group_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Attribute Groups - Delete",
+        description: `
+          This endpoint deletes an existing attribute group in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
+  .post(
+    "/attributes",
+    async ({ headers, body, set }) => {
+      try {
+        const { attr_name, attr_description, attr_group_id } = body;
+
+        const response = await prisma.attributes.create({
+          data: {
+            attr_name: attr_name,
+            attr_description: attr_description,
+            attr_group_id: attr_group_id,
+            is_active: true,
+            created_at: now,
+          },
+        });
+
+        if (!response) {
+          set.status = 404;
+          return { message: "No attributes found" };
+        }
+
+        return { message: "Attribute created successfully" };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error creating attributes:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        attr_name: t.String(),
+        attr_description: t.String(),
+        attr_group_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Attributes - Create",
+        description: `
+          This endpoint creates a new attribute in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
+  .put(
+    "/attributes/:attr_id",
+    async ({ headers, body, params, set }) => {
+      try {
+        const { attr_name, attr_description, is_active } = body;
+        const { attr_id } = params;
+
+        const response = await prisma.attributes.update({
+          where: {
+            id: attr_id
+          },
+          data: {
+            attr_name: attr_name,
+            attr_description: attr_description,
+            is_active: is_active
+          }
+        });
+
+        if (!response) {
+          set.status = 404;
+          return { message: "No attributes found" };
+        }
+
+        return { message: "Attribute updated successfully" };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error updating attributes:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        attr_name: t.String(),
+        attr_description: t.String(),
+        is_active: t.Boolean(),
+      }),
+      params: t.Object({
+        attr_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Attributes - Update",
+        description: `
+          This endpoint updates an existing attribute in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
+  .delete(
+    "/attributes/:attr_id",
+    async ({ headers, params, set }) => {
+      try {
+        const { attr_id } = params;
+
+        const response = await prisma.attributes.delete({
+          where: {
+            id: attr_id
+          }
+        });
+
+        if (!response) {
+          set.status = 404;
+          return { message: "No attributes found" };
+        }
+
+        return { message: "Attribute deleted successfully" };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error deleting attributes:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      params: t.Object({
+        attr_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Attributes - Delete",
+        description: `
+          This endpoint deletes an existing attribute in the 3NConnect.
         `.trim(),
         security: [{ bearerAuth: [] }],
         tags: ["3NConnect"],
