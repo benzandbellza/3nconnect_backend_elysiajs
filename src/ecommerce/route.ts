@@ -1142,7 +1142,7 @@ export const ecommerceRoute = new Elysia({
     "/products/planetone-stock",
     async ({ headers, set, query }) => {
       try {
-        return await prisma.vw_sync_stock_ecommerce.findMany({
+        const response = await prisma.vw_sync_stock_ecommerce.findMany({
           select : {
             mat_unit_identity: true,
             mat_name: true,
@@ -1156,6 +1156,13 @@ export const ecommerceRoute = new Elysia({
             sale_option_name: true,
           },
         });
+
+        if (!response) {
+          set.status = 404;
+          return { message: "No valid products found" };
+        }
+        
+        return response;
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
