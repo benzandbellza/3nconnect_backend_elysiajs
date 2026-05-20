@@ -2,8 +2,6 @@ import { Elysia, t } from "elysia";
 import { prisma } from "./prisma_connection";
 import { auth } from "../plugins/auth";
 import "dotenv/config";
-import { linkSymbols } from "bun:ffi";
-import { dmmfToRuntimeDataModel } from "@prisma/client/runtime/client";
 
 const now: Date = new Date();
 // const utc7: Date = new Date(now.getTime() + 7 * 60 * 60 * 1000);
@@ -1141,6 +1139,47 @@ export const ecommerceRoute = new Elysia({
     },
   )
   .get(
+    "/products/planetone-stock",
+    async ({ headers, set, query }) => {
+      try {
+        return await prisma.vw_sync_stock_ecommerce.findMany({
+          select : {
+            mat_identity: true,
+            mat_name: true,
+            mat_category_text: true,
+            mat_qty_unit: true,
+            mat_status: true,
+            is_online_status: true,
+            company_id: true,
+            company_name: true,
+            online_price: true,
+            sale_option_name: true,
+          },
+        });
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching products:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Products - PlanetOne Stock",
+        description: `
+          This endpoint retrieves PlanetOne stock products with server-side pagination, search, and sorting.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
+  .get(
     "/products/active",
     async ({ headers, set }) => {
       try {
@@ -1159,7 +1198,7 @@ export const ecommerceRoute = new Elysia({
                 brand_name: true,
               },
             },
-            categories: {
+            product_categories: {
               select: {
                 name: true,
               },

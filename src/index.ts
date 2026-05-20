@@ -22,7 +22,11 @@ const app = new Elysia()
   .get("/", async (e) => {
     return { message: "Welcome to 3NConnect ElysiaJS API" };
   })
-  .listen(process.env.APP_PORT || 3000, () => {
+  .listen(
+    {
+      port :process.env.APP_PORT || 3000,
+    }, () => {
+    
     console.log(
       `Server is running at http://${process.env.APP_HOSTNAME}:${process.env.APP_PORT}`,
     );

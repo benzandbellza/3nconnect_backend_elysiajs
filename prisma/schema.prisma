@@ -241,3 +241,23 @@ view vw_planetone_stocks {
 
   @@schema("3nconnect")
 }
+
+view vw_sync_stock_ecommerce {
+  id                     Int?
+  created_at             DateTime? @db.Timestamptz(6)
+  mat_unit_identity      String?
+  ecommerce_mat_identity String?
+  mat_identity           String?
+  mat_name               String?
+  mat_category_text      String?
+  mat_status             String?
+  mat_qty_unit           String?
+  mat_agqty_unit         String?
+  company_id             Int?
+  company_name           String?
+  online_price           Float?
+  sale_option_name       String?
+  is_online_status       Boolean?
+
+  @@schema("3nconnect")
+}
