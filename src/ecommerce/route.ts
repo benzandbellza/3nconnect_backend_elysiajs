@@ -1144,7 +1144,7 @@ export const ecommerceRoute = new Elysia({
       try {
         return await prisma.vw_sync_stock_ecommerce.findMany({
           select : {
-            mat_identity: true,
+            mat_unit_identity: true,
             mat_name: true,
             mat_category_text: true,
             mat_qty_unit: true,

@@ -247,7 +247,6 @@ view vw_sync_stock_ecommerce {
   created_at             DateTime? @db.Timestamptz(6)
   mat_unit_identity      String?
   ecommerce_mat_identity String?
-  mat_identity           String?
   mat_name               String?
   mat_category_text      String?
   mat_status             String?

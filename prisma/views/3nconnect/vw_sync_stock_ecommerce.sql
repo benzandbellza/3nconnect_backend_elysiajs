@@ -3,7 +3,6 @@ SELECT
   p.created_at,
   p."MM_RPTMAT_MATUnit ID" AS mat_unit_identity,
   product_ecommerce.mat_identity AS ecommerce_mat_identity,
-  p."MM_RPTMAT_MAT ID" AS mat_identity,
   p."MM_RPTMAT_MAT Name" AS mat_name,
   p."MM_RPTMAT_MAT Category" AS mat_category_text,
   p."MM_RPTMAT_Status" AS mat_status,
@@ -35,16 +34,13 @@ FROM
       ) product_ecommerce ON (
         (
           (
-            (
-              product_ecommerce.mat_identity ~~ (p."MM_RPTMAT_MATUnit ID" || '%' :: text)
-            )
-            OR (
-              product_ecommerce.mat_identity ~~ (p."MM_RPTMAT_MAT ID" || '%' :: text)
-            )
+            p."MM_RPTMAT_MATUnit ID" = product_ecommerce.mat_identity
           )
           AND (product_ecommerce.company_id = p.company_id)
         )
       )
     )
     JOIN "3nconnect".companies com ON ((p.company_id = com.id))
-  );
+  )
+WHERE
+  (product_ecommerce.mat_identity IS NOT NULL);
