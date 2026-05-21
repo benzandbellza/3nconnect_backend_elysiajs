@@ -12,7 +12,20 @@ WITH union_planetone_stock AS (
     g."Expired" AS expired,
     g."Avail. Life" AS available_life,
     g."Unit Cost" AS unitcost,
-    g."Cost BLN" AS costbalance
+    g."Cost BLN" AS costbalance,
+    g."PO#" AS po_no,
+    g."PO Date" AS po_date,
+    g."PO REF" AS po_referrence,
+    g."Purchaser Personnel" AS purchaser_personnel,
+    g."PR#" AS pr_no,
+    g."MAT IN" AS mat_in,
+    g."MAT IN Ref" AS mat_in_referrence,
+    g."INV ID(MATIN)" AS invoice_id_mat_in,
+    g."Received Date Time" AS received_datetime,
+    g."QTY 1+2" AS qty_in_p_ready,
+    g."QTY 1+2-3" AS qty_in_p_ready_m_pnout,
+    g."Age" AS age,
+    g."Product Life" AS product_life
   FROM
     gibstock g
   UNION
@@ -30,7 +43,20 @@ WITH union_planetone_stock AS (
     l."Expired" AS expired,
     l."Avail. Life" AS available_life,
     l."Unit Cost" AS unitcost,
-    l."Cost BLN" AS costbalance
+    l."Cost BLN" AS costbalance,
+    l."PO#" AS po_no,
+    l."PO Date" AS po_date,
+    l."PO REF" AS po_referrence,
+    l."Purchaser Personnel" AS purchaser_personnel,
+    l."PR#" AS pr_no,
+    l."MAT IN" AS mat_in,
+    l."MAT IN Ref" AS mat_in_referrence,
+    l."INV ID(MATIN)" AS invoice_id_mat_in,
+    l."Received Date Time" AS received_datetime,
+    l."QTY 1+2" AS qty_in_p_ready,
+    l."QTY 1+2-3" AS qty_in_p_ready_m_pnout,
+    l."Age" AS age,
+    l."Product Life" AS product_life
   FROM
     lableaderstock l
   UNION
@@ -48,7 +74,20 @@ WITH union_planetone_stock AS (
     b."Expired" AS expired,
     b."Avail. Life" AS available_life,
     b."Unit Cost" AS unitcost,
-    b."Cost BLN" AS costbalance
+    b."Cost BLN" AS costbalance,
+    b."PO#" AS po_no,
+    b."PO Date" AS po_date,
+    b."PO REF" AS po_referrence,
+    b."Purchaser Personnel" AS purchaser_personnel,
+    b."PR#" AS pr_no,
+    b."MAT IN" AS mat_in,
+    b."MAT IN Ref" AS mat_in_referrence,
+    b."INV ID(MATIN)" AS invoice_id_mat_in,
+    b."Received Date Time" AS received_datetime,
+    b."QTY 1+2" AS qty_in_p_ready,
+    b."QTY 1+2-3" AS qty_in_p_ready_m_pnout,
+    b."Age" AS age,
+    b."Product Life" AS product_life
   FROM
     biodesignstock b
 )
@@ -65,6 +104,19 @@ SELECT
   expired,
   available_life,
   unitcost,
-  costbalance
+  costbalance,
+  po_no,
+  po_date,
+  po_referrence,
+  purchaser_personnel,
+  pr_no,
+  mat_in,
+  mat_in_referrence,
+  invoice_id_mat_in,
+  received_datetime,
+  qty_in_p_ready,
+  qty_in_p_ready_m_pnout,
+  age,
+  product_life
 FROM
   union_planetone_stock;

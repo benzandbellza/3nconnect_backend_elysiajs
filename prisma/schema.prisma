@@ -253,19 +253,32 @@ view vw_planetone_grouping_stock {
 }
 
 view vw_planetone_stocks {
-  company_name   String?
-  MATUnit        String?
-  Lot            String?
-  location_id    String?
-  qty_balance    Int?
-  qty_ready      Int?
-  qty_pn_out     Int?
-  qty_total      Int?
-  unit           String?
-  expired        String?
-  available_life Int?
-  unitcost       Float?
-  costbalance    Float?
+  company_name           String?
+  MATUnit                String?
+  Lot                    String?
+  location_id            String?
+  qty_balance            Int?
+  qty_ready              Int?
+  qty_pn_out             Int?
+  qty_total              Int?
+  unit                   String?
+  expired                String?
+  available_life         Int?
+  unitcost               Float?
+  costbalance            Float?
+  po_no                  String?
+  po_date                String?
+  po_referrence          String?
+  purchaser_personnel    String?
+  pr_no                  String?
+  mat_in                 String?
+  mat_in_referrence      String?
+  invoice_id_mat_in      String?
+  received_datetime      String?
+  qty_in_p_ready         Int?
+  qty_in_p_ready_m_pnout Int?
+  age                    Int?
+  product_life           String?
 
   @@schema("3nconnect")
 }
