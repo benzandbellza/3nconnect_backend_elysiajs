@@ -252,7 +252,7 @@ model promotion_bundle_deal_products {
   product_option_id Int?
   sale_price        Float?
   sale_percent      Float?
-  promotions        promotions? @relation(fields: [promotion_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  promotions        promotions? @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("3nconnect")
 }
@@ -265,7 +265,7 @@ model promotion_discount_products {
   product_option_id Int?
   sale_price        Float?
   sale_percent      Float?
-  promotions        promotions? @relation(fields: [promotion_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "discount_products_promotion_id_fkey")
+  promotions        promotions? @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "discount_products_promotion_id_fkey")
 
   @@schema("3nconnect")
 }

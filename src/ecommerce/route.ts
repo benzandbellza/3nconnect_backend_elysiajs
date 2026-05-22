@@ -3235,4 +3235,295 @@ export const ecommerceRoute = new Elysia({
       },
     }
   )
+
+  .get(
+    "/promotions/discount/:promotion_id",
+    async ({ headers, params, set }) => {
+      try {
+        const { promotion_id } = params;
+        const response = await prisma.promotions.findUnique({
+          where: {
+            id: promotion_id,
+          },
+          select: {
+            url_image: true,
+            promotion_image: true,
+            promotion_name: true,
+            promotion_description: true,
+            promotion_type: true,
+            promotion_start: true,
+            promotion_end: true,
+            is_active: true,
+            is_accept_overlapse_promotion: true,
+            promotion_discount_products: {
+              select: {
+                product_option_id: true,
+                sale_price: true,
+                sale_percent: true,
+              },
+            },
+          },
+        });
+
+        if (!response) {
+          set.status = 404;
+          return { message: "Discount promotion not found" };
+        }
+        return response;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching discount promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      params: t.Object({
+        promotion_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions - Discount Detail",
+        description: `
+          This endpoint retrieves the details of a discount promotion in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
+  .post(
+    "/promotions/discount",
+    async({ headers, body, set }) => {
+      try {
+        const {
+          url_image,
+          promotion_image,
+          promotion_name,
+          promotion_description,
+          promotion_type,
+          promotion_start,
+          promotion_end,
+          is_accept_overlapse_promotion,
+          items
+        } = body;
+
+        const response = await prisma.promotions.create({
+          data: {
+            url_image: url_image,
+            promotion_image: promotion_image,
+            promotion_name: promotion_name,
+            promotion_description: promotion_description,
+            promotion_type: promotion_type,
+            promotion_start: promotion_start,
+            promotion_end: promotion_end,
+            is_accept_overlapse_promotion: is_accept_overlapse_promotion,
+            is_active: true,
+            created_at: now,
+          },
+          select: {
+            id: true,
+          }
+        });
+
+        if (!response) {
+          set.status = 400;
+          return { message: "Failed to create discount promotion" };
+        }
+        const promotionId = response.id;
+        
+        await prisma.promotion_discount_products.createMany({
+          data: items.map((item: any) => ({
+            promotion_id: promotionId,
+            product_option_id: item.product_option_id,
+            sale_price: item.sale_price,
+            sale_percent: item.sale_percent,
+          }))
+        });
+
+        return { message: "Discount promotion created successfully" };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error creating discount promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        url_image: t.String(),
+        promotion_image: t.String(),
+        promotion_name: t.String(),
+        promotion_description: t.String(),
+        promotion_type: t.String(),
+        promotion_start: t.Date(),
+        promotion_end: t.Date(),
+        is_accept_overlapse_promotion: t.Boolean(),
+        items: t.Array(t.Object({
+          product_option_id: t.Number(),
+          sale_price: t.Number(),
+          sale_percent: t.Number(),
+        })),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions - Create Discount",
+        description: `
+          This endpoint creates a new discount promotion in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    }
+  )
+  .put(
+    "/promotions/discount/:promotion_id",
+    async({ headers, body, params, set }) => {
+      try {
+        const { promotion_id } = params;
+        const {
+          url_image,
+          promotion_image,
+          promotion_name,
+          promotion_description,
+          promotion_type,
+          promotion_start,
+          promotion_end,
+          is_active,
+          is_accept_overlapse_promotion,
+          items
+        } = body;
+
+        const response = await prisma.promotions.update({
+          where: {
+            id: promotion_id,
+          },
+          data: {
+            url_image: url_image,
+            promotion_image: promotion_image,
+            promotion_name: promotion_name,
+            promotion_description: promotion_description,
+            promotion_type: promotion_type,
+            promotion_start: promotion_start,
+            promotion_end: promotion_end,
+            is_active: is_active,
+            is_accept_overlapse_promotion: is_accept_overlapse_promotion,
+            updated_at: now,
+          },
+        });
+
+        if (!response) {
+          set.status = 400;
+          return { message: "Failed to update discount promotion" };
+        }
+
+        await prisma.promotion_discount_products.deleteMany({
+          where: {
+            promotion_id: promotion_id,
+          },
+        });
+
+        await prisma.promotion_discount_products.createMany({
+          data: items.map((item: any) => ({
+            promotion_id: promotion_id,
+            product_option_id: item.product_option_id,
+            sale_price: item.sale_price,
+            sale_percent: item.sale_percent,
+          })),
+        });
+
+        return { message: "Discount promotion updated successfully" };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error updating discount promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        url_image: t.String(),
+        promotion_image: t.String(),
+        promotion_name: t.String(),
+        promotion_description: t.String(),
+        promotion_type: t.String(),
+        promotion_start: t.Date(),
+        promotion_end: t.Date(),
+        is_active: t.Boolean(),
+        is_accept_overlapse_promotion: t.Boolean(),
+        items: t.Array(t.Object({
+          product_option_id: t.Number(),
+          sale_price: t.Number(),
+          sale_percent: t.Number(),
+        })),
+      }),
+      params: t.Object({
+        promotion_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions - Update Discount",
+        description: `
+          This endpoint updates an existing discount promotion in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    }
+  )
+  .delete(
+    "/promotions/discount/:promotion_id",
+    async({ params, set }) => {
+      try {
+        const { promotion_id } = params;
+
+        const response = await prisma.promotions.delete({
+          where: {
+            id: promotion_id,
+          },
+        });
+
+        if (!response) {
+          set.status = 404;
+          return { message: "Discount promotion not found" };
+        }
+
+        return { message: "Discount promotion deleted successfully" };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error deleting discount promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      params: t.Object({
+        promotion_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions - Delete Discount",
+        description: `
+          This endpoint deletes an existing discount promotion in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    }
+  )
   
