@@ -2900,3 +2900,339 @@ export const ecommerceRoute = new Elysia({
       },
     },
   )
+  .post(
+    "/promotions",
+    async ({ headers, set, body}) => {
+      try {
+        const { promotion_type } = body;
+        const response = await prisma.promotions.findMany({
+          where: {
+            promotion_type: promotion_type
+          },
+          orderBy: {
+            created_at: "desc",
+          },
+        });
+
+        if (!response) {
+          set.status = 404;
+          return { message: "No flash sale promotions found" };
+        }
+        return response;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching flash sale promotions:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        promotion_type: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions - Flash Sale",
+        description: `
+          This endpoint retrieves all active flash sale promotions in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
+  .get(
+    "/promotions/flash-sale/:promotion_id",
+    async ({ headers, params, set }) => {
+      try {
+        const { promotion_id } = params;
+        const response = await prisma.promotions.findUnique({
+          where: {
+            id: promotion_id,
+          },
+          select: {
+            url_image: true,
+            promotion_image: true,
+            promotion_name: true,
+            promotion_description: true,
+            promotion_type: true,
+            promotion_start: true,
+            promotion_end: true,
+            is_active: true,
+            is_accept_overlapse_promotion: true,
+            promotion_flashsale_products: {
+              select: {
+                product_option_id: true,
+                sale_price: true,
+                sale_percent: true,
+              },
+            },
+          },
+        });
+
+        if (!response) {
+          set.status = 404;
+          return { message: "Flash sale promotion not found" };
+        }
+        return response;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching flash sale promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      params: t.Object({
+        promotion_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions - Flash Sale Detail",
+        description: `
+          This endpoint retrieves the details of a flash sale promotion in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
+  .post(
+    "/promotions/flash-sale",
+    async({ headers, body, set }) => {
+      try {
+        const {
+          url_image,
+          promotion_image,
+          promotion_name,
+          promotion_description,
+          promotion_type,
+          promotion_start,
+          promotion_end,
+          is_accept_overlapse_promotion,
+          items
+        } = body;
+
+        const response = await prisma.promotions.create({
+          data: {
+            url_image: url_image,
+            promotion_image: promotion_image,
+            promotion_name: promotion_name,
+            promotion_description: promotion_description,
+            promotion_type: promotion_type,
+            promotion_start: promotion_start,
+            promotion_end: promotion_end,
+            is_accept_overlapse_promotion: is_accept_overlapse_promotion,
+            is_active: true,
+            created_at: now,
+          },
+          select: {
+            id: true,
+          }
+        });
+
+        if (!response) {
+          set.status = 400;
+          return { message: "Failed to create flash sale promotion" };
+        }
+        const promotionId = response.id;
+        
+        await prisma.promotion_flashsale_products.createMany({
+          data: items.map((item: any) => ({
+            promotion_id: promotionId,
+            product_option_id: item.product_option_id,
+            sale_price: item.sale_price,
+            sale_percent: item.sale_percent,
+          }))
+        });
+
+        return { message: "Flash sale promotion created successfully" };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error creating flash sale promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        url_image: t.String(),
+        promotion_image: t.String(),
+        promotion_name: t.String(),
+        promotion_description: t.String(),
+        promotion_type: t.String(),
+        promotion_start: t.Date(),
+        promotion_end: t.Date(),
+        is_accept_overlapse_promotion: t.Boolean(),
+        items: t.Array(t.Object({
+          product_option_id: t.Number(),
+          sale_price: t.Number(),
+          sale_percent: t.Number(),
+        })),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions - Create Flash Sale",
+        description: `
+          This endpoint creates a new flash sale promotion in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    }
+  )
+  .put(
+    "/promotions/flash-sale/:promotion_id",
+    async({ headers, body, params, set }) => {
+      try {
+        const { promotion_id } = params;
+        const {
+          url_image,
+          promotion_image,
+          promotion_name,
+          promotion_description,
+          promotion_type,
+          promotion_start,
+          promotion_end,
+          is_active,
+          is_accept_overlapse_promotion,
+          items
+        } = body;
+
+        const response = await prisma.promotions.update({
+          where: {
+            id: promotion_id,
+          },
+          data: {
+            url_image: url_image,
+            promotion_image: promotion_image,
+            promotion_name: promotion_name,
+            promotion_description: promotion_description,
+            promotion_type: promotion_type,
+            promotion_start: promotion_start,
+            promotion_end: promotion_end,
+            is_active: is_active,
+            is_accept_overlapse_promotion: is_accept_overlapse_promotion,
+            updated_at: now,
+          },
+        });
+
+        if (!response) {
+          set.status = 400;
+          return { message: "Failed to update flash sale promotion" };
+        }
+
+        await prisma.promotion_flashsale_products.deleteMany({
+          where: {
+            promotion_id: promotion_id,
+          },
+        });
+
+        await prisma.promotion_flashsale_products.createMany({
+          data: items.map((item: any) => ({
+            promotion_id: promotion_id,
+            product_option_id: item.product_option_id,
+            sale_price: item.sale_price,
+            sale_percent: item.sale_percent,
+          })),
+        });
+
+        return { message: "Flash sale promotion updated successfully" };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error updating flash sale promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        url_image: t.String(),
+        promotion_image: t.String(),
+        promotion_name: t.String(),
+        promotion_description: t.String(),
+        promotion_type: t.String(),
+        promotion_start: t.Date(),
+        promotion_end: t.Date(),
+        is_active: t.Boolean(),
+        is_accept_overlapse_promotion: t.Boolean(),
+        items: t.Array(t.Object({
+          product_option_id: t.Number(),
+          sale_price: t.Number(),
+          sale_percent: t.Number(),
+        })),
+      }),
+      params: t.Object({
+        promotion_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions - Update Flash Sale",
+        description: `
+          This endpoint updates an existing flash sale promotion in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    }
+  )
+  .delete(
+    "/promotions/flash-sale/:promotion_id",
+    async({ params, set }) => {
+      try {
+        const { promotion_id } = params;
+
+        const response = await prisma.promotions.delete({
+          where: {
+            id: promotion_id,
+          },
+        });
+
+        if (!response) {
+          set.status = 404;
+          return { message: "Flash sale promotion not found" };
+        }
+
+        return { message: "Flash sale promotion deleted successfully" };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error deleting flash sale promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      params: t.Object({
+        promotion_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions - Delete Flash Sale",
+        description: `
+          This endpoint deletes an existing flash sale promotion in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    }
+  )
+  
