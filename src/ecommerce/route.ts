@@ -3526,4 +3526,352 @@ export const ecommerceRoute = new Elysia({
       },
     }
   )
-  
+  .post(
+    "/promotions/bundle-deal",
+    async({ headers, body, set }) => {
+      try {
+        const {
+          url_image,
+          promotion_image,
+          promotion_name,
+          promotion_description,
+          promotion_type,
+          promotion_start,
+          promotion_end,
+          is_accept_overlapse_promotion,
+          customer_tiers,
+          get_products,
+        } = body;
+
+        const response = await prisma.promotions.create({
+          data: {
+            url_image: url_image,
+            promotion_image: promotion_image,
+            promotion_name: promotion_name,
+            promotion_description: promotion_description,
+            promotion_type: promotion_type,
+            promotion_start: promotion_start,
+            promotion_end: promotion_end,
+            is_accept_overlapse_promotion: is_accept_overlapse_promotion,
+            customer_tiers: customer_tiers,
+            is_active: true,
+            created_at: now,
+          },
+          select: {
+            id: true,
+          }
+        });
+
+        if (!response) {
+          set.status = 400;
+          return { message: "Failed to create discount promotion" };
+        }
+        const promotionId = response.id;
+        
+        for (const item of get_products) {
+          const getProducts = await prisma.promotion_bundle_deal_get_products.create({
+            data: {
+              promotion_id: promotionId,
+              product_option_id: item.product_option_id,
+              get_quantity: item.buy_quantity,
+            },
+            select: {
+              id: true,
+            },
+          })
+
+          const bundle_deal_get_id = getProducts.id;
+          await prisma.promotion_bundle_deal_free_products.createMany({
+            data: item.free_products.map((freeProduct: any) => ({
+              bundle_deal_get_id: bundle_deal_get_id,
+              product_option_id: freeProduct.product_option_id,
+              free_quantity: freeProduct.free_quantity,
+            }))
+          });
+
+        }
+
+        return { message: "Bundle deal get x free y promotion created successfully" };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error creating bundle deal get x free y promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        url_image: t.String(),
+        promotion_image: t.String(),
+        promotion_name: t.String(),
+        promotion_description: t.String(),
+        promotion_type: t.String(),
+        promotion_start: t.Date(),
+        promotion_end: t.Date(),
+        is_accept_overlapse_promotion: t.Boolean(),
+        customer_tiers: t.Array(t.String()),
+        get_products: t.Array(t.Object({
+          product_option_id: t.Number(),
+          buy_quantity: t.Number(),
+          free_products: t.Array(t.Object({
+            product_option_id: t.Number(),
+            free_quantity: t.Number(),
+          })),
+        })),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions - Create Bundle Deal Get X Free Y",
+        description: `
+          This endpoint creates a new bundle deal get x free y promotion in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    }
+  )
+  .put(
+    "/promotions/bundle-deal/:promotion_id",
+    async({ headers, body, set, params }) => {
+      try {
+        const {
+          url_image,
+          promotion_image,
+          promotion_name,
+          promotion_description,
+          promotion_type,
+          promotion_start,
+          promotion_end,
+          is_accept_overlapse_promotion,
+          customer_tiers,
+          get_products,
+        } = body;
+
+        const { promotion_id } = params;
+        
+        const response = await prisma.promotions.update({
+          where: {
+            id: promotion_id,
+          },
+          data: {
+            url_image: url_image,
+            promotion_image: promotion_image,
+            promotion_name: promotion_name,
+            promotion_description: promotion_description,
+            promotion_type: promotion_type,
+            promotion_start: promotion_start,
+            promotion_end: promotion_end,
+            is_accept_overlapse_promotion: is_accept_overlapse_promotion,
+            customer_tiers: customer_tiers,
+            updated_at: now,
+          },
+        });
+
+        if (!response) {
+          set.status = 400;
+          return { message: "Failed to update discount promotion" };
+        }
+
+        const existingGetProducts = await prisma.promotion_bundle_deal_get_products.findMany({
+          where: {
+            promotion_id: promotion_id,
+          },
+          select: {
+            id: true,
+          }
+        });
+
+        const arrayOfGetProductIds = existingGetProducts.map((item) => item.id);
+
+        await prisma.promotion_bundle_deal_free_products.deleteMany({
+          where: {
+            bundle_deal_get_id: {
+              in: arrayOfGetProductIds,
+            },
+          },
+        });
+
+        await prisma.promotion_bundle_deal_get_products.deleteMany({
+          where: {
+            promotion_id: promotion_id,
+          },
+        });
+
+        for (const item of get_products) {
+          const getProducts = await prisma.promotion_bundle_deal_get_products.create({
+            data: {
+              promotion_id: promotion_id,
+              product_option_id: item.product_option_id,
+              get_quantity: item.buy_quantity,
+            },
+            select: {
+              id: true,
+            },
+          })
+
+          const bundle_deal_get_id = getProducts.id;
+          await prisma.promotion_bundle_deal_free_products.createMany({
+            data: item.free_products.map((freeProduct: any) => ({
+              bundle_deal_get_id: bundle_deal_get_id,
+              product_option_id: freeProduct.product_option_id,
+              free_quantity: freeProduct.free_quantity,
+            }))
+          });
+
+        }
+
+        return { message: "Bundle deal get x free y promotion created successfully" };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error creating bundle deal get x free y promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      params: t.Object({
+        promotion_id: t.Number(),
+      }),
+      body: t.Object({
+        url_image: t.String(),
+        promotion_image: t.String(),
+        promotion_name: t.String(),
+        promotion_description: t.String(),
+        promotion_type: t.String(),
+        promotion_start: t.Date(),
+        promotion_end: t.Date(),
+        is_accept_overlapse_promotion: t.Boolean(),
+        customer_tiers: t.Array(t.String()),
+        get_products: t.Array(t.Object({
+          product_option_id: t.Number(),
+          buy_quantity: t.Number(),
+          free_products: t.Array(t.Object({
+            product_option_id: t.Number(),
+            free_quantity: t.Number(),
+          })),
+        })),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions - Create Bundle Deal Get X Free Y",
+        description: `
+          This endpoint creates a new bundle deal get x free y promotion in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    }
+  )
+  .get(
+    "/promotions/bundle-deal/:promotion_id",
+    async ({ params, set }) => {
+      try {
+        const { promotion_id } = params;
+
+        const promotion = await prisma.promotions.findUnique({
+          where: {
+            id: promotion_id,
+          },
+          select: {
+            id: true,
+            url_image: true,
+            promotion_image: true,
+            promotion_name: true,
+            promotion_description: true,
+            promotion_type: true,
+            promotion_start: true,
+            promotion_end: true,
+            is_active: true,
+            is_accept_overlapse_promotion: true,
+            customer_tiers: true,
+            promotion_bundle_deal_get_products: {
+              select: {
+                product_option_id: true,
+                get_quantity: true,
+                promotion_bundle_deal_free_products: {
+                  select: {
+                    product_option_id: true,
+                    free_quantity: true,
+                  },
+                },
+              },  
+            },
+          },
+        });
+
+        if (!promotion) {
+          set.status = 404;
+          return { message: "Promotion not found" };
+        }
+
+        return promotion;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching bundle deal promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      params: t.Object({
+        promotion_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions - Get Bundle Deal Get X Free Y",
+        description: `
+          This endpoint fetches an existing bundle deal get x free y promotion in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    }
+  )
+  .delete(
+    "/promotions/bundle-deal/:promotion_id",
+    async ({ params, set }) => {
+      try {
+        const { promotion_id } = params;
+
+        const response = await prisma.promotions.delete({
+          where: {
+            id: promotion_id,
+          },
+        });
+
+        if (!response) {
+          set.status = 404;
+          return { message: "Promotion not found" };
+        }
+
+        return { message: "Promotion deleted successfully" };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error deleting bundle deal promotion:", error);
+        return { message: errorMessage }; 
+      }
+    },
+    {
+      params: t.Object({
+        promotion_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions - Delete Bundle Deal Get X Free Y",
+        description: `
+          This endpoint deletes an existing bundle deal get x free y promotion in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+       },
+    }
+  )
