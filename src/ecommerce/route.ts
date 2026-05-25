@@ -3536,6 +3536,21 @@ export const ecommerceRoute = new Elysia({
               in: ["bundle_deal_get_x_free_y", "bundle_deal_grand_total_free_y"],
             },
           },
+          select: {
+            id: true,
+            url_image: true,
+            promotion_name: true,
+            promotion_description: true,
+            promotion_type: true,
+            promotion_start: true,
+            promotion_end: true,
+            is_active: true,
+            is_accept_overlapse_promotion: true,
+            customer_tiers: true,
+            minimum_grand_total: true,
+            promotion_bundle_deal_get_products: true,
+            promotion_bundle_deal_grand_total_free_products: true,
+          }
         });
         return response;
       } catch (error) {
