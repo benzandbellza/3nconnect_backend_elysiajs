@@ -328,6 +328,32 @@ model promotion_bundle_deal_grand_total_free_products {
   @@schema("3nconnect")
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model gift_voucher {
+  id                            Int       @id @default(autoincrement())
+  url_image                     String?
+  voucher_image                 String?
+  voucher_name                  String?
+  voucher_description           String?
+  assigned_customer_ids         String[]
+  discount_type                 String?
+  discount_value                Float?
+  is_accept_overlapse_promotion Boolean?
+  voucher_type                  String?
+  min_purchase_amount           Float?
+  max_discount_amount           Float?
+  voucher_start                 DateTime? @db.Timestamptz(6)
+  voucher_end                   DateTime? @db.Timestamptz(6)
+  tier_upgrade_trigger          String[]
+  limited_total_quantity        Int?
+  is_active                     Boolean?
+  created_at                    DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at                    DateTime? @db.Timestamptz(6)
+  is_lifetime                   Boolean?
+
+  @@schema("3nconnect")
+}
+
 view vw_planetone_grouping_stock {
   MATUnit  String?
   grandqty Int?
