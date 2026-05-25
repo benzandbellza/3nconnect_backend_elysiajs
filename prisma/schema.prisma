@@ -271,22 +271,24 @@ model promotion_flashsale_products {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model promotions {
-  id                                 Int                                  @id @default(autoincrement())
-  url_image                          String?
-  promotion_image                    String?
-  promotion_name                     String?
-  promotion_type                     String?
-  promotion_start                    DateTime?                            @db.Timestamptz(6)
-  promotion_end                      DateTime?                            @db.Timestamptz(6)
-  created_at                         DateTime                             @default(now()) @db.Timestamptz(6)
-  updated_at                         DateTime?                            @db.Timestamptz(6)
-  is_active                          Boolean?
-  is_accept_overlapse_promotion      Boolean?
-  promotion_description              String?
-  customer_tiers                     String[]
-  promotion_bundle_deal_get_products promotion_bundle_deal_get_products[]
-  promotion_discount_products        promotion_discount_products[]
-  promotion_flashsale_products       promotion_flashsale_products[]
+  id                                              Int                                               @id @default(autoincrement())
+  url_image                                       String?
+  promotion_image                                 String?
+  promotion_name                                  String?
+  promotion_type                                  String?
+  promotion_start                                 DateTime?                                         @db.Timestamptz(6)
+  promotion_end                                   DateTime?                                         @db.Timestamptz(6)
+  created_at                                      DateTime                                          @default(now()) @db.Timestamptz(6)
+  updated_at                                      DateTime?                                         @db.Timestamptz(6)
+  is_active                                       Boolean?
+  is_accept_overlapse_promotion                   Boolean?
+  promotion_description                           String?
+  customer_tiers                                  String[]
+  minimum_grand_total                             Float?
+  promotion_bundle_deal_get_products              promotion_bundle_deal_get_products[]
+  promotion_bundle_deal_grand_total_free_products promotion_bundle_deal_grand_total_free_products[]
+  promotion_discount_products                     promotion_discount_products[]
+  promotion_flashsale_products                    promotion_flashsale_products[]
 
   @@schema("3nconnect")
 }
@@ -310,6 +312,17 @@ model promotion_bundle_deal_get_products {
   get_quantity                        Int?
   promotion_bundle_deal_free_products promotion_bundle_deal_free_products[]
   promotions                          promotions?                           @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "promotion_bundle_deal_products_promotion_id_fkey")
+
+  @@schema("3nconnect")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model promotion_bundle_deal_grand_total_free_products {
+  id                Int         @id(map: "promotion_bundle_deal_grand_total_free_pkey") @default(autoincrement())
+  promotion_id      Int?
+  product_option_id Int?
+  free_quantity     Int?
+  promotions        promotions? @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "promotion_bundle_deal_grand_total_free_produc_promotion_id_fkey")
 
   @@schema("3nconnect")
 }
