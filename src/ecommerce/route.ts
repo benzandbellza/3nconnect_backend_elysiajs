@@ -11,6 +11,51 @@ export const ecommerceRoute = new Elysia({
 })
   .use(auth())
   .get(
+    "/customers/pdpa-accepted",
+    async({ headers, set })=>{
+      try {
+        const response = await prisma.customer_user.findMany({
+          where : {
+            pdpa_accepted: true,
+          },
+          select: {
+            id: true,
+            authid: true,
+            member_no: true,
+            gender: true,
+            prefix_name_th: true,
+            prefix_name_en: true,
+            name_th: true,
+            name_en: true,
+            email: true,
+            birthday_date: true,
+            phone_no: true,
+          }
+        })
+        return response;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error getting customers:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Customer Users - PDPA Accepted",
+        description: `
+          This endpoint gets all customer users who have accepted PDPA in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    }
+  )
+  .get(
     "/brands",
     async ({ headers, set }) => {
       try {
@@ -2916,7 +2961,7 @@ export const ecommerceRoute = new Elysia({
 
         if (!response) {
           set.status = 404;
-          return { message: "No flash sale promotions found" };
+          return { message: `No ${promotion_type} promotions found` };
         }
         return response;
       } catch (error) {
@@ -2935,9 +2980,9 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions - Flash Sale",
+        summary: "Promotions - Search by Promotion Type",
         description: `
-          This endpoint retrieves all active flash sale promotions in the 3NConnect.
+          This endpoint retrieves all active promotions by promotion type in the 3NConnect.
         `.trim(),
         security: [{ bearerAuth: [] }],
         tags: ["3NConnect"],
@@ -2995,7 +3040,7 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions - Flash Sale Detail",
+        summary: "Promotions Flash Sale - GET By Promotion ID",
         description: `
           This endpoint retrieves the details of a flash sale promotion in the 3NConnect.
         `.trim(),
@@ -3083,7 +3128,7 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions - Create Flash Sale",
+        summary: "Promotions Flash Sale - Create",
         description: `
           This endpoint creates a new flash sale promotion in the 3NConnect.
         `.trim(),
@@ -3182,7 +3227,7 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions - Update Flash Sale",
+        summary: "Promotions Flash Sale - Update",
         description: `
           This endpoint updates an existing flash sale promotion in the 3NConnect.
         `.trim(),
@@ -3226,7 +3271,7 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions - Delete Flash Sale",
+        summary: "Promotions Flash Sale - Delete",
         description: `
           This endpoint deletes an existing flash sale promotion in the 3NConnect.
         `.trim(),
@@ -3235,7 +3280,6 @@ export const ecommerceRoute = new Elysia({
       },
     }
   )
-
   .get(
     "/promotions/discount/:promotion_id",
     async ({ headers, params, set }) => {
@@ -3286,7 +3330,7 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions - Discount Detail",
+        summary: "Promotions Discount - GET By Promotion ID",
         description: `
           This endpoint retrieves the details of a discount promotion in the 3NConnect.
         `.trim(),
@@ -3374,7 +3418,7 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions - Create Discount",
+        summary: "Promotions Discount - Create",
         description: `
           This endpoint creates a new discount promotion in the 3NConnect.
         `.trim(),
@@ -3473,7 +3517,7 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions - Update Discount",
+        summary: "Promotions Discount - Update",
         description: `
           This endpoint updates an existing discount promotion in the 3NConnect.
         `.trim(),
@@ -3517,7 +3561,7 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions - Delete Discount",
+        summary: "Promotions Discount - Delete",
         description: `
           This endpoint deletes an existing discount promotion in the 3NConnect.
         `.trim(),
@@ -3566,7 +3610,7 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions - Get Bundle Deal",
+        summary: "Promotions Bundle Deal - Find All",
         description: `
           This endpoint gets all bundle deal promotions in the 3NConnect.
         `.trim(),
@@ -3673,7 +3717,7 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions - Create Bundle Deal Get X Free Y",
+        summary: "Promotions Bundle Deal Get X Free Y - Create",
         description: `
           This endpoint creates a new bundle deal get x free y promotion in the 3NConnect.
         `.trim(),
@@ -3722,7 +3766,7 @@ export const ecommerceRoute = new Elysia({
 
         if (!response) {
           set.status = 400;
-          return { message: "Failed to update discount promotion" };
+          return { message: "Failed to update get x free y promotion" };
         }
 
         const existingGetProducts = await prisma.promotion_bundle_deal_get_products.findMany({
@@ -3773,11 +3817,11 @@ export const ecommerceRoute = new Elysia({
 
         }
 
-        return { message: "Bundle deal get x free y promotion created successfully" };
+        return { message: "Bundle deal get x free y promotion updated successfully" };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        console.error("Error creating bundle deal get x free y promotion:", error);
+        console.error("Error updating bundle deal get x free y promotion:", error);
         return { message: errorMessage };
       }
     },
@@ -3809,9 +3853,9 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions - Create Bundle Deal Get X Free Y",
+        summary: "Promotions Bundle Deal Get X Free Y - Update",
         description: `
-          This endpoint creates a new bundle deal get x free y promotion in the 3NConnect.
+          This endpoint updates a bundle deal get x free y promotion in the 3NConnect.
         `.trim(),
         security: [{ bearerAuth: [] }],
         tags: ["3NConnect"],
@@ -3878,7 +3922,7 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions - Get Bundle Deal Get X Free Y",
+        summary: "Promotions Bundle Deal Get X Free Y - GET By Promotion ID",
         description: `
           This endpoint fetches an existing bundle deal get x free y promotion in the 3NConnect.
         `.trim(),
@@ -3921,7 +3965,7 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions - Delete Bundle Deal Get X Free Y",
+        summary: "Promotions Bundle Deal Get X Free Y - Delete",
         description: `
           This endpoint deletes an existing bundle deal get x free y promotion in the 3NConnect.
         `.trim(),
@@ -4012,7 +4056,7 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions - Create Bundle Deal Grand Total X Free Y",
+        summary: "Promotions Bundle Deal Grand Total X Free Y - Create",
         description: `
           This endpoint creates a new bundle deal grand total x free y promotion in the 3NConnect.
         `.trim(),
@@ -4063,7 +4107,7 @@ export const ecommerceRoute = new Elysia({
 
         if (!response) {
           set.status = 400;
-          return { message: "Failed to update discount promotion" };
+          return { message: "Failed to update grand total x free y promotion" };
         }
 
         const delResponse = await prisma.promotion_bundle_deal_grand_total_free_products.deleteMany({
@@ -4092,11 +4136,11 @@ export const ecommerceRoute = new Elysia({
           }
         }
 
-        return { message: "Bundle deal get x free y promotion created successfully" };
+        return { message: "Bundle deal grand total x free y promotion updated successfully" };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        console.error("Error creating bundle deal get x free y promotion:", error);
+        console.error("Error updating bundle deal grand total x free y promotion:", error);
         return { message: errorMessage };
       }
     },
@@ -4127,9 +4171,9 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions - Create Bundle Deal Grand Total X Free Y",
+        summary: "Promotions Bundle Deal Grand Total X Free Y - Update",
         description: `
-          This endpoint creates a new bundle deal grand total x free y promotion in the 3NConnect.
+          This endpoint updates a new bundle deal grand total x free y promotion in the 3NConnect.
         `.trim(),
         security: [{ bearerAuth: [] }],
         tags: ["3NConnect"],
@@ -4178,7 +4222,7 @@ export const ecommerceRoute = new Elysia({
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        console.error("Error fetching bundle deal promotion:", error);
+        console.error("Error fetching bundle deal grand total x free y promotion:", error);
         return { message: errorMessage };
       }
     },
@@ -4191,9 +4235,9 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions - Get Bundle Deal Get X Free Y",
+        summary: "Promotions Bundle Deal Grand Total X Free Y - GET By Promotion ID",
         description: `
-          This endpoint fetches an existing bundle deal get x free y promotion in the 3NConnect.
+          This endpoint fetches an existing bundle deal grand total x free y promotion in the 3NConnect.
         `.trim(),
         security: [{ bearerAuth: [] }],
         tags: ["3NConnect"],
@@ -4264,7 +4308,7 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions - Extra Points",
+        summary: "Promotions Extra Points - Create",
         description: `
           This endpoint creates a new extra points promotion in the 3NConnect.
         `.trim(),
@@ -4307,7 +4351,7 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions - Extra Points",
+        summary: "Promotions Extra Points - GET By Promotion ID",
         description: `
           This endpoint gets an existing extra points promotion in the 3NConnect.
         `.trim(),
@@ -4365,7 +4409,7 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions - Extra Points",
+        summary: "Promotions Extra Points - Update",
         description: `
           This endpoint updates an existing extra points promotion in the 3NConnect.
         `.trim(),
@@ -4408,52 +4452,7 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions - Extra Points",
-        description: `
-          This endpoint deletes an existing extra points promotion in the 3NConnect.
-        `.trim(),
-        security: [{ bearerAuth: [] }],
-        tags: ["3NConnect"],
-      },
-    }
-  )
-  .get(
-    "/customers/pdpa-accepted",
-    async({ headers, set })=>{
-      try {
-        const response = await prisma.customer_user.findMany({
-          where : {
-            pdpa_accepted: true,
-          },
-          select: {
-            id: true,
-            authid: true,
-            member_no: true,
-            gender: true,
-            prefix_name_th: true,
-            prefix_name_en: true,
-            name_th: true,
-            name_en: true,
-            email: true,
-            birthday_date: true,
-            phone_no: true,
-          }
-        })
-        return response;
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "Unknown error";
-        set.status = 500;
-        console.error("Error deleting extra points promotion:", error);
-        return { message: errorMessage };
-      }
-    },
-    {
-      headers: t.Object({
-        authorization: t.String(),
-      }),
-      detail: {
-        servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions - Extra Points",
+        summary: "Promotions Extra Points - Delete",
         description: `
           This endpoint deletes an existing extra points promotion in the 3NConnect.
         `.trim(),
@@ -4542,7 +4541,7 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions - Gift Voucher",
+        summary: "Promotions Gift Voucher - Create",
         description: `
           This endpoint creates a new gift voucher promotion in the 3NConnect.
         `.trim(),
@@ -4576,7 +4575,7 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions - Gift Voucher",
+        summary: "Promotions Gift Voucher - Find All",
         description: `
           This endpoint gets all gift voucher promotions in the 3NConnect.
         `.trim(),
@@ -4617,9 +4616,9 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions - Gift Voucher",
+        summary: "Promotions Gift Voucher - GET By Voucher ID",
         description: `
-          This endpoint gets all gift voucher promotions in the 3NConnect.
+          This endpoint gets a gift voucher promotion by ID in the 3NConnect.
         `.trim(),
         security: [{ bearerAuth: [] }],
         tags: ["3NConnect"],
@@ -4716,7 +4715,7 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions - Gift Voucher Updates",
+        summary: "Promotions Gift Voucher - Update",
         description: `
           This endpoint updates a gift voucher in the 3NConnect.
         `.trim(),
@@ -4760,7 +4759,7 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions - Gift Voucher",
+        summary: "Promotions Gift Voucher - Delete",
         description: `
           This endpoint deletes an existing gift voucher promotion in the 3NConnect.
         `.trim(),
