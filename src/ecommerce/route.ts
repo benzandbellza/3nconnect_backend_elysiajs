@@ -4191,3 +4191,208 @@ export const ecommerceRoute = new Elysia({
       },
     }
   )
+  .post(
+    "/promotions/extra-points",
+    async({headers, body, set}) => {
+      try {
+        const {
+          url_image,
+          promotion_image,
+          promotion_name,
+          promotion_description,
+          promotion_type,
+          promotion_start,
+          promotion_end,
+          is_accept_overlapse_promotion,
+          is_active,
+          points_multiplier
+        } = body;
+
+        const response = await prisma.promotions.create({
+          data: {
+            url_image : url_image,
+            promotion_image: promotion_image,
+            promotion_name: promotion_name,
+            promotion_description: promotion_description,
+            promotion_type: promotion_type,
+            promotion_start: promotion_start,
+            promotion_end: promotion_end,
+            is_accept_overlapse_promotion: is_accept_overlapse_promotion,
+            is_active: is_active,
+            points_multiplier: points_multiplier,
+            created_at: now
+          }
+        })
+
+        if (!response) {
+          set.status = 404;
+          return { "message" : "Failed creating extra points." }
+        }
+        
+        return { "message" : "Extra points created successfully." }
+      }catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error creating extra points promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      body: t.Object({
+        url_image: t.Any(),
+        promotion_image: t.Any(),
+        promotion_name: t.String(),
+        promotion_description: t.Any(),
+        promotion_type: t.String(),
+        promotion_start: t.Date(),
+        promotion_end: t.Date(),
+        is_accept_overlapse_promotion: t.Boolean(),
+        is_active: t.Boolean(),
+        points_multiplier: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions - Extra Points",
+        description: `
+          This endpoint creates a new extra points promotion in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    }
+  )
+  .get(
+    "/promotions/extra-points/:promotion_id",
+    async({params, set}) => {
+      try {
+        const { promotion_id } = params;
+        
+        const response = await prisma.promotions.findUnique({
+          where: {
+            id: promotion_id
+          }
+        })
+
+        if (!response) {
+          set.status = 404;
+          return { "message" : "Failed getting extra points." }
+        }
+        
+        return response;
+      }catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error getting extra points promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      params: t.Object({
+        promotion_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions - Extra Points",
+        description: `
+          This endpoint gets an existing extra points promotion in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    }
+  )
+  .put(
+    "/promotions/extra-points/:promotion_id",
+    async({params, body, set}) => {
+      try {
+        const { promotion_id } = params;
+        
+        const response = await prisma.promotions.update({
+          where: {
+            id: promotion_id
+          },
+          data: {
+            ...body
+          }
+        })
+
+        if (!response) {
+          set.status = 404;
+          return { "message" : "Failed updating extra points." }
+        }
+        
+        return { "message" : "Extra points updated successfully." };
+      }catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error updating extra points promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      params: t.Object({
+        promotion_id: t.Number(),
+      }),
+      body: t.Object({
+        url_image: t.Any(),
+        promotion_image: t.Any(),
+        promotion_name: t.String(),
+        promotion_description: t.Any(),
+        promotion_type: t.String(),
+        promotion_start: t.Date(),
+        promotion_end: t.Date(),
+        is_accept_overlapse_promotion: t.Boolean(),
+        is_active: t.Boolean(),
+        points_multiplier: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions - Extra Points",
+        description: `
+          This endpoint updates an existing extra points promotion in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    }
+  )
+  .delete(
+    "/promotions/extra-points/:promotion_id",
+    async({params, set}) => {
+      try {
+        const { promotion_id } = params;
+        
+        const response = await prisma.promotions.delete({
+          where: {
+            id: promotion_id
+          }
+        })
+
+        if (!response) {
+          set.status = 404;
+          return { "message" : "Failed deleting extra points." }
+        }
+        
+        return { "message" : "Extra points deleted successfully." };
+      }catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error deleting extra points promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      params: t.Object({
+        promotion_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions - Extra Points",
+        description: `
+          This endpoint deletes an existing extra points promotion in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    }
+  )

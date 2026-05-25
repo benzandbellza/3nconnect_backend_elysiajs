@@ -285,6 +285,7 @@ model promotions {
   promotion_description                           String?
   customer_tiers                                  String[]
   minimum_grand_total                             Float?
+  points_multiplier                               Int?
   promotion_bundle_deal_get_products              promotion_bundle_deal_get_products[]
   promotion_bundle_deal_grand_total_free_products promotion_bundle_deal_grand_total_free_products[]
   promotion_discount_products                     promotion_discount_products[]
