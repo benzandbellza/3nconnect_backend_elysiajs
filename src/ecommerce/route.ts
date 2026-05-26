@@ -1136,6 +1136,7 @@ export const ecommerceRoute = new Elysia({
                 option_name: true,
                 online_price: true,
                 min_price: true,
+                is_stock: true,
               },
               orderBy: {
                 row_no: "asc",
@@ -1363,6 +1364,7 @@ export const ecommerceRoute = new Elysia({
                 option_name: true,
                 online_price: true,
                 min_price: true,
+                attributes_hierarchy: true,
               },
               orderBy: {
                 row_no: "asc",
@@ -1376,7 +1378,6 @@ export const ecommerceRoute = new Elysia({
                 credit_terms: true,
               },
             },
-            attributes_hierarchy: true,
           },
         });
 
@@ -1433,7 +1434,6 @@ export const ecommerceRoute = new Elysia({
           condition_description,
           warranty_description,
           youtube_url,
-          attributes_hierarchy,
         } = body;
 
         // TODO : check options.mat_id do not repeat in company
@@ -1491,7 +1491,6 @@ export const ecommerceRoute = new Elysia({
             warranty_description: warranty_description,
             youtube_url: youtube_url,
             category_hierarchy: category_hierarchy,
-            attributes_hierarchy: attributes_hierarchy && attributes_hierarchy.length > 0 ? attributes_hierarchy : [],
             created_at: now,
           },
           select: {
@@ -1529,7 +1528,7 @@ export const ecommerceRoute = new Elysia({
                   mat_identity: option.mat_id,
                   option_name: option.option_name,
                   online_price: option.online_price,
-                  min_price: option.min_price,
+                  attributes_hierarchy: option.attribute_ids && option.attribute_ids.length > 0 ? option.attribute_ids : [],
                   created_at: now,
                 },
               });
@@ -1577,7 +1576,7 @@ export const ecommerceRoute = new Elysia({
             mat_id: t.String(),
             option_name: t.Any(),
             online_price: t.Any(),
-            min_price: t.Any(),
+            attribute_ids: t.Any(),
           }),
         ),
         payment_methods: t.Object({
@@ -1593,7 +1592,6 @@ export const ecommerceRoute = new Elysia({
         condition_description: t.Any(),
         warranty_description: t.Any(),
         youtube_url: t.Any(),
-        attributes_hierarchy: t.Any(),
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
@@ -1630,7 +1628,6 @@ export const ecommerceRoute = new Elysia({
           video_product,
           warranty_description,
           youtube_url,
-          attributes_hierarchy,
         } = body;
 
         // TODO : check options.mat_id do not repeat in company not self
@@ -1694,7 +1691,6 @@ export const ecommerceRoute = new Elysia({
             video_product: video_product,
             warranty_description: warranty_description,
             youtube_url: youtube_url,
-            attributes_hierarchy: attributes_hierarchy && attributes_hierarchy.length > 0 ? attributes_hierarchy : [],
             updated_at: now,
           },
         });
@@ -1779,7 +1775,7 @@ export const ecommerceRoute = new Elysia({
                     mat_identity: option.mat_id,
                     option_name: option.option_name,
                     online_price: option.online_price,
-                    min_price: option.min_price,
+                    attributes_hierarchy: option.attribute_ids && option.attribute_ids.length > 0 ? option.attribute_ids : [],
                     created_at: now,
                   },
                 })
@@ -1797,7 +1793,7 @@ export const ecommerceRoute = new Elysia({
                     mat_identity: option.mat_id,
                     option_name: option.option_name,
                     online_price: option.online_price,
-                    min_price: option.min_price,
+                    attributes_hierarchy: option.attribute_ids && option.attribute_ids.length > 0 ? option.attribute_ids : [],
                     updated_at: now,
                   },
                 })
@@ -1859,7 +1855,7 @@ export const ecommerceRoute = new Elysia({
             mat_id: t.String(),
             option_name: t.Any(),
             online_price: t.Any(),
-            min_price: t.Any(),
+            attribute_ids: t.Any(),
           })
         ),
         payment_methods: t.Object({
@@ -1874,7 +1870,6 @@ export const ecommerceRoute = new Elysia({
         video_product: t.Any(),
         warranty_description: t.Any(),
         youtube_url: t.Any(),
-        attributes_hierarchy: t.Any(),
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
@@ -1893,7 +1888,7 @@ export const ecommerceRoute = new Elysia({
     async ({ headers, params, body, set }) => {
       try {
         const { product_id, product_options_id } = params;
-        const { online_price, min_price } = body;
+        const { online_price } = body;
         
         const response = await prisma.product_options.update({
           where: {
@@ -1901,7 +1896,6 @@ export const ecommerceRoute = new Elysia({
           },
           data: {
             online_price: online_price,
-            min_price: min_price,
           },
         });
 
@@ -1928,7 +1922,6 @@ export const ecommerceRoute = new Elysia({
       }),
       body: t.Object({
         online_price: t.Number(),
-        min_price: t.Number(),
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
