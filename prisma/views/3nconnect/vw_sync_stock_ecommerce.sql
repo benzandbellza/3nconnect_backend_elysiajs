@@ -10,8 +10,11 @@ SELECT
   p."MM_RPTMAT_AGQty-Unit" AS mat_agqty_unit,
   com.id AS company_id,
   com.company_name,
+  product_ecommerce.min_price,
   product_ecommerce.online_price,
   product_ecommerce.option_name AS sale_option_name,
+  product_ecommerce.is_stock,
+  product_ecommerce.attributes_hierarchy,
   CASE
     WHEN (product_ecommerce.mat_identity IS NOT NULL) THEN TRUE
     ELSE false
@@ -25,7 +28,10 @@ FROM
           tp.company_id,
           tpo.mat_identity,
           tpo.online_price,
-          tpo.option_name
+          tpo.min_price,
+          tpo.is_stock,
+          tpo.option_name,
+          tpo.attributes_hierarchy
         FROM
           (
             "3nconnect".products tp

@@ -1188,27 +1188,88 @@ export const ecommerceRoute = new Elysia({
     "/products/planetone-stock",
     async ({ headers, set, query }) => {
       try {
+        const {
+          limit = 50,
+          offset = 0,
+          search = '',
+          sort_by = 'mat_unit_identity',
+          sort_dir = 'asc',
+          online_status = 'all',
+          company_name = '',
+          mat_status = '',
+        } = query;
+
+        // Build where clause
+        const whereClause: any = {};
+
+        if (search) {
+          whereClause.OR = [
+            { mat_unit_identity: { contains: search, mode: 'insensitive' } },
+            { mat_name: { contains: search, mode: 'insensitive' } },
+            { mat_category_text: { contains: search, mode: 'insensitive' } },
+          ];
+        }
+
+        if (online_status !== 'all') {
+          if(online_status === "online"){
+            whereClause.is_online_status = true;
+          }else{
+            whereClause.is_online_status = false;
+          }
+        }
+
+        if (company_name !== 'All') {
+          whereClause.company_name = { contains: company_name, mode: 'insensitive' };
+        }
+
+        if (mat_status) {
+          whereClause.mat_status = mat_status;
+        }
+
+        // Get total count
+        const total = await prisma.vw_sync_stock_ecommerce.count({
+          where: whereClause,
+        });
+
+        // Get paginated data
         const response = await prisma.vw_sync_stock_ecommerce.findMany({
-          select : {
+          where: whereClause,
+          select: {
             mat_unit_identity: true,
             mat_name: true,
             mat_category_text: true,
             mat_qty_unit: true,
             mat_status: true,
             is_online_status: true,
+            is_stock: true,
             company_id: true,
             company_name: true,
             online_price: true,
+            min_price: true,
             sale_option_name: true,
+            attributes_hierarchy: true,
           },
+          orderBy: {
+            [sort_by]: sort_dir,
+          },
+          skip: Number(offset),
+          take: Number(limit),
         });
 
         if (!response) {
           set.status = 404;
           return { message: "No valid products found" };
         }
-        
-        return response;
+
+        return {
+          data: response,
+          pagination: {
+            total,
+            limit: Number(limit),
+            offset: Number(offset),
+            total_pages: Math.ceil(total / Number(limit)),
+          },
+        };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
@@ -1220,11 +1281,67 @@ export const ecommerceRoute = new Elysia({
       headers: t.Object({
         authorization: t.String(),
       }),
+      query: t.Object({
+        limit: t.Optional(t.Number({ default: 50 })),
+        offset: t.Optional(t.Number({ default: 0 })),
+        search: t.Optional(t.String({ default: '' })),
+        sort_by: t.Optional(t.String({ default: 'mat_unit_identity' })),
+        sort_dir: t.Optional(t.String({ default: 'asc' })),
+        online_status: t.Optional(t.String({ default: 'all' })),
+        company_name: t.Optional(t.String({ default: '' })),
+        mat_status: t.Optional(t.String({ default: '' })),
+      }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
         summary: "Products - PlanetOne Stock",
         description: `
           This endpoint retrieves PlanetOne stock products with server-side pagination, search, and sorting.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    },
+  )
+  .patch(
+    "/products/planetone-stock/:mat_unit_identity",
+    async ({ params, body, set }) => {
+      try {
+        const { mat_unit_identity } = params;
+        
+        const response = await prisma.product_options.updateMany({
+          where: {
+            mat_identity: mat_unit_identity,
+          },
+          data: body
+        });
+
+        if(!response){
+          set.status = 404;
+          return { message : "Failed to patch planetone stock" }
+        }
+
+        return { message : "patch successfully."};
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error updating product:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      params: t.Object({
+        mat_unit_identity: t.String(),
+      }),
+      body: t.Object({
+        min_price: t.Optional(t.Any()),
+        is_stock: t.Optional(t.Boolean()),
+        attributes_hierarchy: t.Optional(t.Array(t.Any())),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Products - PlanetOne Stock",
+        description: `
+          This endpoint updates PlanetOne stock products with server-side pagination, search, and sorting.
         `.trim(),
         security: [{ bearerAuth: [] }],
         tags: ["3NConnect"],

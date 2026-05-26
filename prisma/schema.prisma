@@ -417,8 +417,11 @@ view vw_sync_stock_ecommerce {
   mat_agqty_unit         String?
   company_id             Int?
   company_name           String?
+  min_price              Float?
   online_price           Float?
   sale_option_name       String?
+  is_stock               Boolean?
+  attributes_hierarchy   Int[]
   is_online_status       Boolean?
 
   @@schema("3nconnect")
