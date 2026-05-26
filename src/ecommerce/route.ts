@@ -3591,9 +3591,6 @@ export const ecommerceRoute = new Elysia({
             is_active: true,
             is_accept_overlapse_promotion: true,
             customer_tiers: true,
-            minimum_grand_total: true,
-            promotion_bundle_deal_get_products: true,
-            promotion_bundle_deal_grand_total_free_products: true,
           }
         });
         return response;
@@ -3988,7 +3985,7 @@ export const ecommerceRoute = new Elysia({
           promotion_end,
           is_accept_overlapse_promotion,
           customer_tiers,
-          minimum_grand_total,
+          tiers,
         } = body;
 
         const response = await prisma.promotions.create({
@@ -4002,7 +3999,6 @@ export const ecommerceRoute = new Elysia({
             promotion_end: promotion_end,
             is_accept_overlapse_promotion: is_accept_overlapse_promotion,
             customer_tiers: customer_tiers,
-            minimum_grand_total: minimum_grand_total,
             is_active: true,
             created_at: now,
           },
@@ -4017,13 +4013,29 @@ export const ecommerceRoute = new Elysia({
         }
         const promotionId = response.id;
 
-        await prisma.promotion_bundle_deal_grand_total_free_products.createMany({
-          data: body.free_products.map((freeProduct: any) => ({
-            promotion_id: promotionId,
-            product_option_id: freeProduct.product_option_id,
-            free_quantity: freeProduct.free_quantity,
-          }))
-        });
+        for (const tier of tiers) {
+          const resTier = await prisma.promotion_bundle_deal_grand_total_tiers.create({
+            data: {
+              promotion_id: promotionId,
+              level_no: tier.level_no,
+              minimum_grand_total: tier.minimum_grand_total,
+            },
+            select : {
+              id: true,
+            }
+          });
+
+          const tier_id = resTier.id;
+          for (const free_product of tier.free_products){
+            await prisma.promotion_bundle_deal_grand_total_free_products.create({
+              data: {
+                bundle_deal_grand_total_tiers_id: tier_id,
+                product_option_id: free_product.product_option_id,
+                free_quantity: free_product.free_quantity,
+              }
+            });
+          }
+        }
 
         return { message: "Bundle deal grand total x free y promotion created successfully" };
       } catch (error) {
@@ -4038,8 +4050,8 @@ export const ecommerceRoute = new Elysia({
         authorization: t.String(),
       }),
       body: t.Object({
-        url_image: t.String(),
-        promotion_image: t.String(),
+        url_image: t.Any(),
+        promotion_image: t.Any(),
         promotion_name: t.String(),
         promotion_description: t.String(),
         promotion_type: t.String(),
@@ -4047,10 +4059,16 @@ export const ecommerceRoute = new Elysia({
         promotion_end: t.Date(),
         is_accept_overlapse_promotion: t.Boolean(),
         customer_tiers: t.Array(t.String()),
-        minimum_grand_total: t.Number(),
-        free_products: t.Array(t.Object({
-          product_option_id: t.Number(),
-          free_quantity: t.Number(),
+        tiers: t.Array(
+          t.Object({
+            level_no: t.Number(),
+            minimum_grand_total: t.Number(),
+            free_products: t.Array(
+              t.Object({
+                product_option_id: t.Number(),
+                free_quantity: t.Number(),
+              })
+            ),
           })
         ),
       }),
@@ -4080,8 +4098,7 @@ export const ecommerceRoute = new Elysia({
           promotion_end,
           is_accept_overlapse_promotion,
           customer_tiers,
-          minimum_grand_total,
-          free_products,
+          tiers,
         } = body;
 
         const { promotion_id } = params;
@@ -4100,40 +4117,46 @@ export const ecommerceRoute = new Elysia({
             promotion_end: promotion_end,
             is_accept_overlapse_promotion: is_accept_overlapse_promotion,
             customer_tiers: customer_tiers,
-            minimum_grand_total: minimum_grand_total,
             updated_at: now,
           },
         });
 
-        if (!response) {
-          set.status = 400;
-          return { message: "Failed to update grand total x free y promotion" };
-        }
-
-        const delResponse = await prisma.promotion_bundle_deal_grand_total_free_products.deleteMany({
+        // Delete existing tiers
+        await prisma.promotion_bundle_deal_grand_total_tiers.deleteMany({
           where: {
             promotion_id: promotion_id,
           },
         });
 
-        if(!delResponse){
-          set.status = 500;
-          return { message: "Failed to delete free products" };
-        }
-
-        for(const free_product of free_products){
-          const createResponse = await prisma.promotion_bundle_deal_grand_total_free_products.create({
+        // Create new tiers
+        for (const tier of tiers) {
+          const resTier = await prisma.promotion_bundle_deal_grand_total_tiers.create({
             data: {
               promotion_id: promotion_id,
-              product_option_id: free_product.product_option_id,
-              free_quantity: free_product.free_quantity,
+              level_no: tier.level_no,
+              minimum_grand_total: tier.minimum_grand_total,
             },
+            select: {
+              id: true,
+            }
           });
 
-          if(!createResponse){
-            set.status = 500;
-            return { message: "Failed to create free product" };
+          const tier_id = resTier.id;
+          
+          for (const freeProduct of tier.free_products) {
+            await prisma.promotion_bundle_deal_grand_total_free_products.create({
+              data: {
+                bundle_deal_grand_total_tiers_id: tier_id,
+                product_option_id: freeProduct.product_option_id,
+                free_quantity: freeProduct.free_quantity,
+              },
+            });
           }
+        }
+
+        if (!response) {
+          set.status = 400;
+          return { message: "Failed to update grand total x free y promotion" };
         }
 
         return { message: "Bundle deal grand total x free y promotion updated successfully" };
@@ -4152,8 +4175,8 @@ export const ecommerceRoute = new Elysia({
         promotion_id: t.Number(),
       }),
       body: t.Object({
-        url_image: t.String(),
-        promotion_image: t.String(),
+        url_image: t.Any(),
+        promotion_image: t.Any(),
         promotion_name: t.String(),
         promotion_description: t.String(),
         promotion_type: t.String(),
@@ -4161,11 +4184,16 @@ export const ecommerceRoute = new Elysia({
         promotion_end: t.Date(),
         is_accept_overlapse_promotion: t.Boolean(),
         customer_tiers: t.Array(t.String()),
-        minimum_grand_total: t.Number(),
-        free_products: t.Array(
+        tiers: t.Array(
           t.Object({
-            product_option_id: t.Number(),
-            free_quantity: t.Number(),
+            level_no: t.Number(),
+            minimum_grand_total: t.Number(),
+            free_products: t.Array(
+              t.Object({
+                product_option_id: t.Number(),
+                free_quantity: t.Number(),
+              })
+            ),
           })
         ),
       }),
@@ -4202,12 +4230,17 @@ export const ecommerceRoute = new Elysia({
             promotion_end: true,
             is_active: true,
             is_accept_overlapse_promotion: true,
-            minimum_grand_total: true,
             customer_tiers: true,
-            promotion_bundle_deal_grand_total_free_products: {
+            promotion_bundle_deal_grand_total_tiers: {
               select: {
-                product_option_id: true,
-                free_quantity: true,
+                level_no: true,
+                minimum_grand_total: true,
+                promotion_bundle_deal_grand_total_free_products: {
+                  select: {
+                    product_option_id: true,
+                    free_quantity: true,
+                  },
+                },
               },
             },
           },
