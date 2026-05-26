@@ -1186,6 +1186,41 @@ export const ecommerceRoute = new Elysia({
   )
   .get(
     "/products/planetone-stock",
+    async ({ headers, set }) => {
+      try {
+        // Get paginated data
+        const response = await prisma.vw_sync_stock_ecommerce.findMany();
+
+        if (!response) {
+          set.status = 404;
+          return { message: "No valid products found" };
+        }
+
+        return response;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching products:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Products PlanetOne Stock - Find All",
+        description: `
+          This endpoint retrieves PlanetOne stock products with server-side pagination, search, and sorting.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    },
+  )
+  .get(
+    "/products/planetone-stock/paginator",
     async ({ headers, set, query }) => {
       try {
         const {
@@ -1293,7 +1328,7 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Products - PlanetOne Stock",
+        summary: "Products PlanetOne Stock - Find by Paginator",
         description: `
           This endpoint retrieves PlanetOne stock products with server-side pagination, search, and sorting.
         `.trim(),
