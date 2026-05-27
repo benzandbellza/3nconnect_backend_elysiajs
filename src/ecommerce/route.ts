@@ -3097,7 +3097,10 @@ export const ecommerceRoute = new Elysia({
         const { promotion_type } = body;
         const response = await prisma.promotions.findMany({
           where: {
-            promotion_type: promotion_type
+            promotion_type: {
+              contains: promotion_type,
+              mode: "insensitive",
+            }
           },
           orderBy: {
             created_at: "desc",
@@ -4423,7 +4426,7 @@ export const ecommerceRoute = new Elysia({
     }
   )
   .post(
-    "/promotions/extra-points",
+    "/promotions/extra-points/bill-total",
     async({headers, body, set}) => {
       try {
         const {
@@ -4436,7 +4439,7 @@ export const ecommerceRoute = new Elysia({
           promotion_end,
           is_accept_overlapse_promotion,
           is_active,
-          points_multiplier
+          tier_rules,
         } = body;
 
         const response = await prisma.promotions.create({
@@ -4450,8 +4453,10 @@ export const ecommerceRoute = new Elysia({
             promotion_end: promotion_end,
             is_accept_overlapse_promotion: is_accept_overlapse_promotion,
             is_active: is_active,
-            points_multiplier: points_multiplier,
             created_at: now
+          },
+          select : {
+            id: true,
           }
         })
 
@@ -4459,7 +4464,15 @@ export const ecommerceRoute = new Elysia({
           set.status = 404;
           return { "message" : "Failed creating extra points." }
         }
-        
+
+        const promotionId = response.id;
+        await prisma.promotion_extra_points_tier_rules.createMany({
+          data: tier_rules.map((rule: any) => ({
+            ...rule,
+            promotion_id: promotionId,
+          }))
+        });
+
         return { "message" : "Extra points created successfully." }
       }catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Unknown error";
@@ -4474,15 +4487,109 @@ export const ecommerceRoute = new Elysia({
       }),
       body: t.Object({
         url_image: t.Any(),
-        promotion_image: t.Any(),
+        promotion_image: t.Optional(t.String()),
         promotion_name: t.String(),
-        promotion_description: t.Any(),
+        promotion_description: t.Optional(t.String()),
         promotion_type: t.String(),
         promotion_start: t.Date(),
         promotion_end: t.Date(),
         is_accept_overlapse_promotion: t.Boolean(),
         is_active: t.Boolean(),
-        points_multiplier: t.Number(),
+        tier_rules: t.Array(
+          t.Object({
+            level_no: t.Number(),
+            min_amount: t.Number(),
+            points_multiplier: t.Number(),
+          })
+        ),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions Extra Points - Create",
+        description: `
+          This endpoint creates a new extra points promotion in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    }
+  )
+  .post(
+    "/promotions/extra-points/product-point",
+    async({headers, body, set}) => {
+      try {
+        const {
+          url_image,
+          promotion_image,
+          promotion_name,
+          promotion_description,
+          promotion_type,
+          promotion_start,
+          promotion_end,
+          is_accept_overlapse_promotion,
+          is_active,
+          items,
+        } = body;
+
+        const response = await prisma.promotions.create({
+          data: {
+            url_image : url_image,
+            promotion_image: promotion_image,
+            promotion_name: promotion_name,
+            promotion_description: promotion_description,
+            promotion_type: promotion_type,
+            promotion_start: promotion_start,
+            promotion_end: promotion_end,
+            is_accept_overlapse_promotion: is_accept_overlapse_promotion,
+            is_active: is_active,
+            created_at: now
+          },
+          select : {
+            id: true,
+          }
+        })
+
+        if (!response) {
+          set.status = 404;
+          return { "message" : "Failed creating extra points." }
+        }
+
+        const promotionId = response.id;
+        await prisma.promotion_extra_points_products.createMany({
+          data: items.map((item: any) => ({
+            ...item,
+            promotion_id: promotionId,
+          }))
+        });
+
+        return { "message" : "Extra points created successfully." }
+      }catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error creating extra points promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        url_image: t.Any(),
+        promotion_image: t.Optional(t.String()),
+        promotion_name: t.String(),
+        promotion_description: t.Optional(t.String()),
+        promotion_type: t.String(),
+        promotion_start: t.Date(),
+        promotion_end: t.Date(),
+        is_accept_overlapse_promotion: t.Boolean(),
+        is_active: t.Boolean(),
+        items: t.Array(
+          t.Object({
+            product_option_id: t.Number(),
+            points_multiplier: t.Number(),
+          })
+        ),
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
@@ -4496,7 +4603,7 @@ export const ecommerceRoute = new Elysia({
     }
   )
   .get(
-    "/promotions/extra-points/:promotion_id",
+    "/promotions/extra-points/bill-total/:promotion_id",
     async({params, set}) => {
       try {
         const { promotion_id } = params;
@@ -4504,6 +4611,87 @@ export const ecommerceRoute = new Elysia({
         const response = await prisma.promotions.findUnique({
           where: {
             id: promotion_id
+          },
+          select : {
+            url_image: true,
+            promotion_image: true,
+            promotion_name: true,
+            promotion_description: true,
+            promotion_type: true,
+            promotion_start: true,
+            promotion_end: true,
+            is_active: true,
+            is_accept_overlapse_promotion: true,
+            promotion_extra_points_tier_rules: {
+              select: {
+                level_no: true,
+                min_amount: true,
+                points_multiplier: true
+              },
+              orderBy: {
+                level_no: "asc",
+              }
+            }
+          }
+        })
+
+        if (!response) {
+          set.status = 404;
+          return { "message" : "Failed getting extra points." }
+        }
+        
+        return response;
+      }catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error getting extra points promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      params: t.Object({
+        promotion_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions Extra Points - GET By Promotion ID",
+        description: `
+          This endpoint gets an existing extra points promotion in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    }
+  )
+  .get(
+    "/promotions/extra-points/product-point/:promotion_id",
+    async({params, set}) => {
+      try {
+        const { promotion_id } = params;
+        
+        const response = await prisma.promotions.findUnique({
+          where: {
+            id: promotion_id
+          },
+          select : {
+            url_image: true,
+            promotion_image: true,
+            promotion_name: true,
+            promotion_description: true,
+            promotion_type: true,
+            promotion_start: true,
+            promotion_end: true,
+            is_active: true,
+            is_accept_overlapse_promotion: true,
+            promotion_extra_points_products: {
+              select: {
+                product_option_id: true,
+                points_multiplier: true
+              }
+            }
           }
         })
 
@@ -4539,17 +4727,38 @@ export const ecommerceRoute = new Elysia({
     }
   )
   .put(
-    "/promotions/extra-points/:promotion_id",
+    "/promotions/extra-points/bill-total/:promotion_id",
     async({params, body, set}) => {
       try {
         const { promotion_id } = params;
+        const {
+          url_image,
+          promotion_image,
+          promotion_name,
+          promotion_description,
+          promotion_type,
+          promotion_start,
+          promotion_end,
+          is_accept_overlapse_promotion,
+          is_active,
+          tier_rules
+        } = body;
         
         const response = await prisma.promotions.update({
           where: {
             id: promotion_id
           },
           data: {
-            ...body
+            url_image,
+            promotion_image,
+            promotion_name,
+            promotion_description,
+            promotion_type,
+            promotion_start,
+            promotion_end,
+            is_accept_overlapse_promotion,
+            is_active,
+            updated_at: now,
           }
         })
 
@@ -4557,7 +4766,20 @@ export const ecommerceRoute = new Elysia({
           set.status = 404;
           return { "message" : "Failed updating extra points." }
         }
-        
+
+        await prisma.promotion_extra_points_tier_rules.deleteMany({
+          where: {
+            promotion_id: promotion_id,
+          }
+        });
+
+        await prisma.promotion_extra_points_tier_rules.createMany({
+          data: tier_rules.map((rule: any) => ({
+            ...rule,
+            promotion_id: promotion_id,
+          }))
+        });
+
         return { "message" : "Extra points updated successfully." };
       }catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Unknown error";
@@ -4583,7 +4805,110 @@ export const ecommerceRoute = new Elysia({
         promotion_end: t.Date(),
         is_accept_overlapse_promotion: t.Boolean(),
         is_active: t.Boolean(),
-        points_multiplier: t.Number(),
+        tier_rules: t.Array(
+          t.Object({
+            level_no: t.Number(),
+            min_amount: t.Number(),
+            points_multiplier: t.Number(),
+          })
+        ),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions Extra Points - Update",
+        description: `
+          This endpoint updates an existing extra points promotion in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    }
+  )
+  .put(
+    "/promotions/extra-points/product-point/:promotion_id",
+    async({params, body, set}) => {
+      try {
+        const { promotion_id } = params;
+        const {
+          url_image,
+          promotion_image,
+          promotion_name,
+          promotion_description,
+          promotion_type,
+          promotion_start,
+          promotion_end,
+          is_accept_overlapse_promotion,
+          is_active,
+          items
+        } = body;
+        
+        const response = await prisma.promotions.update({
+          where: {
+            id: promotion_id
+          },
+          data: {
+            url_image,
+            promotion_image,
+            promotion_name,
+            promotion_description,
+            promotion_type,
+            promotion_start,
+            promotion_end,
+            is_accept_overlapse_promotion,
+            is_active,
+            updated_at: now,
+          }
+        })
+
+        if (!response) {
+          set.status = 404;
+          return { "message" : "Failed updating extra points." }
+        }
+
+        await prisma.promotion_extra_points_products.deleteMany({
+          where: {
+            promotion_id: promotion_id,
+          }
+        });
+
+        await prisma.promotion_extra_points_products.createMany({
+          data: items.map((item: any) => ({
+            ...item,
+            promotion_id: promotion_id,
+          }))
+        });
+
+        return { "message" : "Extra points updated successfully." };
+      }catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error updating extra points promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      params: t.Object({
+        promotion_id: t.Number(),
+      }),
+      body: t.Object({
+        url_image: t.Optional(t.String()),
+        promotion_image: t.Optional(t.String()),
+        promotion_name: t.String(),
+        promotion_description: t.Optional(t.String()),
+        promotion_type: t.String(),
+        promotion_start: t.Date(),
+        promotion_end: t.Date(),
+        is_accept_overlapse_promotion: t.Boolean(),
+        is_active: t.Boolean(),
+        items: t.Array(
+          t.Object({
+            product_option_id: t.Number(),
+            points_multiplier: t.Number(),
+          })
+        ),
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],

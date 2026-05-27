@@ -285,10 +285,11 @@ model promotions {
   is_accept_overlapse_promotion           Boolean?
   promotion_description                   String?
   customer_tiers                          String[]
-  points_multiplier                       Int?
   promotion_bundle_deal_get_products      promotion_bundle_deal_get_products[]
   promotion_bundle_deal_grand_total_tiers promotion_bundle_deal_grand_total_tiers[]
   promotion_discount_products             promotion_discount_products[]
+  promotion_extra_points_products         promotion_extra_points_products[]
+  promotion_extra_points_tier_rules       promotion_extra_points_tier_rules[]
   promotion_flashsale_products            promotion_flashsale_products[]
 
   @@schema("3nconnect")
@@ -362,6 +363,29 @@ model promotion_bundle_deal_grand_total_tiers {
   minimum_grand_total                             Float?
   promotion_bundle_deal_grand_total_free_products promotion_bundle_deal_grand_total_free_products[]
   promotions                                      promotions?                                       @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("3nconnect")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model promotion_extra_points_tier_rules {
+  id                Int         @id @default(autoincrement())
+  promotion_id      Int?
+  level_no          Int?
+  min_amount        Float?
+  points_multiplier Float?
+  promotions        promotions? @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("3nconnect")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model promotion_extra_points_products {
+  id                Int         @id(map: "promotion_extra_points_product_point_pkey") @default(autoincrement())
+  promotion_id      Int?
+  product_option_id Int?
+  points_multiplier Float?
+  promotions        promotions? @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "promotion_extra_points_product_point_promotion_id_fkey")
 
   @@schema("3nconnect")
 }
