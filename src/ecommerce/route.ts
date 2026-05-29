@@ -5039,6 +5039,7 @@ export const ecommerceRoute = new Elysia({
             is_limit_voucher: true,
             is_specific_customers: true,
             is_active: true,
+            is_lifetime_period: true,
             gift_voucher_method: true,
             limited_total_quantity: true,
             gift_voucher_generic: {
@@ -5106,6 +5107,7 @@ export const ecommerceRoute = new Elysia({
           voucher_description,
           voucher_name,
           voucher_image,
+          is_lifetime_period,
         } = body;
 
         const response = await prisma.gift_voucher.create({
@@ -5125,6 +5127,7 @@ export const ecommerceRoute = new Elysia({
             is_limit_voucher: is_limit_voucher,
             is_specific_customers: is_specific_customers,
             is_active: is_active,
+            is_lifetime_period: is_lifetime_period,
             limited_total_quantity: limited_total_quantity,
             voucher_uuid: crypto.randomUUID(),
             created_at: now,
@@ -5168,8 +5171,8 @@ export const ecommerceRoute = new Elysia({
         authorization: t.String(),
       }),
       body: t.Object({
-        campaign_start: t.Date(),
-        campaign_end: t.Date(),
+        campaign_start: t.Any(),
+        campaign_end: t.Any(),
         customer_tiers: t.Array(t.String()),
         gift_voucher_generic: t.Any(),
         gift_voucher_method: t.String(),
@@ -5177,6 +5180,7 @@ export const ecommerceRoute = new Elysia({
         is_active: t.Boolean(),
         is_limit_voucher: t.Boolean(),
         is_specific_customers: t.Any(),
+        is_lifetime_period: t.Boolean(),
         limited_total_quantity: t.Any(),
         specific_customers: t.Array(t.String()),
         url_image: t.Any(),
@@ -5218,6 +5222,7 @@ export const ecommerceRoute = new Elysia({
           voucher_description,
           voucher_name,
           voucher_image,
+          is_lifetime_period,
         } = body;
 
         const response = await prisma.gift_voucher.update({
@@ -5240,6 +5245,7 @@ export const ecommerceRoute = new Elysia({
             is_limit_voucher: is_limit_voucher,
             is_specific_customers: is_specific_customers,
             is_active: is_active,
+            is_lifetime_period: is_lifetime_period,
             limited_total_quantity: limited_total_quantity,
             updated_at: now,
           },
@@ -5283,8 +5289,8 @@ export const ecommerceRoute = new Elysia({
         gift_voucher_id: t.Number(),
       }),
       body: t.Object({
-        campaign_start: t.Date(),
-        campaign_end: t.Date(),
+        campaign_start: t.Any(),
+        campaign_end: t.Any(),
         customer_tiers: t.Array(t.String()),
         gift_voucher_generic: t.Object({
           redemption_type: t.String(),
@@ -5299,6 +5305,7 @@ export const ecommerceRoute = new Elysia({
         is_active: t.Boolean(),
         is_limit_voucher: t.Boolean(),
         is_specific_customers: t.Any(),
+        is_lifetime_period: t.Boolean(),
         limited_total_quantity: t.Any(),
         specific_customers: t.Array(t.String()),
         url_image: t.Any(),
@@ -5393,6 +5400,7 @@ export const ecommerceRoute = new Elysia({
             is_limit_voucher: true,
             is_specific_customers: true,
             is_active: true,
+            is_lifetime_period: true,
             gift_voucher_method: true,
             limited_total_quantity: true,
             gift_voucher_event: {
@@ -5402,6 +5410,7 @@ export const ecommerceRoute = new Elysia({
                 max_discount: true,
                 min_purchase: true,
                 percent_discount: true,
+                tier_trigger_name: true,
               }
             }
           }
@@ -5459,6 +5468,7 @@ export const ecommerceRoute = new Elysia({
           voucher_description,
           voucher_name,
           voucher_image,
+          is_lifetime_period,
         } = body;
 
         const response = await prisma.gift_voucher.create({
@@ -5478,6 +5488,7 @@ export const ecommerceRoute = new Elysia({
             is_limit_voucher: is_limit_voucher,
             is_specific_customers: is_specific_customers,
             is_active: is_active,
+            is_lifetime_period: is_lifetime_period,
             limited_total_quantity: limited_total_quantity,
             voucher_uuid: crypto.randomUUID(),
             created_at: now,
@@ -5504,6 +5515,7 @@ export const ecommerceRoute = new Elysia({
             max_discount: gift_voucher_event.max_discount,
             min_purchase: gift_voucher_event.min_purchase,
             percent_discount: gift_voucher_event.percent_discount,
+            tier_trigger_name: gift_voucher_event.tier_trigger_name,
           }
         });
 
@@ -5520,21 +5532,23 @@ export const ecommerceRoute = new Elysia({
         authorization: t.String(),
       }),
       body: t.Object({
-        campaign_start: t.Date(),
-        campaign_end: t.Date(),
-        customer_tiers: t.Array(t.String()),
+        campaign_start: t.Any(),
+        campaign_end: t.Any(),
+        customer_tiers: t.Any(),
         gift_voucher_event: t.Object({
           event_trigger_type: t.String(),
           discount_type: t.String(),
           max_discount: t.Any(),
           min_purchase: t.Any(),
           percent_discount: t.Any(),
+          tier_trigger_name: t.Any(),
         }),
         gift_voucher_method: t.String(),
         is_accept_overlapse_promotion: t.Boolean(),
         is_active: t.Boolean(),
         is_limit_voucher: t.Boolean(),
         is_specific_customers: t.Any(),
+        is_lifetime_period: t.Boolean(),
         limited_total_quantity: t.Any(),
         specific_customers: t.Array(t.String()),
         url_image: t.Any(),
@@ -5576,6 +5590,7 @@ export const ecommerceRoute = new Elysia({
           voucher_description,
           voucher_name,
           voucher_image,
+          is_lifetime_period,
         } = body;
 
         const response = await prisma.gift_voucher.update({
@@ -5598,6 +5613,7 @@ export const ecommerceRoute = new Elysia({
             is_limit_voucher: is_limit_voucher,
             is_specific_customers: is_specific_customers,
             is_active: is_active,
+            is_lifetime_period: is_lifetime_period,
             limited_total_quantity: limited_total_quantity,
             updated_at: now,
           },
@@ -5621,6 +5637,7 @@ export const ecommerceRoute = new Elysia({
             max_discount: gift_voucher_event.max_discount,
             min_purchase: gift_voucher_event.min_purchase,
             percent_discount: gift_voucher_event.percent_discount,
+            tier_trigger_name: gift_voucher_event.tier_trigger_name,
           }
         });
 
@@ -5640,21 +5657,23 @@ export const ecommerceRoute = new Elysia({
         gift_voucher_id: t.Number(),
       }),
       body: t.Object({
-        campaign_start: t.Date(),
-        campaign_end: t.Date(),
-        customer_tiers: t.Array(t.String()),
+        campaign_start: t.Any(),
+        campaign_end: t.Any(),
+        customer_tiers: t.Any(),
         gift_voucher_event: t.Object({
           event_trigger_type: t.String(),
           discount_type: t.String(),
           max_discount: t.Any(),
           min_purchase: t.Any(),
           percent_discount: t.Any(),
+          tier_trigger_name: t.Any(),
         }),
         gift_voucher_method: t.String(),
         is_accept_overlapse_promotion: t.Boolean(),
         is_active: t.Boolean(),
         is_limit_voucher: t.Boolean(),
         is_specific_customers: t.Any(),
+        is_lifetime_period: t.Boolean(),
         limited_total_quantity: t.Any(),
         specific_customers: t.Array(t.String()),
         url_image: t.Any(),
