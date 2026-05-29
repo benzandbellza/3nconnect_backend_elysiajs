@@ -3549,8 +3549,8 @@ export const ecommerceRoute = new Elysia({
         authorization: t.String(),
       }),
       body: t.Object({
-        url_image: t.String(),
-        promotion_image: t.String(),
+        url_image: t.Any(),
+        promotion_image: t.Any(),
         promotion_name: t.String(),
         promotion_description: t.String(),
         promotion_type: t.String(),
