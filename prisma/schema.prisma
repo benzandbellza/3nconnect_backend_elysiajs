@@ -408,14 +408,15 @@ model gift_voucher_event {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model gift_voucher_generic {
-  id               Int           @id @default(autoincrement())
-  gift_voucher_id  Int?
-  redemption_type  String?
-  discount_type    String?
-  min_purchase     Float?
-  percent_discount Float?
-  max_discount     Float?
-  gift_voucher     gift_voucher? @relation(fields: [gift_voucher_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id                  Int           @id @default(autoincrement())
+  gift_voucher_id     Int?
+  redemption_type     String?
+  discount_type       String?
+  min_purchase        Float?
+  percent_discount    Float?
+  max_discount        Float?
+  voucher_redeem_code String?
+  gift_voucher        gift_voucher? @relation(fields: [gift_voucher_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("3nconnect")
 }

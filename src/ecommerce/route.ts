@@ -5048,6 +5048,7 @@ export const ecommerceRoute = new Elysia({
                 max_discount: true,
                 min_purchase: true,
                 percent_discount: true,
+                voucher_redeem_code: true,
               }
             }
           }
@@ -5149,6 +5150,7 @@ export const ecommerceRoute = new Elysia({
               max_discount: gift_voucher_generic.max_discount,
               min_purchase: gift_voucher_generic.min_purchase,
               percent_discount: gift_voucher_generic.percent_discount,
+              voucher_redeem_code: gift_voucher_generic.voucher_redeem_code ?? null,
             }
           });
         }
@@ -5261,6 +5263,7 @@ export const ecommerceRoute = new Elysia({
             max_discount: gift_voucher_generic.max_discount,
             min_purchase: gift_voucher_generic.min_purchase,
             percent_discount: gift_voucher_generic.percent_discount,
+            voucher_redeem_code: gift_voucher_generic.voucher_redeem_code,
           }
         });
 
@@ -5289,6 +5292,7 @@ export const ecommerceRoute = new Elysia({
           max_discount: t.Any(),
           min_purchase: t.Any(),
           percent_discount: t.Any(),
+          voucher_redeem_code: t.Any(),
         }),
         gift_voucher_method: t.String(),
         is_accept_overlapse_promotion: t.Boolean(),
