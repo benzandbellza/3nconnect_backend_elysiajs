@@ -4505,7 +4505,7 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions Extra Points - Create",
+        summary: "Promotions Extra Points Bill Total - Create",
         description: `
           This endpoint creates a new extra points promotion in the 3NConnect.
         `.trim(),
@@ -4593,7 +4593,7 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions Extra Points - Create",
+        summary: "Promotions Extra Points Product - Create",
         description: `
           This endpoint creates a new extra points promotion in the 3NConnect.
         `.trim(),
@@ -4657,7 +4657,7 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions Extra Points - GET By Promotion ID",
+        summary: "Promotions Extra Points Bill Total - GET By Promotion ID",
         description: `
           This endpoint gets an existing extra points promotion in the 3NConnect.
         `.trim(),
@@ -4717,7 +4717,7 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions Extra Points - GET By Promotion ID",
+        summary: "Promotions Extra Points Product - GET By Promotion ID",
         description: `
           This endpoint gets an existing extra points promotion in the 3NConnect.
         `.trim(),
@@ -4815,7 +4815,7 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions Extra Points - Update",
+        summary: "Promotions Extra Points Bill Total - Update",
         description: `
           This endpoint updates an existing extra points promotion in the 3NConnect.
         `.trim(),
@@ -4912,7 +4912,7 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions Extra Points - Update",
+        summary: "Promotions Extra Points Product - Update",
         description: `
           This endpoint updates an existing extra points promotion in the 3NConnect.
         `.trim(),
@@ -4964,149 +4964,105 @@ export const ecommerceRoute = new Elysia({
       },
     }
   )
-  .post(
-    "/promotions/gift-voucher",
-    async({headers, body, set}) => {
-      try {
-        const {
-          url_image,
-          voucher_image,
-          voucher_name,
-          voucher_description,
-          assigned_customer_ids,
-          discount_type,
-          discount_value,
-          is_accept_overlapse_promotion,
-          voucher_type,
-          min_purchase_amount,
-          max_discount_amount,
-          voucher_start,
-          voucher_end,
-          tier_upgrade_trigger,
-          limited_total_quantity,
-          is_active,
-          is_lifetime,
-        } = body;
-        
-        const response = await prisma.gift_voucher.create({
-          data: {
-            url_image: url_image,
-            voucher_image: voucher_image,
-            voucher_name: voucher_name,
-            voucher_description: voucher_description,
-            assigned_customer_ids: assigned_customer_ids && assigned_customer_ids.length > 0 ? assigned_customer_ids : [],
-            discount_type: discount_type,
-            discount_value: discount_value,
-            is_accept_overlapse_promotion: is_accept_overlapse_promotion,
-            voucher_type: voucher_type,
-            min_purchase_amount: min_purchase_amount,
-            max_discount_amount: max_discount_amount,
-            voucher_start: voucher_start,
-            voucher_end: voucher_end,
-            tier_upgrade_trigger : tier_upgrade_trigger && tier_upgrade_trigger.length > 0 ? tier_upgrade_trigger : [],
-            limited_total_quantity: limited_total_quantity,
-            is_active: is_active,
-            is_lifetime: is_lifetime,
-            created_at: now,
-          },
-        });
-        
-        return response;
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "Unknown error";
-        set.status = 500;
-        console.error("Error creating gift voucher promotion:", error);
-        return { message: errorMessage };
-      }
-    },
-    {
-      headers: t.Object({
-        authorization: t.String(),
-      }),
-      body: t.Object({
-        url_image: t.Any(),
-        voucher_image: t.Any(),
-        voucher_name: t.String(),
-        voucher_description: t.Any(),
-        assigned_customer_ids: t.Any(),
-        discount_type: t.String(),
-        discount_value: t.Number(),
-        is_accept_overlapse_promotion: t.Boolean(),
-        voucher_type: t.String(),
-        min_purchase_amount: t.Number(),
-        max_discount_amount: t.Number(),
-        voucher_start: t.Any(),
-        voucher_end: t.Any(),
-        tier_upgrade_trigger: t.Any(),
-        limited_total_quantity: t.Any(),
-        is_active: t.Boolean(),
-        is_lifetime: t.Boolean(),
-      }),
-      detail: {
-        servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions Gift Voucher - Create",
-        description: `
-          This endpoint creates a new gift voucher promotion in the 3NConnect.
-        `.trim(),
-        security: [{ bearerAuth: [] }],
-        tags: ["3NConnect"],
-      },
-    }
-  )
   .get(
-    "/promotions/gift-voucher",
-    async ({ headers, set }) => {
+    "/gift-voucher/generic",
+    async({ headers, set}) => {
       try {
-        const response = await prisma.gift_voucher.findMany();
-
-        if(!response){
-          set.status = 404;
-          return { message: "Gift voucher not found" };
-        }
-        
-        return response;
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "Unknown error";
-        set.status = 500;
-        console.error("Error getting gift voucher promotions:", error);
-        return { message: errorMessage };
-      }
-    },
-    {
-      headers: t.Object({
-        authorization: t.String(),
-      }),
-      detail: {
-        servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions Gift Voucher - Find All",
-        description: `
-          This endpoint gets all gift voucher promotions in the 3NConnect.
-        `.trim(),
-        security: [{ bearerAuth: [] }],
-        tags: ["3NConnect"],
-      },
-    }
-  )
-  .get(
-    "/promotions/gift-voucher/:voucher_id",
-    async ({ headers, set, params }) => {
-      try {
-        const response = await prisma.gift_voucher.findUnique({
+        const response = await prisma.gift_voucher.findMany({
           where: {
-            id: params.voucher_id,
+            gift_voucher_type: "generic",
           },
+          select: {
+            id: true,
+            url_image: true,
+            voucher_name: true,
+            voucher_description: true,
+            voucher_conditions: true,
+            campaign_start: true,
+            campaign_end: true,
+            customer_tiers: true,
+            is_accept_overlapse_promotion: true,
+            is_limit_voucher: true,
+            is_active: true,
+          }
         });
 
-        if(!response){
+        if(!response) {
           set.status = 404;
-          return { message: "Gift voucher not found" };
+          return { "message" : "No generic gift vouchers found." }
         }
-        
+
         return response;
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        console.error("Error getting gift voucher promotions:", error);
+        console.error("Error fetching generic gift voucher promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Gift Voucher Generic - Find All",
+        description: `
+          This endpoint finds all generic gift vouchers in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    }
+  )
+  .get(
+    "/gift-voucher/generic/:gift_voucher_id",
+    async({ headers, params, set}) => {
+      try {
+        const { gift_voucher_id } = params;
+        const response = await prisma.gift_voucher.findFirst({
+          where: {
+            gift_voucher_type: "generic",
+            id: gift_voucher_id,
+          },
+          select: {
+            url_image: true,
+            voucher_image: true,
+            voucher_name: true,
+            voucher_description: true,
+            voucher_conditions: true,
+            campaign_start: true,
+            campaign_end: true,
+            customer_tiers: true,
+            specific_customers: true,
+            is_accept_overlapse_promotion: true,
+            is_limit_voucher: true,
+            is_specific_customers: true,
+            is_active: true,
+            gift_voucher_method: true,
+            limited_total_quantity: true,
+            gift_voucher_generic: {
+              select: {
+                redemption_type: true,
+                discount_type: true,
+                max_discount: true,
+                min_purchase: true,
+                percent_discount: true,
+              }
+            }
+          }
+        });
+
+        if(!response) {
+          set.status = 404;
+          return { "message" : "No generic gift vouchers found." }
+        }
+
+        return response;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching generic gift voucher promotion:", error);
         return { message: errorMessage };
       }
     },
@@ -5115,13 +5071,123 @@ export const ecommerceRoute = new Elysia({
         authorization: t.String(),
       }),
       params: t.Object({
-        voucher_id: t.Number(),
+        gift_voucher_id: t.Number(),
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions Gift Voucher - GET By Voucher ID",
+        summary: "Gift Voucher Generic - Find by Gift Voucher ID",
         description: `
-          This endpoint gets a gift voucher promotion by ID in the 3NConnect.
+          This endpoint finds a specific generic gift voucher in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    }
+  )
+  .post(
+    "/gift-voucher/generic",
+    async({ headers, set, body}) => {
+      try {
+        const {
+          campaign_start,
+          campaign_end,
+          customer_tiers,
+          gift_voucher_generic,
+          gift_voucher_method,
+          is_accept_overlapse_promotion,
+          is_active,
+          is_limit_voucher,
+          is_specific_customers,
+          limited_total_quantity,
+          specific_customers,
+          url_image,
+          voucher_conditions,
+          voucher_description,
+          voucher_name,
+          voucher_image,
+        } = body;
+
+        const response = await prisma.gift_voucher.create({
+          data: {
+            url_image: url_image,
+            gift_voucher_type: 'generic',
+            gift_voucher_method: gift_voucher_method,
+            voucher_image: voucher_image,
+            voucher_name: voucher_name,
+            voucher_description: voucher_description,
+            voucher_conditions: voucher_conditions,
+            campaign_start: campaign_start,
+            campaign_end: campaign_end,
+            customer_tiers: customer_tiers,
+            specific_customers: specific_customers && specific_customers.length > 0 ? specific_customers : [],
+            is_accept_overlapse_promotion: is_accept_overlapse_promotion,
+            is_limit_voucher: is_limit_voucher,
+            is_specific_customers: is_specific_customers,
+            is_active: is_active,
+            limited_total_quantity: limited_total_quantity,
+            voucher_uuid: crypto.randomUUID(),
+            created_at: now,
+          },
+          select: {
+            id: true,
+          }
+        });
+
+        if(!response) {
+          set.status = 400;
+          return { "message" : "Failed to create generic gift voucher." }
+        }
+
+        if(gift_voucher_generic) {
+          const giftVoucherId = response.id;
+          
+          await prisma.gift_voucher_generic.create({
+            data: {
+              gift_voucher_id: giftVoucherId,
+              redemption_type: gift_voucher_generic.redemption_type,
+              discount_type: gift_voucher_generic.discount_type,
+              max_discount: gift_voucher_generic.max_discount,
+              min_purchase: gift_voucher_generic.min_purchase,
+              percent_discount: gift_voucher_generic.percent_discount,
+            }
+          });
+        }
+
+        return { "message" : "Generic gift voucher created successfully." };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error creating generic gift voucher promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        campaign_start: t.Date(),
+        campaign_end: t.Date(),
+        customer_tiers: t.Array(t.String()),
+        gift_voucher_generic: t.Any(),
+        gift_voucher_method: t.String(),
+        is_accept_overlapse_promotion: t.Boolean(),
+        is_active: t.Boolean(),
+        is_limit_voucher: t.Boolean(),
+        is_specific_customers: t.Any(),
+        limited_total_quantity: t.Any(),
+        specific_customers: t.Array(t.String()),
+        url_image: t.Any(),
+        voucher_conditions: t.Any(),
+        voucher_description: t.String(),
+        voucher_name: t.String(),
+        voucher_image: t.Any(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Gift Voucher Generic - Create",
+        description: `
+          This endpoint creates a new generic gift voucher in the 3NConnect.
         `.trim(),
         security: [{ bearerAuth: [] }],
         tags: ["3NConnect"],
@@ -5129,64 +5195,80 @@ export const ecommerceRoute = new Elysia({
     }
   )
   .put(
-    "/promotions/gift-voucher/:voucher_id",
-    async ({ headers, set, params, body }) => {
+    "/gift-voucher/generic/:gift_voucher_id",
+    async({ headers, set, body, params }) => {
       try {
-        const { 
-          url_image,
-          voucher_image,
-          voucher_name,
-          voucher_description,
-          assigned_customer_ids,
-          discount_type,
-          discount_value,
+        const { gift_voucher_id } = params;
+        const {
+          campaign_start,
+          campaign_end,
+          customer_tiers,
+          gift_voucher_generic,
+          gift_voucher_method,
           is_accept_overlapse_promotion,
-          voucher_type,
-          min_purchase_amount,
-          max_discount_amount,
-          voucher_start,
-          voucher_end,
-          tier_upgrade_trigger,
-          limited_total_quantity,
           is_active,
-          is_lifetime,
+          is_limit_voucher,
+          is_specific_customers,
+          limited_total_quantity,
+          specific_customers,
+          url_image,
+          voucher_conditions,
+          voucher_description,
+          voucher_name,
+          voucher_image,
         } = body;
+
         const response = await prisma.gift_voucher.update({
           where: {
-            id: params.voucher_id,
+            id: gift_voucher_id
           },
           data: {
             url_image: url_image,
+            gift_voucher_type: 'generic',
+            gift_voucher_method: gift_voucher_method,
             voucher_image: voucher_image,
             voucher_name: voucher_name,
             voucher_description: voucher_description,
-            assigned_customer_ids: assigned_customer_ids && assigned_customer_ids.length > 0 ? assigned_customer_ids : [],
-            discount_type: discount_type,
-            discount_value: discount_value,
+            voucher_conditions: voucher_conditions,
+            campaign_start: campaign_start,
+            campaign_end: campaign_end,
+            customer_tiers: customer_tiers,
+            specific_customers: specific_customers && specific_customers.length > 0 ? specific_customers : [],
             is_accept_overlapse_promotion: is_accept_overlapse_promotion,
-            voucher_type: voucher_type,
-            min_purchase_amount: min_purchase_amount,
-            max_discount_amount: max_discount_amount,
-            voucher_start: voucher_start,
-            voucher_end: voucher_end,
-            tier_upgrade_trigger : tier_upgrade_trigger && tier_upgrade_trigger.length > 0 ? tier_upgrade_trigger : [],
-            limited_total_quantity: limited_total_quantity,
+            is_limit_voucher: is_limit_voucher,
+            is_specific_customers: is_specific_customers,
             is_active: is_active,
-            is_lifetime: is_lifetime,
+            limited_total_quantity: limited_total_quantity,
             updated_at: now,
           },
+          select: {
+            id: true,
+          }
         });
 
-        if(!response){
-          set.status = 404;
-          return { message: "Gift voucher not found" };
+        if(!response) {
+          set.status = 400;
+          return { "message" : "Failed to update generic gift voucher." }
         }
         
-        return response;
+        await prisma.gift_voucher_generic.updateMany({
+          where: {
+            gift_voucher_id: gift_voucher_id,
+          },
+          data: {
+            redemption_type: gift_voucher_generic.redemption_type,
+            discount_type: gift_voucher_generic.discount_type,
+            max_discount: gift_voucher_generic.max_discount,
+            min_purchase: gift_voucher_generic.min_purchase,
+            percent_discount: gift_voucher_generic.percent_discount,
+          }
+        });
+
+        return { "message" : "Generic gift voucher updated successfully." };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
-        console.error("Error updating gift voucher:", error);
+        console.error("Error updating generic gift voucher promotion:", error);
         return { message: errorMessage };
       }
     },
@@ -5195,32 +5277,393 @@ export const ecommerceRoute = new Elysia({
         authorization: t.String(),
       }),
       params: t.Object({
-        voucher_id: t.Number(),
+        gift_voucher_id: t.Number(),
       }),
       body: t.Object({
-        url_image: t.Any(),
-        voucher_image: t.Any(),
-        voucher_name: t.String(),
-        voucher_description: t.Any(),
-        assigned_customer_ids: t.Any(),
-        discount_type: t.String(),
-        discount_value: t.Number(),
+        campaign_start: t.Date(),
+        campaign_end: t.Date(),
+        customer_tiers: t.Array(t.String()),
+        gift_voucher_generic: t.Object({
+          redemption_type: t.String(),
+          discount_type: t.String(),
+          max_discount: t.Any(),
+          min_purchase: t.Any(),
+          percent_discount: t.Any(),
+        }),
+        gift_voucher_method: t.String(),
         is_accept_overlapse_promotion: t.Boolean(),
-        voucher_type: t.String(),
-        min_purchase_amount: t.Number(),
-        max_discount_amount: t.Number(),
-        voucher_start: t.Any(),
-        voucher_end: t.Any(),
-        tier_upgrade_trigger: t.Any(),
-        limited_total_quantity: t.Any(),
         is_active: t.Boolean(),
-        is_lifetime: t.Boolean(),
+        is_limit_voucher: t.Boolean(),
+        is_specific_customers: t.Any(),
+        limited_total_quantity: t.Any(),
+        specific_customers: t.Array(t.String()),
+        url_image: t.Any(),
+        voucher_conditions: t.Any(),
+        voucher_description: t.String(),
+        voucher_name: t.String(),
+        voucher_image: t.Any(),
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions Gift Voucher - Update",
+        summary: "Gift Voucher Generic - Update",
         description: `
-          This endpoint updates a gift voucher in the 3NConnect.
+          This endpoint updates an existing generic gift voucher in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    }
+  )
+  .get(
+    "/gift-voucher/event",
+    async({ headers, set}) => {
+      try {
+        const response = await prisma.gift_voucher.findMany({
+          where: {
+            gift_voucher_type: "event",
+          },
+          select: {
+            id: true,
+            url_image: true,
+            voucher_name: true,
+            voucher_description: true,
+            voucher_conditions: true,
+            campaign_start: true,
+            campaign_end: true,
+            customer_tiers: true,
+            is_accept_overlapse_promotion: true,
+            is_limit_voucher: true,
+            is_active: true,
+          }
+        });
+
+        if(!response) {
+          set.status = 404;
+          return { "message" : "No event gift vouchers found." }
+        }
+
+        return response;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching event gift voucher promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Gift Voucher Event - Find All",
+        description: `
+          This endpoint finds all event gift vouchers in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    }
+  )
+  .get(
+    "/gift-voucher/event/:gift_voucher_id",
+    async({ headers, params, set}) => {
+      try {
+        const { gift_voucher_id } = params;
+        const response = await prisma.gift_voucher.findFirst({
+          where: {
+            gift_voucher_type: "event",
+            id: gift_voucher_id,
+          },
+          select: {
+            url_image: true,
+            voucher_image: true,
+            voucher_name: true,
+            voucher_description: true,
+            voucher_conditions: true,
+            campaign_start: true,
+            campaign_end: true,
+            customer_tiers: true,
+            specific_customers: true,
+            is_accept_overlapse_promotion: true,
+            is_limit_voucher: true,
+            is_specific_customers: true,
+            is_active: true,
+            gift_voucher_method: true,
+            limited_total_quantity: true,
+            gift_voucher_event: {
+              select: { 
+                event_trigger_type: true,
+                discount_type: true,
+                max_discount: true,
+                min_purchase: true,
+                percent_discount: true,
+              }
+            }
+          }
+        });
+
+        if(!response) {
+          set.status = 404;
+          return { "message" : "No event gift vouchers found." }
+        }
+
+        return response;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching event gift voucher promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      params: t.Object({
+        gift_voucher_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Gift Voucher Event - Find by Gift Voucher ID",
+        description: `
+          This endpoint finds a specific event gift voucher in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    }
+  )
+  .post(
+    "/gift-voucher/event",
+    async({ headers, set, body}) => {
+      try {
+        const {
+          campaign_start,
+          campaign_end,
+          customer_tiers,
+          gift_voucher_event,
+          gift_voucher_method,
+          is_accept_overlapse_promotion,
+          is_active,
+          is_limit_voucher,
+          is_specific_customers,
+          limited_total_quantity,
+          specific_customers,
+          url_image,
+          voucher_conditions,
+          voucher_description,
+          voucher_name,
+          voucher_image,
+        } = body;
+
+        const response = await prisma.gift_voucher.create({
+          data: {
+            url_image: url_image,
+            gift_voucher_type: 'event',
+            gift_voucher_method: gift_voucher_method,
+            voucher_image: voucher_image,
+            voucher_name: voucher_name,
+            voucher_description: voucher_description,
+            voucher_conditions: voucher_conditions,
+            campaign_start: campaign_start,
+            campaign_end: campaign_end,
+            customer_tiers: customer_tiers,
+            specific_customers: specific_customers && specific_customers.length > 0 ? specific_customers : [],
+            is_accept_overlapse_promotion: is_accept_overlapse_promotion,
+            is_limit_voucher: is_limit_voucher,
+            is_specific_customers: is_specific_customers,
+            is_active: is_active,
+            limited_total_quantity: limited_total_quantity,
+            voucher_uuid: crypto.randomUUID(),
+            created_at: now,
+          },
+          select: {
+            id: true,
+          }
+        });
+
+        if(!response) {
+          set.status = 400;
+          return { "message" : "Failed to create event gift voucher." }
+        }
+
+        console.log(response.id);
+
+        const giftVoucherId = response.id;
+        
+        await prisma.gift_voucher_event.create({
+          data: {
+            gift_voucher_id: giftVoucherId,
+            event_trigger_type: gift_voucher_event.event_trigger_type,
+            discount_type: gift_voucher_event.discount_type,
+            max_discount: gift_voucher_event.max_discount,
+            min_purchase: gift_voucher_event.min_purchase,
+            percent_discount: gift_voucher_event.percent_discount,
+          }
+        });
+
+        return { "message" : "Event gift voucher created successfully." };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error creating event gift voucher promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        campaign_start: t.Date(),
+        campaign_end: t.Date(),
+        customer_tiers: t.Array(t.String()),
+        gift_voucher_event: t.Object({
+          event_trigger_type: t.String(),
+          discount_type: t.String(),
+          max_discount: t.Any(),
+          min_purchase: t.Any(),
+          percent_discount: t.Any(),
+        }),
+        gift_voucher_method: t.String(),
+        is_accept_overlapse_promotion: t.Boolean(),
+        is_active: t.Boolean(),
+        is_limit_voucher: t.Boolean(),
+        is_specific_customers: t.Any(),
+        limited_total_quantity: t.Any(),
+        specific_customers: t.Array(t.String()),
+        url_image: t.Any(),
+        voucher_conditions: t.Any(),
+        voucher_description: t.String(),
+        voucher_name: t.String(),
+        voucher_image: t.Any(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Gift Voucher Event - Create",
+        description: `
+          This endpoint creates a new event gift voucher in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    }
+  )
+  .put(
+    "/gift-voucher/event/:gift_voucher_id",
+    async({ headers, set, body, params }) => {
+      try {
+        const { gift_voucher_id } = params;
+        const {
+          campaign_start,
+          campaign_end,
+          customer_tiers,
+          gift_voucher_event,
+          gift_voucher_method,
+          is_accept_overlapse_promotion,
+          is_active,
+          is_limit_voucher,
+          is_specific_customers,
+          limited_total_quantity,
+          specific_customers,
+          url_image,
+          voucher_conditions,
+          voucher_description,
+          voucher_name,
+          voucher_image,
+        } = body;
+
+        const response = await prisma.gift_voucher.update({
+          where: {
+            id: gift_voucher_id
+          },
+          data: {
+            url_image: url_image,
+            gift_voucher_type: 'event',
+            gift_voucher_method: gift_voucher_method,
+            voucher_image: voucher_image,
+            voucher_name: voucher_name,
+            voucher_description: voucher_description,
+            voucher_conditions: voucher_conditions,
+            campaign_start: campaign_start,
+            campaign_end: campaign_end,
+            customer_tiers: customer_tiers,
+            specific_customers: specific_customers && specific_customers.length > 0 ? specific_customers : [],
+            is_accept_overlapse_promotion: is_accept_overlapse_promotion,
+            is_limit_voucher: is_limit_voucher,
+            is_specific_customers: is_specific_customers,
+            is_active: is_active,
+            limited_total_quantity: limited_total_quantity,
+            updated_at: now,
+          },
+          select: {
+            id: true,
+          }
+        });
+
+        if(!response) {
+          set.status = 400;
+          return { "message" : "Failed to update event gift voucher." }
+        }
+        
+        await prisma.gift_voucher_event.updateMany({
+          where: {
+            gift_voucher_id: gift_voucher_id,
+          },
+          data: {
+            event_trigger_type: gift_voucher_event.event_trigger_type,
+            discount_type: gift_voucher_event.discount_type,
+            max_discount: gift_voucher_event.max_discount,
+            min_purchase: gift_voucher_event.min_purchase,
+            percent_discount: gift_voucher_event.percent_discount,
+          }
+        });
+
+        return { "message" : "Event gift voucher updated successfully." };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error updating event gift voucher promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      params: t.Object({
+        gift_voucher_id: t.Number(),
+      }),
+      body: t.Object({
+        campaign_start: t.Date(),
+        campaign_end: t.Date(),
+        customer_tiers: t.Array(t.String()),
+        gift_voucher_event: t.Object({
+          event_trigger_type: t.String(),
+          discount_type: t.String(),
+          max_discount: t.Any(),
+          min_purchase: t.Any(),
+          percent_discount: t.Any(),
+        }),
+        gift_voucher_method: t.String(),
+        is_accept_overlapse_promotion: t.Boolean(),
+        is_active: t.Boolean(),
+        is_limit_voucher: t.Boolean(),
+        is_specific_customers: t.Any(),
+        limited_total_quantity: t.Any(),
+        specific_customers: t.Array(t.String()),
+        url_image: t.Any(),
+        voucher_conditions: t.Any(),
+        voucher_description: t.String(),
+        voucher_name: t.String(),
+        voucher_image: t.Any(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Gift Voucher Event - Update",
+        description: `
+          This endpoint updates an existing event gift voucher in the 3NConnect.
         `.trim(),
         security: [{ bearerAuth: [] }],
         tags: ["3NConnect"],
@@ -5228,25 +5671,24 @@ export const ecommerceRoute = new Elysia({
     }
   )
   .delete(
-    "/promotions/gift-voucher/:voucher_id",
+    "/gift-voucher/generic/:gift_voucher_id",
     async({headers, set, params}) => {
-      
       try {
-        const { voucher_id } = params;
-        
+        const { gift_voucher_id } = params;
+
         const response = await prisma.gift_voucher.delete({
           where: {
-            id: voucher_id
+            id: gift_voucher_id,
           }
-        })
+        });
 
-        if (!response) {
+        if(!response) {
           set.status = 404;
-          return { "message" : "Failed deleting gift voucher." }
+          return { "message" : "Gift voucher not found." }
         }
-        
+
         return { "message" : "Gift voucher deleted successfully." };
-      }catch (error) {
+      } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
         console.error("Error deleting gift voucher promotion:", error);
@@ -5258,16 +5700,57 @@ export const ecommerceRoute = new Elysia({
         authorization: t.String(),
       }),
       params: t.Object({
-        voucher_id: t.Number(),
+        gift_voucher_id: t.Number(),
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Promotions Gift Voucher - Delete",
+        summary: "Gift Voucher Generic - Delete",
         description: `
-          This endpoint deletes an existing gift voucher promotion in the 3NConnect.
+          This endpoint deletes an existing generic gift voucher in the 3NConnect.
         `.trim(),
         security: [{ bearerAuth: [] }],
         tags: ["3NConnect"],
-      },
-    }
+    }}
+  )
+  .delete(
+    "/gift-voucher/event/:gift_voucher_id",
+    async({headers, set, params}) => {
+      try {
+        const { gift_voucher_id } = params;
+
+        const response = await prisma.gift_voucher.delete({
+          where: {
+            id: gift_voucher_id,
+          }
+        });
+
+        if(!response) {
+          set.status = 404;
+          return { "message" : "Gift voucher not found." }
+        }
+
+        return { "message" : "Gift voucher deleted successfully." };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error deleting gift voucher promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      params: t.Object({
+        gift_voucher_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Gift Voucher Event - Delete",
+        description: `
+          This endpoint deletes an existing event gift voucher in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+    }}
   )
