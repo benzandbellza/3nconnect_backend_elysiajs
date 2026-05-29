@@ -483,3 +483,22 @@ view vw_sync_stock_ecommerce {
 
   @@schema("3nconnect")
 }
+
+view vw_customer_information {
+  user_id         String?   @db.Uuid
+  auth_id         String?   @db.Uuid
+  member_no       String?
+  gender          String?
+  prefix_th       String?
+  fullname_th     String?
+  email           String?
+  phone_no        String?
+  birthday        DateTime? @db.Date
+  pdpa_accepted   Boolean?
+  pdpa_version    String?
+  tier            String?   @db.VarChar(20)
+  tier_start_at   DateTime? @db.Timestamptz(6)
+  tier_expired_at DateTime? @db.Timestamptz(6)
+
+  @@schema("3nconnect")
+}

@@ -14,22 +14,21 @@ export const ecommerceRoute = new Elysia({
     "/customers/pdpa-accepted",
     async({ headers, set })=>{
       try {
-        const response = await prisma.customer_user.findMany({
+        const response = await prisma.vw_customer_information.findMany({
           where : {
             pdpa_accepted: true,
           },
           select: {
-            id: true,
-            authid: true,
+            user_id: true,
+            auth_id: true,
             member_no: true,
             gender: true,
-            prefix_name_th: true,
-            prefix_name_en: true,
-            name_th: true,
-            name_en: true,
+            prefix_th: true,
+            fullname_th: true,
             email: true,
-            birthday_date: true,
+            birthday: true,
             phone_no: true,
+            tier: true,
           }
         })
         return response;
