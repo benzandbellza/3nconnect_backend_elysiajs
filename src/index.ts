@@ -1,6 +1,7 @@
 import { Elysia } from "elysia";
 import { ecommerceRoute } from "./ecommerce/route";
 import { reportsRoute } from "./reports/route";
+import { publicRoute } from "./publics/route";
 import { cors } from "@elysiajs/cors";
 import { openapi } from "@elysiajs/openapi";
 
@@ -19,6 +20,7 @@ const app = new Elysia()
     }),
   )
   .use(cors())
+  .use(publicRoute)
   .use(ecommerceRoute)
   .use(reportsRoute)
   .get("/", async (e) => {

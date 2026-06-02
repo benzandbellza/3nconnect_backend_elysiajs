@@ -504,19 +504,21 @@ view vw_customer_information {
 }
 
 view vw_flashsale_products_list {
-  promotion_type  String?
-  promotion_name  String?
-  company_name    String?
-  brand_name      String?
-  category_name   String?
-  mat_identity    String?
-  product_name    String?
-  unit            String?
-  online_price    Float?
-  sale_price      Float?
-  sale_percent    Float?
-  promotion_start DateTime? @db.Timestamptz(6)
-  promotion_end   DateTime? @db.Timestamptz(6)
+  promotion_type    String?
+  promotion_name    String?
+  company_name      String?
+  brand_name        String?
+  category_name     String?
+  mat_identity      String?
+  product_name      String?
+  unit              String?
+  online_price      Float?
+  sale_price        Float?
+  sale_percent      Float?
+  promotion_start   DateTime? @db.Timestamptz(6)
+  promotion_end     DateTime? @db.Timestamptz(6)
+  product_option_id Int?
+  url_image         String?
 
   @@schema("3nconnect")
 }
@@ -535,6 +537,29 @@ view vw_discount_products_list {
   sale_percent    Float?
   promotion_start DateTime? @db.Timestamptz(6)
   promotion_end   DateTime? @db.Timestamptz(6)
+
+  @@schema("3nconnect")
+}
+
+view vw_bundle_deal_get_x_free_y {
+  promotion_type        String?
+  promotion_name        String?
+  get_company_name      String?
+  get_brand_name        String?
+  get_product_category  String?
+  get_mat_identity      String?
+  get_product_name      String?
+  get_product_unit      String?
+  get_quantity          Int?
+  free_company_name     String?
+  free_brand_name       String?
+  free_product_category String?
+  free_mat_identity     String?
+  free_product_name     String?
+  free_product_unit     String?
+  free_quantity         Int?
+  promotion_start       DateTime? @db.Timestamptz(6)
+  promotion_end         DateTime? @db.Timestamptz(6)
 
   @@schema("3nconnect")
 }

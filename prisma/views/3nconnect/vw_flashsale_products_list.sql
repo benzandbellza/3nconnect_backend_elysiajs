@@ -11,7 +11,16 @@ SELECT
   pfp.sale_price,
   pfp.sale_percent,
   p.promotion_start,
-  p.promotion_end
+  p.promotion_end,
+  po.id AS product_option_id,
+  (
+    SELECT
+      pi.url_image
+    FROM
+      "3nconnect".product_images pi
+    WHERE
+      (po.id = pi.product_id)
+  ) AS url_image
 FROM
   (
     (
