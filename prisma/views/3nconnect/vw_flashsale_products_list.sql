@@ -5,7 +5,10 @@ SELECT
   b.brand_name,
   pc.name AS category_name,
   po.mat_identity,
-  p2.product_name,
+  CASE
+    WHEN (po.option_name IS NULL) THEN p2.product_name
+    ELSE concat(p2.product_name, ' ', po.option_name)
+  END AS product_name,
   p2.unit,
   po.online_price,
   pfp.sale_price,
@@ -19,8 +22,18 @@ SELECT
     FROM
       "3nconnect".product_images pi
     WHERE
-      (po.id = pi.product_id)
-  ) AS url_image
+      (pi.product_id = p2.id)
+    LIMIT
+      1
+  ) AS url_image,
+  p.id AS promotion_id,
+  CASE
+    WHEN (
+      (p.promotion_start <= NOW())
+      AND (p.promotion_end >= NOW())
+    ) THEN TRUE
+    ELSE false
+  END AS is_promotion_active
 FROM
   (
     (

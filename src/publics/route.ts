@@ -121,10 +121,8 @@ export const publicRoute = new Elysia({
         security: [{ bearerAuth: [] }],
         tags: ["Publics"],
       },
-    },
-    
+    },    
   )
-  // Products
   .get(
     "/products/flashsale",
     async ({ set }) => {
@@ -141,16 +139,29 @@ export const publicRoute = new Elysia({
             }
           },
           select: {
+            id: true,
             promotion_name: true,
             promotion_start: true,
             promotion_end: true,
           }
         });
 
+        if(!flashsale_detail){
+          return {
+            success: true,
+            message: 'No active flash sale',
+            data: {
+              detail: null,
+              products: []
+            }
+          }
+        }
+        
+        const promotion_id = flashsale_detail?.id;
         const flashsale_products = await prisma.vw_flashsale_products_list.findMany({
           where: {
-            promotion_start: flashsale_detail?.promotion_start,
-            promotion_end: flashsale_detail?.promotion_end
+            promotion_id: promotion_id,
+            is_promotion_active: true
           },
           select:{
             product_option_id: true,
@@ -190,4 +201,234 @@ export const publicRoute = new Elysia({
         tags: ["Publics"],
       },
     }
+  )
+  .get(
+    "/products",
+    async ({ set }) => {
+      try { 
+        const products = await prisma.vw_products.findMany({
+          select: {
+            company_name: true,
+            brand_name: true,
+            category_name: true,
+            mat_identity: true,
+            product_name: true,
+            unit: true,
+            online_price: true,
+            product_option_id: true,
+            url_image: true,
+          }
+        });
+
+        return {
+          success: true,
+          message: 'Products',
+          data: {
+            products: products
+          }
+        }
+      } catch (error) {
+        set.status = 500
+        return {
+          success: false,
+          message: 'Internal server error'
+        }
+      }
+    },
+    {
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Products - List",
+        description: `
+          This endpoint gets products.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["Publics"],
+      },
+    }
+  )
+  .get(
+    "/product-categories/active",
+    async ({ set }) => {
+      try {
+        const response = await prisma.product_categories.findMany({
+          where: {
+            is_active: true,
+            level: 0,
+          },
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            other_product_categories: {
+              where: {
+                is_active: true,
+                level: 1,
+              },
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+                other_product_categories: {
+                  where: {
+                    is_active: true,
+                    level: 2,
+                  },
+                  select: {
+                    id: true,
+                    name: true,
+                    slug: true,
+                  },
+                },
+              },
+            },
+          },
+          orderBy: {
+            id: "asc",
+          },
+        });
+
+        if (!response) {
+          set.status = 404;
+          return { message: "No valid product categories found" };
+        }
+        return response;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching product categories:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Product Categories - Find All Active",
+        description: `
+          This endpoint retrieves all active product categories in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["Publics"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
+  .get(
+    "/products/:product_option_id",
+    async ({ params, set }) => {
+      try {
+        const product_option_id = params.product_option_id;
+        const responseProductOption = await prisma.product_options.findFirst({
+          where: {
+            id: product_option_id
+          },
+          select: {
+            product_id: true
+          }
+        });
+
+        if (!responseProductOption) {
+          set.status = 404;
+          return { message: "No valid product option found" };
+        }
+
+        const productId = responseProductOption.product_id!;
+
+        const response = await prisma.products.findFirst({
+          where: {
+            id: productId,
+          },
+          select: {
+            id: true,
+            product_name: true,
+            unit: true,
+            product_description: true,
+            condition_description: true,
+            warranty_description: true,
+            video_product: true,
+            youtube_url: true,
+            product_categories: {
+              select : {
+                name: true
+              }
+            },
+            product_images: {
+              select: {
+                url_image: true
+              },
+              orderBy: {
+                is_show: "desc"
+              }
+            }
+          },
+        });
+
+        if (!response) {
+          set.status = 404;
+          return { message: "No valid products found" };
+        }
+
+        const promoteProductIndex = await prisma.vw_promotion_products_index.findMany({
+            where: {
+              product_id: productId
+            },
+            select: {
+              product_option_id: true,
+              option_name: true,
+              product_promotion_type: true,
+              online_price: true,
+              sale_price: true,
+              sale_percent: true,
+              mat_identity: true,
+            }
+          });
+
+        if(promoteProductIndex.length === 0){
+          return {
+            ...response,
+            product_options: []
+          };
+        }
+
+        for (const item of promoteProductIndex) {
+          const stock = await prisma.vw_planetone_stocks.findFirst({
+            where: {
+              MATUnit: {
+                startsWith: item.mat_identity!
+              }
+            },
+            select: {
+              qty_total: true
+            }
+          });
+          (item as any).qty_total = stock?.qty_total || 0;
+        }
+
+        const result = {
+          ...response,
+          product_options: promoteProductIndex ?? []
+        }
+        return result;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching product:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      params: t.Object({
+        product_option_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Products - Find All",
+        description: `
+          This endpoint retrieves all valid products in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
   )

@@ -391,7 +391,7 @@ export const ecommerceRoute = new Elysia({
           },
           orderBy: {
             id: "asc",
-          },
+          }, 
         });
 
         if (!response) {
@@ -412,9 +412,9 @@ export const ecommerceRoute = new Elysia({
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Product Categories - Find All",
+        summary: "Product Categories - Find All Active",
         description: `
-          This endpoint retrieves all valid product categories in the 3NConnect.
+          This endpoint retrieves all active product categories in the 3NConnect.
         `.trim(),
         security: [{ bearerAuth: [] }],
         tags: ["3NConnect"],

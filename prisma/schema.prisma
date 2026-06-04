@@ -504,21 +504,23 @@ view vw_customer_information {
 }
 
 view vw_flashsale_products_list {
-  promotion_type    String?
-  promotion_name    String?
-  company_name      String?
-  brand_name        String?
-  category_name     String?
-  mat_identity      String?
-  product_name      String?
-  unit              String?
-  online_price      Float?
-  sale_price        Float?
-  sale_percent      Float?
-  promotion_start   DateTime? @db.Timestamptz(6)
-  promotion_end     DateTime? @db.Timestamptz(6)
-  product_option_id Int?
-  url_image         String?
+  promotion_type      String?
+  promotion_name      String?
+  company_name        String?
+  brand_name          String?
+  category_name       String?
+  mat_identity        String?
+  product_name        String?
+  unit                String?
+  online_price        Float?
+  sale_price          Float?
+  sale_percent        Float?
+  promotion_start     DateTime? @db.Timestamptz(6)
+  promotion_end       DateTime? @db.Timestamptz(6)
+  product_option_id   Int?
+  url_image           String?
+  promotion_id        Int?
+  is_promotion_active Boolean?
 
   @@schema("3nconnect")
 }
@@ -560,6 +562,35 @@ view vw_bundle_deal_get_x_free_y {
   free_quantity         Int?
   promotion_start       DateTime? @db.Timestamptz(6)
   promotion_end         DateTime? @db.Timestamptz(6)
+
+  @@schema("3nconnect")
+}
+
+view vw_products {
+  company_name      String?
+  brand_name        String?
+  category_name     String?
+  mat_identity      String?
+  product_name      String?
+  unit              String?
+  online_price      Float?
+  product_option_id Int?
+  url_image         String?
+
+  @@schema("3nconnect")
+}
+
+view vw_promotion_products_index {
+  product_id             Int?
+  product_option_id      Int?
+  product_name           String?
+  unit                   String?
+  option_name            String?
+  product_promotion_type String?
+  online_price           Float?
+  sale_price             Float?
+  sale_percent           Float?
+  mat_identity           String?
 
   @@schema("3nconnect")
 }
