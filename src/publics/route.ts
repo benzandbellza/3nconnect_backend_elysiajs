@@ -171,6 +171,7 @@ export const publicRoute = new Elysia({
             sale_price: true,
             sale_percent: true,
             url_image: true,
+            mat_identity: true,
           },
           orderBy: {
             sale_percent: 'desc'
@@ -486,6 +487,57 @@ export const publicRoute = new Elysia({
         summary: "Products - Find By Category ID",
         description: `
           This endpoint retrieves products by their category ID.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["Publics"],
+      },
+    },
+  )
+  .post(
+    "/products/stock-inventory",
+    async ({ body, set }) => {
+      try {
+        const { mat_identity } = body;
+        const responses = [];
+        for(const mat of mat_identity){
+          const response = await prisma.vw_planetone_stocks.findFirst({
+            where: {
+              MATUnit: {
+                startsWith: mat
+              }
+            },
+            select: {
+              qty_total: true,
+            }
+          });
+          responses.push({
+            mat_identity: mat,
+            qty_total: response?.qty_total || 0,
+          });
+        }
+      
+        if (!responses.length) {
+          set.status = 404;
+          return { message: "No valid product found" };
+        }
+
+        return responses;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching product stock inventory:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      body: t.Object({
+        mat_identity: t.Array(t.String()),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Products - Stock Inventory",
+        description: `
+          This endpoint retrieves stock inventory for a product.
         `.trim(),
         security: [{ bearerAuth: [] }],
         tags: ["Publics"],
