@@ -444,55 +444,6 @@ export const publicRoute = new Elysia({
       },
     },
   )
-  .get(
-    "/product-categories/:category_id",
-    async ({ params, set }) => {
-      try {
-        const { category_id } = params;
-        const response = await prisma.vw_promotion_products_index.findMany({
-          where: {
-            category_hierarchy: {
-              has: category_id
-            }
-          },
-          orderBy: [
-            {
-              promotion_type: "desc"
-            },
-            {
-              sale_percent: "desc"
-            }
-          ]
-        });
-
-        if (!response) {
-          set.status = 404;
-          return { message: "No valid products found" };
-        }
-
-        return response;
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "Unknown error";
-        set.status = 500;
-        console.error("Error fetching product categories:", error);
-        return { message: errorMessage };
-      }
-    },
-    {
-      params: t.Object({
-        category_id: t.String(),
-      }),
-      detail: {
-        servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Products - Find By Category ID",
-        description: `
-          This endpoint retrieves products by their category ID.
-        `.trim(),
-        security: [{ bearerAuth: [] }],
-        tags: ["Publics"],
-      },
-    },
-  )
   .post(
     "/products/stock-inventory",
     async ({ body, set }) => {
@@ -538,6 +489,89 @@ export const publicRoute = new Elysia({
         summary: "Products - Stock Inventory",
         description: `
           This endpoint retrieves stock inventory for a product.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["Publics"],
+      },
+    },
+  )
+  .post(
+    "/products/check-promotions/get-x-free-y",
+    async ({ body, set }) => {
+      try {
+        const { product_option_id } = body;
+        const response = await prisma.vw_promotion_bundle_deal_index.findMany({
+          where: {
+            get_product_option_id: product_option_id,
+            is_accept_overlapse_promotion: true,
+          }
+        });
+        return response;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error checking bundle deal:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      body: t.Object({
+        product_option_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Products - Check Bundle Deal",
+        description: `
+          This endpoint checks if a product is a bundle deal.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["Publics"],
+      },
+    },
+  )
+  .get(
+    "/product-categories/:category_id",
+    async ({ params, set }) => {
+      try {
+        const { category_id } = params;
+        const response = await prisma.vw_promotion_products_index.findMany({
+          where: {
+            category_hierarchy: {
+              has: category_id
+            }
+          },
+          orderBy: [
+            {
+              promotion_type: "desc"
+            },
+            {
+              sale_percent: "desc"
+            }
+          ]
+        });
+
+        if (!response) {
+          set.status = 404;
+          return { message: "No valid products found" };
+        }
+
+        return response;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching product categories:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      params: t.Object({
+        category_id: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Products - Find By Category ID",
+        description: `
+          This endpoint retrieves products by their category ID.
         `.trim(),
         security: [{ bearerAuth: [] }],
         tags: ["Publics"],

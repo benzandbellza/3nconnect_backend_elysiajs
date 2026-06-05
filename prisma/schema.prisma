@@ -581,19 +581,39 @@ view vw_products {
 }
 
 view vw_promotion_products_index {
-  product_id         Int?
-  product_option_id  Int?
-  url_image          String?
-  category_hierarchy String[]
-  product_name       String?
-  unit               String?
-  mat_identity       String?
-  option_name        String?
-  promotion_type     String?
-  online_price       Float?
-  promotion_id       Int?
-  sale_price         Float?
-  sale_percent       Float?
+  product_id                    Int?
+  product_option_id             Int?
+  url_image                     String?
+  category_hierarchy            String[]
+  product_name                  String?
+  unit                          String?
+  mat_identity                  String?
+  option_name                   String?
+  promotion_type                String?
+  online_price                  Float?
+  promotion_id                  Int?
+  is_accept_overlapse_promotion Boolean?
+  sale_price                    Float?
+  sale_percent                  Float?
+
+  @@schema("3nconnect")
+}
+
+view vw_promotion_bundle_deal_index {
+  promotion_id                  Int?
+  promotion_name                String?
+  is_accept_overlapse_promotion Boolean?
+  get_product_option_id         Int?
+  get_product_name              String?
+  get_product_price             Float?
+  get_quantity                  Int?
+  get_product_unit              String?
+  free_url_image                String?
+  free_product_option_id        Int?
+  product_name                  String?
+  free_product_price            Float?
+  free_quantity                 Int?
+  free_product_unit             String?
 
   @@schema("3nconnect")
 }

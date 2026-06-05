@@ -19,6 +19,11 @@ SELECT
     NULL :: integer
   ) AS promotion_id,
   COALESCE(
+    flash_sale_table.is_accept_overlapse_promotion,
+    discount_table.is_accept_overlapse_promotion,
+    NULL :: boolean
+  ) AS is_accept_overlapse_promotion,
+  COALESCE(
     flash_sale_table.sale_price,
     discount_table.sale_price,
     NULL :: double precision
@@ -48,7 +53,8 @@ FROM
             pfp.promotion_id,
             pfp.product_option_id,
             pfp.sale_price,
-            pfp.sale_percent
+            pfp.sale_percent,
+            p_1.is_accept_overlapse_promotion
           FROM
             (
               "3nconnect".promotions p_1
@@ -69,7 +75,8 @@ FROM
           pdp.promotion_id,
           pdp.product_option_id,
           pdp.sale_price,
-          pdp.sale_percent
+          pdp.sale_percent,
+          p_1.is_accept_overlapse_promotion
         FROM
           (
             "3nconnect".promotions p_1
@@ -78,10 +85,8 @@ FROM
         WHERE
           (
             (p_1.promotion_type = 'discount' :: text)
-            AND (
-              (p_1.promotion_start <= NOW())
-              AND (p_1.promotion_end >= NOW())
-            )
+            AND (p_1.promotion_start <= NOW())
+            AND (p_1.promotion_end >= NOW())
             AND (p_1.is_active = TRUE)
           )
       ) discount_table ON ((po.id = discount_table.product_option_id))
