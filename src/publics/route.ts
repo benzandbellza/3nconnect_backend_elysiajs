@@ -158,10 +158,10 @@ export const publicRoute = new Elysia({
         }
         
         const promotion_id = flashsale_detail?.id;
-        const flashsale_products = await prisma.vw_flashsale_products_list.findMany({
+        const flashsale_products = await prisma.vw_promotion_products_index.findMany({
           where: {
             promotion_id: promotion_id,
-            is_promotion_active: true
+            promotion_type: 'flash_sale'
           },
           select:{
             product_option_id: true,
@@ -171,6 +171,9 @@ export const publicRoute = new Elysia({
             sale_price: true,
             sale_percent: true,
             url_image: true,
+          },
+          orderBy: {
+            sale_percent: 'desc'
           }
         });
 
@@ -206,17 +209,25 @@ export const publicRoute = new Elysia({
     "/products",
     async ({ set }) => {
       try { 
-        const products = await prisma.vw_products.findMany({
+        const products = await prisma.vw_promotion_products_index.findMany({
+          where: {
+            promotion_type: {
+              not: 'flash_sale'
+            }
+          },
           select: {
-            company_name: true,
-            brand_name: true,
-            category_name: true,
             mat_identity: true,
             product_name: true,
+            promotion_type: true,
             unit: true,
             online_price: true,
+            sale_price: true,
+            sale_percent: true,
             product_option_id: true,
             url_image: true,
+          },
+          orderBy: {
+            promotion_type: 'desc'
           }
         });
 
@@ -375,7 +386,7 @@ export const publicRoute = new Elysia({
             select: {
               product_option_id: true,
               option_name: true,
-              product_promotion_type: true,
+              promotion_type: true,
               online_price: true,
               sale_price: true,
               sale_percent: true,

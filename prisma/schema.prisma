@@ -581,16 +581,18 @@ view vw_products {
 }
 
 view vw_promotion_products_index {
-  product_id             Int?
-  product_option_id      Int?
-  product_name           String?
-  unit                   String?
-  option_name            String?
-  product_promotion_type String?
-  online_price           Float?
-  sale_price             Float?
-  sale_percent           Float?
-  mat_identity           String?
+  product_id        Int?
+  product_option_id Int?
+  url_image         String?
+  product_name      String?
+  unit              String?
+  mat_identity      String?
+  option_name       String?
+  promotion_type    String?
+  online_price      Float?
+  promotion_id      Int?
+  sale_price        Float?
+  sale_percent      Float?
 
   @@schema("3nconnect")
 }

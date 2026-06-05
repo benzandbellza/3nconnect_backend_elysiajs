@@ -1,154 +1,88 @@
 SELECT
   p.id AS product_id,
   po.id AS product_option_id,
+  t.url_image,
   p.product_name,
   p.unit,
+  po.mat_identity,
   po.option_name,
   CASE
-    WHEN (
-      EXISTS (
-        SELECT
-          1
-        FROM
-          "3nconnect".promotion_flashsale_products pfp
-        WHERE
-          (pfp.product_option_id = po.id)
-      )
-    ) THEN CASE
-      WHEN (
-        EXISTS (
-          SELECT
-            1
-          FROM
-            (
-              "3nconnect".promotion_flashsale_products pfp
-              JOIN "3nconnect".promotions pro ON ((pfp.promotion_id = pro.id))
-            )
-          WHERE
-            (
-              (pro.promotion_start <= NOW())
-              AND (pro.promotion_end >= NOW())
-              AND (pro.is_active = TRUE)
-            )
-        )
-      ) THEN 'flashsale' :: text
-      ELSE '-' :: text
-    END
-    ELSE CASE
-      WHEN (
-        EXISTS (
-          SELECT
-            1
-          FROM
-            "3nconnect".promotion_discount_products pdp
-          WHERE
-            (pdp.product_option_id = po.id)
-        )
-      ) THEN CASE
-        WHEN (
-          EXISTS (
-            SELECT
-              1
-            FROM
-              (
-                "3nconnect".promotion_discount_products pdp
-                JOIN "3nconnect".promotions pro ON ((pdp.promotion_id = pro.id))
-              )
-            WHERE
-              (
-                (pro.promotion_start <= NOW())
-                AND (pro.promotion_end >= NOW())
-                AND (pro.is_active = TRUE)
-              )
-          )
-        ) THEN 'discount' :: text
-        ELSE '-' :: text
-      END
-      ELSE '-' :: text
-    END
-  END AS product_promotion_type,
+    WHEN (flash_sale_table.sale_price IS NOT NULL) THEN 'flash_sale' :: text
+    WHEN (discount_table.sale_price IS NOT NULL) THEN 'discount' :: text
+    ELSE '-' :: text
+  END AS promotion_type,
   po.online_price,
-  CASE
-    WHEN (
-      EXISTS (
-        SELECT
-          1
-        FROM
-          "3nconnect".promotion_flashsale_products pfp
-        WHERE
-          (pfp.product_option_id = po.id)
-      )
-    ) THEN (
-      SELECT
-        pfp.sale_price
-      FROM
-        "3nconnect".promotion_flashsale_products pfp
-      WHERE
-        (pfp.product_option_id = po.id)
-    )
-    ELSE CASE
-      WHEN (
-        EXISTS (
-          SELECT
-            1
-          FROM
-            "3nconnect".promotion_discount_products pdp
-          WHERE
-            (pdp.product_option_id = po.id)
-        )
-      ) THEN (
-        SELECT
-          pdp.sale_price
-        FROM
-          "3nconnect".promotion_discount_products pdp
-        WHERE
-          (pdp.product_option_id = po.id)
-      )
-      ELSE (0) :: double precision
-    END
-  END AS sale_price,
-  CASE
-    WHEN (
-      EXISTS (
-        SELECT
-          1
-        FROM
-          "3nconnect".promotion_flashsale_products pfp
-        WHERE
-          (pfp.product_option_id = po.id)
-      )
-    ) THEN (
-      SELECT
-        pfp.sale_percent
-      FROM
-        "3nconnect".promotion_flashsale_products pfp
-      WHERE
-        (pfp.product_option_id = po.id)
-    )
-    ELSE CASE
-      WHEN (
-        EXISTS (
-          SELECT
-            1
-          FROM
-            "3nconnect".promotion_discount_products pdp
-          WHERE
-            (pdp.product_option_id = po.id)
-        )
-      ) THEN (
-        SELECT
-          pdp.sale_percent
-        FROM
-          "3nconnect".promotion_discount_products pdp
-        WHERE
-          (pdp.product_option_id = po.id)
-      )
-      ELSE (0) :: double precision
-    END
-  END AS sale_percent,
-  po.mat_identity
+  COALESCE(
+    flash_sale_table.promotion_id,
+    discount_table.promotion_id,
+    NULL :: integer
+  ) AS promotion_id,
+  COALESCE(
+    flash_sale_table.sale_price,
+    discount_table.sale_price,
+    NULL :: double precision
+  ) AS sale_price,
+  COALESCE(
+    flash_sale_table.sale_percent,
+    discount_table.sale_percent,
+    NULL :: double precision
+  ) AS sale_percent
 FROM
   (
-    "3nconnect".product_options po
-    JOIN "3nconnect".products p ON ((p.id = po.product_id))
+    (
+      (
+        (
+          "3nconnect".product_options po
+          JOIN "3nconnect".products p ON ((po.product_id = p.id))
+        )
+        LEFT JOIN (
+          SELECT
+            pfp.id,
+            pfp.promotion_id,
+            pfp.product_option_id,
+            pfp.sale_price,
+            pfp.sale_percent
+          FROM
+            (
+              "3nconnect".promotions p_1
+              JOIN "3nconnect".promotion_flashsale_products pfp ON ((p_1.id = pfp.promotion_id))
+            )
+          WHERE
+            (
+              (p_1.promotion_type = 'flash_sale' :: text)
+              AND (p_1.promotion_start <= NOW())
+              AND (p_1.promotion_end >= NOW())
+              AND (p_1.is_active = TRUE)
+            )
+        ) flash_sale_table ON ((po.id = flash_sale_table.product_option_id))
+      )
+      LEFT JOIN (
+        SELECT
+          pdp.id,
+          pdp.promotion_id,
+          pdp.product_option_id,
+          pdp.sale_price,
+          pdp.sale_percent
+        FROM
+          (
+            "3nconnect".promotions p_1
+            JOIN "3nconnect".promotion_discount_products pdp ON ((p_1.id = pdp.promotion_id))
+          )
+        WHERE
+          (
+            (p_1.promotion_type = 'discount' :: text)
+            AND (
+              (p_1.promotion_start <= NOW())
+              AND (p_1.promotion_end >= NOW())
+            )
+            AND (p_1.is_active = TRUE)
+          )
+      ) discount_table ON ((po.id = discount_table.product_option_id))
+    )
+    LEFT JOIN "3nconnect".product_images t ON (
+      (
+        (p.id = t.product_id)
+        AND (t.is_show = TRUE)
+      )
+    )
   );
