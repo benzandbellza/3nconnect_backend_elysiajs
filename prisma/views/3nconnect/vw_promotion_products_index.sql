@@ -2,6 +2,7 @@ SELECT
   p.id AS product_id,
   po.id AS product_option_id,
   t.url_image,
+  p.category_hierarchy,
   p.product_name,
   p.unit,
   po.mat_identity,
@@ -33,7 +34,13 @@ FROM
       (
         (
           "3nconnect".product_options po
-          JOIN "3nconnect".products p ON ((po.product_id = p.id))
+          JOIN "3nconnect".products p ON (
+            (
+              (po.product_id = p.id)
+              AND (p.is_online_active = TRUE)
+              AND (p.is_active = TRUE)
+            )
+          )
         )
         LEFT JOIN (
           SELECT
