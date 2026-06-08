@@ -172,6 +172,9 @@ export const publicRoute = new Elysia({
             sale_percent: true,
             url_image: true,
             mat_identity: true,
+            is_accept_overlapse_promotion: true,
+            promotion_type: true,
+            option_name: true,
           },
           orderBy: {
             sale_percent: 'desc'
@@ -226,6 +229,8 @@ export const publicRoute = new Elysia({
             sale_percent: true,
             product_option_id: true,
             url_image: true,
+            option_name: true,
+            is_accept_overlapse_promotion: true,
           },
           orderBy: {
             promotion_type: 'desc'
