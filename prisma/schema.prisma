@@ -352,6 +352,9 @@ model gift_voucher {
   voucher_uuid                  String                 @db.Uuid
   limited_total_quantity        Int?
   is_lifetime_period            Boolean?
+  usage_period_day              Int?
+  redeem_code                   String?
+  max_usage_per_customer        Int?
   gift_voucher_event            gift_voucher_event[]
   gift_voucher_generic          gift_voucher_generic[]
 
@@ -410,15 +413,14 @@ model gift_voucher_event {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model gift_voucher_generic {
-  id                  Int           @id @default(autoincrement())
-  gift_voucher_id     Int?
-  redemption_type     String?
-  discount_type       String?
-  min_purchase        Float?
-  percent_discount    Float?
-  max_discount        Float?
-  voucher_redeem_code String?
-  gift_voucher        gift_voucher? @relation(fields: [gift_voucher_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id               Int           @id @default(autoincrement())
+  gift_voucher_id  Int?
+  discount_type    String?
+  min_purchase     Float?
+  percent_discount Float?
+  max_discount     Float?
+  usage_period_day Int?
+  gift_voucher     gift_voucher? @relation(fields: [gift_voucher_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("3nconnect")
 }
