@@ -612,7 +612,7 @@ view vw_promotion_bundle_deal_index {
   get_product_unit              String?
   free_url_image                String?
   free_product_option_id        Int?
-  product_name                  String?
+  free_product_name             String?
   free_product_price            Float?
   free_quantity                 Int?
   free_product_unit             String?

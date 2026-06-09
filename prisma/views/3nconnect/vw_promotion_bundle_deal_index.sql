@@ -9,7 +9,7 @@ SELECT
   get_products_table.unit AS get_product_unit,
   free_products_table.url_image AS free_url_image,
   free_products_table.product_option_id AS free_product_option_id,
-  free_products_table.product_name,
+  free_products_table.product_name AS free_product_name,
   free_products_table.online_price AS free_product_price,
   free_products_table.free_quantity,
   free_products_table.unit AS free_product_unit

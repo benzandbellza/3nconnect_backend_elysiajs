@@ -583,3 +583,126 @@ export const publicRoute = new Elysia({
       },
     },
   )
+  .post(
+    "mycart-information",
+    async ({ body, set }) => {
+      try{
+        const { products } = body;
+        const productInformation = [];
+        for(const product of products){
+          const findPromotionProducts = await prisma.vw_promotion_products_index.findFirst({
+            where: {
+              product_option_id: product.product_option_id,
+              mat_identity: product.mat_identity,
+            },
+            select: {
+              product_option_id: true,
+              online_price: true,
+              sale_price: true,
+              sale_percent: true,
+              mat_identity: true,
+              url_image: true,
+              promotion_type: true,
+              option_name: true,
+              is_accept_overlapse_promotion: true,
+            }
+          });
+
+          const stock = await prisma.vw_planetone_stocks.findFirst({
+            where: {
+              MATUnit: {
+                startsWith: findPromotionProducts?.mat_identity || ''
+              }
+            },
+            select: {
+              qty_total: true,
+            }
+          });
+          const stock_qty: number = stock?.qty_total || 0;
+          
+          if(findPromotionProducts){
+            if((findPromotionProducts.promotion_type === 'flash_sale' || findPromotionProducts.promotion_type === 'discount') && findPromotionProducts.is_accept_overlapse_promotion){
+              const promotion = {
+                product_option_id: findPromotionProducts.product_option_id,
+                online_price: findPromotionProducts.online_price,
+                sale_price: findPromotionProducts.sale_price,
+                sale_percent: findPromotionProducts.sale_percent,
+                mat_identity: findPromotionProducts.mat_identity,
+                url_image: findPromotionProducts.url_image,
+                promotion_type: findPromotionProducts.promotion_type,
+                option_name: findPromotionProducts.option_name,
+                stock_qty: stock_qty,
+                get_x_free_y: [] as Array<any>,
+              }
+              const bundleDeal = await prisma.vw_promotion_bundle_deal_index.findMany({
+                where: {
+                  get_product_option_id: findPromotionProducts.product_option_id,
+                  is_accept_overlapse_promotion: true,
+                },
+                select: {
+                  get_quantity: true,
+                  get_product_unit: true,
+                  free_url_image: true,
+                  free_product_option_id: true,
+                  free_product_name: true,
+                  free_product_price: true,
+                  free_quantity: true,
+                  free_product_unit: true,
+                }
+              });
+              if(bundleDeal.length > 0){
+                promotion.get_x_free_y = bundleDeal.map(deal => ({
+                  get_quantity: deal.get_quantity,
+                  get_product_unit: deal.get_product_unit,
+                  free_url_image: deal.free_url_image,
+                  free_product_option_id: deal.free_product_option_id,
+                  free_product_name: deal.free_product_name,
+                  free_product_price: deal.free_product_price,
+                  free_quantity: deal.free_quantity,
+                  free_product_unit: deal.free_product_unit,
+                }));
+              }
+              productInformation.push(promotion);
+            } else {
+              productInformation.push({
+                product_option_id: findPromotionProducts.product_option_id,
+                online_price: findPromotionProducts.online_price,
+                sale_price: findPromotionProducts.sale_price,
+                sale_percent: findPromotionProducts.sale_percent,
+                mat_identity: findPromotionProducts.mat_identity,
+                url_image: findPromotionProducts.url_image,
+                promotion_type: findPromotionProducts.promotion_type,
+                stock_qty: stock_qty,
+              });
+            }
+          }
+        }
+
+        return productInformation;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching mycart information:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      body: t.Object({
+        products: t.Array(
+          t.Object({
+            product_option_id: t.Number(),
+            mat_identity: t.String(),
+          })
+        ),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Products - Find By Category ID",
+        description: `
+          This endpoint retrieves products by their category ID.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["Publics"],
+      },
+    },
+  )
