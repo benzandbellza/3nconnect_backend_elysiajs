@@ -1,6 +1,7 @@
 SELECT
   pro.id AS promotion_id,
   pro.promotion_name,
+  pro.customer_tiers,
   pro.is_accept_overlapse_promotion,
   get_products_table.product_option_id AS get_product_option_id,
   get_products_table.product_name AS get_product_name,

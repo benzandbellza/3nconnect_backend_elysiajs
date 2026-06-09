@@ -620,36 +620,91 @@ export const publicRoute = new Elysia({
           });
           const stock_qty: number = stock?.qty_total || 0;
           
+          // List รายการสินค้าทั้งหมด ทั้งที่ร่วมโปรโมชั่นและไม่ร่วมโปรโมชั่น เพื่อใช้ในการแสดงข้อมูลในหน้า My Cart
           if(findPromotionProducts){
-            if((findPromotionProducts.promotion_type === 'flash_sale' || findPromotionProducts.promotion_type === 'discount') && findPromotionProducts.is_accept_overlapse_promotion){
-              const promotion = {
-                product_option_id: findPromotionProducts.product_option_id,
-                online_price: findPromotionProducts.online_price,
-                sale_price: findPromotionProducts.sale_price,
-                sale_percent: findPromotionProducts.sale_percent,
-                mat_identity: findPromotionProducts.mat_identity,
-                url_image: findPromotionProducts.url_image,
-                promotion_type: findPromotionProducts.promotion_type,
-                option_name: findPromotionProducts.option_name,
-                stock_qty: stock_qty,
-                get_x_free_y: [] as Array<any>,
-              }
-              const bundleDeal = await prisma.vw_promotion_bundle_deal_index.findMany({
-                where: {
-                  get_product_option_id: findPromotionProducts.product_option_id,
-                  is_accept_overlapse_promotion: true,
-                },
-                select: {
-                  get_quantity: true,
-                  get_product_unit: true,
-                  free_url_image: true,
-                  free_product_option_id: true,
-                  free_product_name: true,
-                  free_product_price: true,
-                  free_quantity: true,
-                  free_product_unit: true,
+            const promotion = {
+              product_option_id: findPromotionProducts.product_option_id,
+              online_price: findPromotionProducts.online_price,
+              sale_price: findPromotionProducts.sale_price,
+              sale_percent: findPromotionProducts.sale_percent,
+              mat_identity: findPromotionProducts.mat_identity,
+              url_image: findPromotionProducts.url_image,
+              promotion_type: findPromotionProducts.promotion_type,
+              option_name: findPromotionProducts.option_name,
+              stock_qty: stock_qty,
+              get_x_free_y: [] as Array<any>,
+              extra_points: 1 as number, // สมมติว่ามีการให้คะแนนสะสมพิเศษสำหรับโปรโมชั่นนี้
+            }
+            // เข้าร่วมรายการ Flash Sale หรือ Discount
+            if(findPromotionProducts.promotion_type === 'flash_sale' || findPromotionProducts.promotion_type === 'discount'){
+              //  สามารถทับซ้อนกับโปรโมชั่นอื่นได้
+              if(findPromotionProducts.is_accept_overlapse_promotion){
+                // ดึงข้อมูลโปรโมชั่นแบบซื้อ X แถม Y ที่สามารถทับซ้อนกับโปรโมชั่น Flash Sale หรือ Discount ได้
+                const bundleDeal = await prisma.vw_promotion_bundle_deal_index.findMany({
+                  where: {
+                    get_product_option_id: findPromotionProducts.product_option_id,
+                    is_accept_overlapse_promotion: true,
+                  },
+                  select: {
+                    get_quantity: true,
+                    get_product_unit: true,
+                    free_url_image: true,
+                    free_product_option_id: true,
+                    free_product_name: true,
+                    free_product_price: true,
+                    free_quantity: true,
+                    free_product_unit: true,
+                    customer_tiers: true,
+                  }
+                });
+                if(bundleDeal.length > 0){
+                  promotion.get_x_free_y = bundleDeal.map(deal => ({
+                    get_quantity: deal.get_quantity,
+                    get_product_unit: deal.get_product_unit,
+                    free_url_image: deal.free_url_image,
+                    free_product_option_id: deal.free_product_option_id,
+                    free_product_name: deal.free_product_name,
+                    free_product_price: deal.free_product_price,
+                    free_quantity: deal.free_quantity,
+                    free_product_unit: deal.free_product_unit,
+                    customer_tiers: deal.customer_tiers,
+                  }));
                 }
-              });
+
+                const extraPoints = await prisma.vw_promotion_extra_points_products_index.findFirst({
+                  where : {
+                    product_option_id: findPromotionProducts.product_option_id,
+                  },
+                  select: {
+                    points_multiplier: true,
+                  }
+                });
+                if(extraPoints){
+                  promotion.extra_points = extraPoints.points_multiplier || 1;
+                }
+                productInformation.push(promotion);
+              }else{
+                // Flash Sale หรือ Discount ที่ไม่สามารถทับซ้อนกับโปรโมชั่นอื่นได้ จึงแสดงเฉพาะโปรโมชั่นนี้เพียงรายการเดียว
+                productInformation.push(promotion)
+              }
+            } else {
+              const bundleDeal = await prisma.vw_promotion_bundle_deal_index.findMany({
+                  where: {
+                    get_product_option_id: findPromotionProducts.product_option_id,
+                    is_accept_overlapse_promotion: true,
+                  },
+                  select: {
+                    get_quantity: true,
+                    get_product_unit: true,
+                    free_url_image: true,
+                    free_product_option_id: true,
+                    free_product_name: true,
+                    free_product_price: true,
+                    free_quantity: true,
+                    free_product_unit: true,
+                    customer_tiers: true,
+                  }
+                });
               if(bundleDeal.length > 0){
                 promotion.get_x_free_y = bundleDeal.map(deal => ({
                   get_quantity: deal.get_quantity,
@@ -660,21 +715,28 @@ export const publicRoute = new Elysia({
                   free_product_price: deal.free_product_price,
                   free_quantity: deal.free_quantity,
                   free_product_unit: deal.free_product_unit,
+                  customer_tiers: deal.customer_tiers,
                 }));
               }
-              productInformation.push(promotion);
-            } else {
-              productInformation.push({
-                product_option_id: findPromotionProducts.product_option_id,
-                online_price: findPromotionProducts.online_price,
-                sale_price: findPromotionProducts.sale_price,
-                sale_percent: findPromotionProducts.sale_percent,
-                mat_identity: findPromotionProducts.mat_identity,
-                url_image: findPromotionProducts.url_image,
-                promotion_type: findPromotionProducts.promotion_type,
-                stock_qty: stock_qty,
+
+              const extraPoints = await prisma.vw_promotion_extra_points_products_index.findFirst({
+                where : {
+                  product_option_id: findPromotionProducts.product_option_id,
+                },
+                select: {
+                  points_multiplier: true,
+                }
               });
+              if(extraPoints){
+                promotion.extra_points = extraPoints.points_multiplier || 1;
+              }
+
+              productInformation.push(promotion);
+              
             }
+          }else{
+            // ไม่เจอสินค้าให้ return ค่าว่างกลับไป
+            return [];
           }
         }
 
