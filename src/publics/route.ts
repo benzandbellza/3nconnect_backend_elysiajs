@@ -136,7 +136,7 @@ export const publicRoute = new Elysia({
             },
             promotion_end: {
               gte: now
-            }
+            },
           },
           select: {
             id: true,
@@ -767,4 +767,135 @@ export const publicRoute = new Elysia({
         tags: ["Publics"],
       },
     },
+  )
+  .post(
+    "/promotions/grandtotal",
+    async ({ body, set }) => {
+      try{
+        const { grand_total } = body;
+
+        const resGrandTotal = await prisma.vw_promotion_grandtotal_bill_index.findFirst({
+          where: {
+            minimum_grand_total: {
+              lte: grand_total
+            },
+            is_accept_overlapse_promotion: true,
+          },
+          select: {
+            bundle_deal_grand_total_tiers_id: true,
+            url_promotion_image: true,
+            promotion_name: true,
+            level_no: true,
+          },
+          orderBy: {
+            level_no: 'desc'
+          },
+        });
+
+        if(!resGrandTotal){
+          return {message: "No grand total promotions available for the given amount"};
+        }
+
+        const getFreeProduct = await prisma.vw_promotion_grandtotal_bill_index.findMany({
+          where :{
+            bundle_deal_grand_total_tiers_id: resGrandTotal.bundle_deal_grand_total_tiers_id
+          },
+          select: {
+            product_option_id: true,
+            product_name: true,
+            option_name: true,
+            online_price: true,
+            free_quantity: true,
+            url_image: true,
+          }
+        });
+
+        if(getFreeProduct.length === 0){
+          return {
+            ...resGrandTotal,
+            free_products: []
+          }
+        }
+
+
+
+        const result = {
+          ...resGrandTotal,
+          free_products: getFreeProduct
+        }
+
+        return result;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching grand total promotions:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      body: t.Object({
+        grand_total: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Products - Find By Category ID",
+        description: `
+          This endpoint retrieves products by their category ID.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["Publics"],
+      },
+    }
+  )
+  .post(
+    "/promotions/extra-points",
+    async ({ body, set }) => {
+      try{
+        const { grand_total } = body;
+
+        const extraPoints = await prisma.vw_promotion_extra_points_bill_index.findFirst({
+          where : {
+            min_amount: {
+              lte: grand_total
+            },
+            is_accept_overlapse_promotion: true
+          },
+          select: {
+            url_promotion_image: true,
+            promotion_name: true,
+            level_no: true,
+            min_amount: true,
+            points_multiplier: true,
+          },
+          orderBy: {
+            min_amount: 'desc'
+          }
+        });
+
+        if(!extraPoints){
+          return {message: "No extra points promotions available for the given grand total"};
+        }
+
+        return extraPoints;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching extra points promotions:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      body: t.Object({
+        grand_total: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions Extra Points - Find By Grand Total",
+        description: `
+          This endpoint retrieves extra points promotions based on the given grand total.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["Publics"],
+      },
+    }
   )

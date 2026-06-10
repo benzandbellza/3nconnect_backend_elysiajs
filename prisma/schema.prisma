@@ -637,3 +637,41 @@ view vw_promotion_extra_points_products_index {
 
   @@schema("3nconnect")
 }
+
+view vw_promotion_grandtotal_bill_index {
+  url_promotion_image              String?
+  promotion_id                     Int?
+  promotion_name                   String?
+  promotion_description            String?
+  promotion_start                  DateTime? @db.Timestamptz(6)
+  promotion_end                    DateTime? @db.Timestamptz(6)
+  bundle_deal_grand_total_tiers_id Int?
+  level_no                         Int?
+  minimum_grand_total              Float?
+  is_accept_overlapse_promotion    Boolean?
+  url_image                        String?
+  product_id                       Int?
+  product_name                     String?
+  product_option_id                Int?
+  option_name                      String?
+  online_price                     Float?
+  free_quantity                    Int?
+  customer_tiers                   String[]
+
+  @@schema("3nconnect")
+}
+
+view vw_promotion_extra_points_bill_index {
+  url_promotion_image           String?
+  promotion_id                  Int?
+  promotion_name                String?
+  promotion_description         String?
+  promotion_start               DateTime? @db.Timestamptz(6)
+  promotion_end                 DateTime? @db.Timestamptz(6)
+  is_accept_overlapse_promotion Boolean?
+  level_no                      Int?
+  min_amount                    Float?
+  points_multiplier             Float?
+
+  @@schema("3nconnect")
+}

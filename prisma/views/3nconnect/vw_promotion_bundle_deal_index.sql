@@ -34,7 +34,14 @@ FROM
           (
             (
               "3nconnect".products p
-              JOIN "3nconnect".product_options po ON ((p.id = po.product_id))
+              JOIN "3nconnect".product_options po ON (
+                (
+                  (p.id = po.product_id)
+                  AND (p.is_pre_order = false)
+                  AND (p.is_active = TRUE)
+                  AND (p.is_online_active = TRUE)
+                )
+              )
             )
             JOIN "3nconnect".promotion_bundle_deal_get_products pbdgp ON ((po.id = pbdgp.product_option_id))
           )
@@ -57,7 +64,14 @@ FROM
           (
             (
               "3nconnect".products p
-              JOIN "3nconnect".product_options po ON ((p.id = po.product_id))
+              JOIN "3nconnect".product_options po ON (
+                (
+                  (p.id = po.product_id)
+                  AND (p.is_pre_order = false)
+                  AND (p.is_active = TRUE)
+                  AND (p.is_online_active = TRUE)
+                )
+              )
             )
             JOIN "3nconnect".promotion_bundle_deal_free_products pbdfp ON ((po.id = pbdfp.product_option_id))
           )

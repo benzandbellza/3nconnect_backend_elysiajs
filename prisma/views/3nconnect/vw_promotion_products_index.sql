@@ -44,6 +44,7 @@ FROM
               (po.product_id = p.id)
               AND (p.is_online_active = TRUE)
               AND (p.is_active = TRUE)
+              AND (p.is_pre_order = false)
             )
           )
         )
