@@ -3,6 +3,7 @@ SELECT
   pro.promotion_name,
   pro.customer_tiers,
   pro.is_accept_overlapse_promotion,
+  get_products_table.url_product_image,
   get_products_table.product_option_id AS get_product_option_id,
   get_products_table.product_name AS get_product_name,
   get_products_table.online_price AS get_product_price,
@@ -29,11 +30,20 @@ FROM
           p.unit,
           po.online_price,
           pbdgp.product_option_id,
-          pbdgp.get_quantity
+          pbdgp.get_quantity,
+          t.url_image AS url_product_image
         FROM
           (
             (
-              "3nconnect".products p
+              (
+                "3nconnect".products p
+                LEFT JOIN "3nconnect".product_images t ON (
+                  (
+                    (p.id = t.product_id)
+                    AND (t.is_show = TRUE)
+                  )
+                )
+              )
               JOIN "3nconnect".product_options po ON (
                 (
                   (p.id = po.product_id)

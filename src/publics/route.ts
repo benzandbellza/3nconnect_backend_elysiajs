@@ -3,6 +3,7 @@ import { prisma } from "./prisma_connection";
 import { auth } from "../plugins/auth";
 import "dotenv/config";
 import { createClient } from '@supabase/supabase-js'
+import { tryParse } from "elysia/type-system/utils";
 
 const now: Date = new Date();
 
@@ -898,4 +899,486 @@ export const publicRoute = new Elysia({
         tags: ["Publics"],
       },
     }
+  )
+  .get(
+    "/promotions",
+    async ({ set }) => {
+      try { 
+        const promotions = await prisma.promotions.findMany({
+          where: {
+            is_active: true,
+            promotion_start: {
+              lte: now
+            },
+            promotion_end: {
+              gte: now
+            },
+          },
+          select: {
+            id: true,
+            promotion_image: true,
+            promotion_type: true,
+            promotion_name: true,
+            promotion_description: true,
+            promotion_start: true,
+            promotion_end: true,
+          },
+          orderBy: {
+            promotion_start: 'asc'
+          }
+        });
+
+        return {
+          success: true,
+          message: 'Promotions',
+          data: {
+            promotions: promotions
+          }
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching promotions:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions - Find All",
+        description: `
+          This endpoint retrieves all promotions in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["Publics"],
+      },
+    }
+  )
+  .get(
+    "/promotions/flash-sale/:promotion_id",
+    async ({ params, set }) => {
+      try {
+        const promotion_id = params.promotion_id;
+
+        const promotionDetail = await prisma.promotions.findFirst({
+          where: {
+            id: promotion_id,
+            is_active: true,
+          },
+          select: {
+            url_image: true,
+            promotion_name: true,
+            promotion_description: true,
+            promotion_start: true,
+            promotion_end: true,
+            is_accept_overlapse_promotion: true,
+          }
+        });
+
+        if(!promotionDetail){
+          set.status = 404;
+          return { message: "No valid flash sale promotion found" };
+        }
+
+        const flashSalePromotion = await prisma.vw_promotion_products_index.findMany({
+          where: {
+            promotion_id: promotion_id,
+            promotion_type: 'flash_sale',
+          },
+          select: {
+            product_option_id: true,
+            url_image: true,
+            product_name: true,
+            option_name: true,
+            unit: true,
+            online_price: true,
+            sale_price: true,
+            sale_percent: true,
+            mat_identity: true,
+          },
+          orderBy: {
+            sale_percent: 'desc'
+          }
+        });
+
+        if(!flashSalePromotion){
+          set.status = 404;
+          return { message: "No valid flash sale promotion found" };
+        }
+
+        return {
+          ...promotionDetail, 
+          products: flashSalePromotion
+        };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching flash sale promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      params: t.Object({
+        promotion_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions - Find Flash Sale By Promotion ID",
+        description: `
+          This endpoint retrieves flash sale promotion by its promotion ID.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["Publics"],
+      },
+    },
+  )
+  .get(
+    "/promotions/discount/:promotion_id",
+    async ({ params, set }) => {
+      try {
+        const promotion_id = params.promotion_id;
+        const promotionDetail = await prisma.promotions.findFirst({
+          where: {
+            id: promotion_id,
+            is_active: true,
+          },
+          select: {
+            url_image: true,
+            promotion_name: true,
+            promotion_description: true,
+            promotion_start: true,
+            promotion_end: true,
+            is_accept_overlapse_promotion: true,
+          }
+        });
+
+        if(!promotionDetail){
+          set.status = 404;
+          return { message: "No valid discount promotion found" };
+        }
+
+        const discountPromotion = await prisma.vw_promotion_products_index.findMany({
+          where: {
+            promotion_id: promotion_id,
+            promotion_type: 'discount',
+          },
+          select: {
+            product_option_id: true,
+            url_image: true,
+            product_name: true,
+            option_name: true,
+            unit: true,
+            online_price: true,
+            sale_price: true,
+            sale_percent: true,
+            mat_identity: true,
+          },
+          orderBy: {
+            sale_percent: 'desc'
+          }
+        });
+
+        if(!discountPromotion){
+          set.status = 404;
+          return { message: "No valid discount promotion found" };
+        }
+
+        return {
+          ...promotionDetail,
+          products: discountPromotion
+        };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching discount promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      params: t.Object({
+        promotion_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions - Find Discount By Promotion ID",
+        description: `
+          This endpoint retrieves discount promotion by its promotion ID.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["Publics"],
+      },
+    },
+  )
+  .get(
+    "/promotions/bundle-deal/get-x-free-y/:promotion_id",
+    async ({ params, set }) => {
+      try {
+        const promotion_id = params.promotion_id;
+
+        const promotionDetail = await prisma.promotions.findFirst({
+          where: {
+            id: promotion_id,
+            is_active: true,
+          },
+          select: {
+            url_image: true,
+            promotion_name: true,
+            promotion_description: true,
+            promotion_start: true,
+            promotion_end: true,
+            is_accept_overlapse_promotion: true,
+          }
+        });
+
+        if(!promotionDetail){
+          set.status = 404;
+          return { message: "No valid bundle deal get x free ypromotion found" };
+        }
+
+        const bundleDealPromotion = await prisma.vw_promotion_bundle_deal_index.findMany({
+          where: {
+            promotion_id: promotion_id,
+          },
+          select: {
+            url_product_image: true,
+            get_product_option_id: true,
+            get_product_name: true,
+            get_quantity: true,
+            get_product_unit: true,
+            free_url_image: true,
+            free_product_option_id: true,
+            free_product_name: true,
+            free_product_price: true,
+            free_quantity: true,
+            free_product_unit: true,
+          }
+        });
+        
+        if(!bundleDealPromotion){
+          set.status = 404;
+          return { message: "No valid bundle deal promotion found" };
+        }
+
+        return {
+          ...promotionDetail,
+          products: bundleDealPromotion
+        };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching bundle deal promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      params: t.Object({
+        promotion_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions - Find Bundle Deal By Promotion ID",
+        description: `
+          This endpoint retrieves bundle deal promotion by its promotion ID.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["Publics"],
+      },
+    },
+  )
+  .get(
+    "/promotions/bundle-deal/grand-total/:promotion_id",
+    async ({ params, set }) => {
+      try {
+        const promotion_id = params.promotion_id;
+
+        const promotionDetail = await prisma.promotions.findFirst({
+          where: {
+            id: promotion_id,
+            is_active: true,
+          },
+          select: {
+            url_image: true,
+            promotion_name: true,
+            promotion_description: true,
+            promotion_start: true,
+            promotion_end: true,
+            is_accept_overlapse_promotion: true,
+          }
+        });
+
+        if(!promotionDetail){
+          set.status = 404;
+          return { message: "No valid bundle deal grand total promotion found" };
+        }
+
+        const bundleDealGrandTotalPromotion = await prisma.vw_promotion_grandtotal_bill_index.findMany({
+          where: {
+            promotion_id: promotion_id,
+          },
+          select: {
+            level_no: true,
+            url_promotion_image: true,
+            promotion_name: true,
+            promotion_description: true,
+            promotion_start: true,
+            promotion_end: true,
+            minimum_grand_total: true,
+            url_image: true,
+            product_name: true,
+            option_name: true,
+            online_price: true,
+            free_quantity: true,
+          }
+        });
+        
+        if(!bundleDealGrandTotalPromotion){
+          set.status = 404;
+          return { message: "No valid bundle deal grand total promotion found" };
+        }
+
+        return {
+          ...promotionDetail,
+          products: bundleDealGrandTotalPromotion
+        };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching grand total for bundle deal promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      params: t.Object({
+        promotion_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions - Find Bundle Deal Grand Total By Promotion ID",
+        description: `
+          This endpoint retrieves bundle deal grand total promotion by its promotion ID.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["Publics"],
+      },
+    },
+  )
+  .get(
+    "/promotions/extra-points/products/:promotion_id",
+    async ({ params, set }) => {
+      try {
+        const promotion_id = params.promotion_id;
+
+        const promotionDetail = await prisma.promotions.findFirst({
+          where: {
+            id: promotion_id,
+            is_active: true,
+          },
+          select: {
+            url_image: true,
+            promotion_name: true,
+            promotion_description: true,
+            promotion_start: true,
+            promotion_end: true,
+            is_accept_overlapse_promotion: true,
+          }
+        });
+
+        if(!promotionDetail){
+          set.status = 404;
+          return { message: "No valid extra points products promotion found" };
+        }
+
+        const extrapointsProducts = await prisma.vw_promotion_extra_points_products_index.findMany({
+          where: {
+            promotion_id: promotion_id,
+          },
+          select: {
+            url_image: true,
+            mat_identity: true,
+            product_option_id: true,
+            product_name: true,
+            option_name: true,
+            points_multiplier: true,
+          }
+        });
+        
+        if(!extrapointsProducts){
+          set.status = 404;
+          return { message: "No valid extra points products promotion found" };
+        }
+
+        return {
+          ...promotionDetail,
+          products: extrapointsProducts
+        };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching extra points products promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      params: t.Object({
+        promotion_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions - Find Extra Points Products By PromotionID",
+        description: `
+          This endpoint retrieves extra points products promotion by its promotion ID.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["Publics"],
+      },
+    },
+  )
+  .get(
+    "/promotions/extra-points/grand-total/:promotion_id",
+    async ({ params, set }) => {
+      try {
+        const promotion_id = params.promotion_id;
+
+        const promotionDetail = await prisma.vw_promotion_extra_points_bill_index.findMany({
+          where: {
+            promotion_id: promotion_id,
+          },
+          select: {
+            url_promotion_image: true,
+            promotion_name: true,
+            promotion_description: true,
+            promotion_start: true,
+            promotion_end: true,
+            is_accept_overlapse_promotion: true,
+            level_no: true,
+            min_amount: true,
+            points_multiplier: true,
+          },
+          orderBy: {
+            level_no: 'asc'
+          }
+        });
+        
+        return promotionDetail
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching extra points products promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      params: t.Object({
+        promotion_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions - Find Extra Points Products By PromotionID",
+        description: `
+          This endpoint retrieves extra points products promotion by its promotion ID.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["Publics"],
+      },
+    },
   )

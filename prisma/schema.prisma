@@ -606,6 +606,7 @@ view vw_promotion_bundle_deal_index {
   promotion_name                String?
   customer_tiers                String[]
   is_accept_overlapse_promotion Boolean?
+  url_product_image             String?
   get_product_option_id         Int?
   get_product_name              String?
   get_product_price             Float?
@@ -634,6 +635,8 @@ view vw_promotion_extra_points_products_index {
   product_option_id             Int?
   option_name                   String?
   points_multiplier             Float?
+  url_image                     String?
+  mat_identity                  String?
 
   @@schema("3nconnect")
 }

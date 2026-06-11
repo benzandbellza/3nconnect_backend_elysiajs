@@ -10,20 +10,30 @@ SELECT
   p2.product_name,
   po.id AS product_option_id,
   po.option_name,
-  pepp.points_multiplier
+  pepp.points_multiplier,
+  t.url_image,
+  po.mat_identity
 FROM
   (
     (
       (
-        "3nconnect".promotions p
-        JOIN "3nconnect".promotion_extra_points_products pepp ON ((p.id = pepp.promotion_id))
+        (
+          "3nconnect".promotions p
+          JOIN "3nconnect".promotion_extra_points_products pepp ON ((p.id = pepp.promotion_id))
+        )
+        JOIN "3nconnect".product_options po ON ((pepp.product_option_id = po.id))
       )
-      JOIN "3nconnect".product_options po ON ((pepp.product_option_id = po.id))
+      JOIN "3nconnect".products p2 ON (
+        (
+          (po.product_id = p2.id)
+          AND (p2.is_active = TRUE)
+        )
+      )
     )
-    JOIN "3nconnect".products p2 ON (
+    LEFT JOIN "3nconnect".product_images t ON (
       (
-        (po.product_id = p2.id)
-        AND (p2.is_active = TRUE)
+        (p2.id = t.product_id)
+        AND (t.is_show = TRUE)
       )
     )
   )
