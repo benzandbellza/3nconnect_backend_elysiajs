@@ -2,6 +2,7 @@ import { Elysia, t } from "elysia";
 import { prisma } from "./prisma_connection";
 import { auth } from "../plugins/auth";
 import "dotenv/config";
+import { tryParse } from "elysia/type-system/utils";
 
 const now: Date = new Date();
 // const utc7: Date = new Date(now.getTime() + 7 * 60 * 60 * 1000);
@@ -5795,6 +5796,27 @@ export const ecommerceRoute = new Elysia({
           where: {
             gift_voucher_type: "redeem_code",
           },
+          select: {
+            id: true,
+            url_image: true,
+            voucher_image: true,
+            voucher_name: true,
+            campaign_start: true,
+            campaign_end: true,
+            customer_tiers: true,
+            is_limit_voucher: true,
+            is_active: true,
+            limited_total_quantity: true,
+            is_lifetime_period: true,
+            updated_at: true,
+            gift_voucher_redeem_code: {
+              select: {
+                redeem_code: true,
+                max_discount: true,
+                max_usage_per_customer: true,
+              }
+            }
+          }
         });
         
         if(!response) {
@@ -5830,7 +5852,7 @@ export const ecommerceRoute = new Elysia({
       try {
         const { gift_voucher_id } = params;
 
-        const response = await prisma.gift_voucher.findMany({
+        const response = await prisma.gift_voucher.findFirst({
           where: {
             gift_voucher_type: "redeem_code",
             id: gift_voucher_id,
@@ -5849,8 +5871,13 @@ export const ecommerceRoute = new Elysia({
             is_lifetime_period: true,
             limited_total_quantity: true,
             usage_period_day: true,
-            redeem_code: true,
-            max_usage_per_customer: true,
+            gift_voucher_redeem_code: {
+              select: {
+                redeem_code: true,
+                max_discount: true,
+                max_usage_per_customer: true,
+              }
+            },
           }
         });
         
@@ -5889,47 +5916,67 @@ export const ecommerceRoute = new Elysia({
     async({ headers, body, set}) => {
       try {
         const {
-          campaign_end, 
-          campaign_start,
-          customer_tiers,
-          is_accept_overlapse_promotion,
-          is_active,
-          is_lifetime_period,
-          is_limit_voucher,
-          limited_total_quantity,
-          redeem_code,
           url_image,
-          voucher_description,
           voucher_image,
           voucher_name,
-          max_usage_per_customer
+          voucher_description,
+          voucher_conditions,
+          campaign_start,
+          campaign_end,
+          customer_tiers,
+          is_accept_overlapse_promotion,
+          is_limit_voucher,
+          is_active,
+          gift_voucher_type,
+          voucher_uuid,
+          limited_total_quantity,
+          is_lifetime_period,
+          redeem_code,
+          max_usage_per_customer,
+          max_discount,
         } = body;
 
         const response = await prisma.gift_voucher.create({
           data: {
             url_image: url_image,
-            gift_voucher_type: 'redeem_code',
             voucher_image: voucher_image,
             voucher_name: voucher_name,
-            voucher_description: voucher_description,
+            voucher_description : voucher_description,
+            voucher_conditions : voucher_conditions,
             campaign_start: campaign_start,
             campaign_end: campaign_end,
             customer_tiers: customer_tiers,
             is_accept_overlapse_promotion: is_accept_overlapse_promotion,
-            is_active: is_active,
-            is_lifetime_period: is_lifetime_period,
             is_limit_voucher: is_limit_voucher,
+            is_active: is_active,
+            gift_voucher_type: gift_voucher_type,
+            voucher_uuid: voucher_uuid,
             limited_total_quantity: limited_total_quantity,
-            voucher_uuid: crypto.randomUUID(),
-            redeem_code: redeem_code,
-            max_usage_per_customer: max_usage_per_customer,
+            is_lifetime_period: is_lifetime_period,
             created_at: now,
           },
+          select: {
+            id: true,
+          }
         });
 
         if(!response) {
           set.status = 400;
-          return { "message" : "Failed to create redeem code gift voucher." }
+          return { "message" : "Failed to create gift voucher." }
+        }
+
+        const responseCreate = await prisma.gift_voucher_redeem_code.create({
+          data: {
+            gift_voucher_id: response.id,
+            redeem_code: redeem_code,
+            max_discount: max_discount,
+            max_usage_per_customer: max_usage_per_customer,
+          }
+        });
+
+        if(!responseCreate){
+          set.status = 400;
+          return { "message" : "Failed to create redeem code." }
         }
 
         return { "message" : "Redeem code gift voucher created successfully." };
@@ -5945,20 +5992,24 @@ export const ecommerceRoute = new Elysia({
         authorization: t.String(),
       }),
       body: t.Object({
-        campaign_end: t.Any(), 
+        url_image: t.Any(),
+        voucher_image: t.Any(),
+        voucher_name: t.String(),
+        voucher_description: t.Any(),
+        voucher_conditions: t.Any(),
         campaign_start: t.Any(),
+        campaign_end: t.Any(),
         customer_tiers: t.Array(t.String()),
         is_accept_overlapse_promotion: t.Boolean(),
-        is_active: t.Boolean(),
-        is_lifetime_period: t.Boolean(),
         is_limit_voucher: t.Boolean(),
-        limited_total_quantity: t.Number(),
+        is_active: t.Boolean(),
+        gift_voucher_type: t.String(),
+        voucher_uuid: t.String(),
+        limited_total_quantity: t.Any(),
+        is_lifetime_period: t.Boolean(),
         redeem_code: t.String(),
-        url_image: t.String(),
-        voucher_description: t.Any(),
-        voucher_image: t.String(),
-        voucher_name: t.String(),
         max_usage_per_customer: t.Number(),
+        max_discount: t.Number(),
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
@@ -5977,20 +6028,23 @@ export const ecommerceRoute = new Elysia({
       try {
         const { gift_voucher_id } = params;
         const {
-          campaign_end, 
-          campaign_start,
-          customer_tiers,
-          is_accept_overlapse_promotion,
-          is_active,
-          is_lifetime_period,
-          is_limit_voucher,
-          limited_total_quantity,
-          redeem_code,
           url_image,
-          voucher_description,
           voucher_image,
           voucher_name,
-          max_usage_per_customer
+          voucher_description,
+          voucher_conditions,
+          campaign_start,
+          campaign_end,
+          customer_tiers,
+          is_accept_overlapse_promotion,
+          is_limit_voucher,
+          is_active,
+          gift_voucher_type,
+          limited_total_quantity,
+          is_lifetime_period,
+          redeem_code,
+          max_usage_per_customer,
+          max_discount,
         } = body;
 
         const response = await prisma.gift_voucher.update({
@@ -5999,21 +6053,19 @@ export const ecommerceRoute = new Elysia({
           },
           data: {
             url_image: url_image,
-            gift_voucher_type: 'redeem_code',
             voucher_image: voucher_image,
             voucher_name: voucher_name,
-            voucher_description: voucher_description,
+            voucher_description : voucher_description,
+            voucher_conditions : voucher_conditions,
             campaign_start: campaign_start,
             campaign_end: campaign_end,
             customer_tiers: customer_tiers,
             is_accept_overlapse_promotion: is_accept_overlapse_promotion,
-            is_active: is_active,
-            is_lifetime_period: is_lifetime_period,
             is_limit_voucher: is_limit_voucher,
+            is_active: is_active,
+            gift_voucher_type: gift_voucher_type,
             limited_total_quantity: limited_total_quantity,
-            voucher_uuid: crypto.randomUUID(),
-            redeem_code: redeem_code,
-            max_usage_per_customer: max_usage_per_customer,
+            is_lifetime_period: is_lifetime_period,
             updated_at: now,
           },
         });
@@ -6021,6 +6073,22 @@ export const ecommerceRoute = new Elysia({
         if(!response) {
           set.status = 400;
           return { "message" : "Failed to update redeem code gift voucher." }
+        }
+
+        const resUpdate = await prisma.gift_voucher_redeem_code.updateMany({
+          where : {
+            gift_voucher_id: gift_voucher_id
+          },
+          data: {
+            redeem_code: redeem_code,
+            max_usage_per_customer: max_usage_per_customer,
+            max_discount: max_discount
+          }
+        })
+
+        if(!resUpdate){
+          set.status = 400;
+          return {"message" : "Failed to update voucher redeem code"};
         }
 
         return { "message" : "Redeem code gift voucher updated successfully." };
@@ -6039,20 +6107,23 @@ export const ecommerceRoute = new Elysia({
         gift_voucher_id: t.Number(),
       }),
       body: t.Object({
-        campaign_end: t.Any(), 
+        url_image: t.Any(),
+        voucher_image: t.Any(),
+        voucher_name: t.String(),
+        voucher_description: t.Any(),
+        voucher_conditions: t.Any(),
         campaign_start: t.Any(),
+        campaign_end: t.Any(),
         customer_tiers: t.Array(t.String()),
         is_accept_overlapse_promotion: t.Boolean(),
-        is_active: t.Boolean(),
-        is_lifetime_period: t.Boolean(),
         is_limit_voucher: t.Boolean(),
-        limited_total_quantity: t.Number(),
+        is_active: t.Boolean(),
+        gift_voucher_type: t.String(),
+        limited_total_quantity: t.Any(),
+        is_lifetime_period: t.Boolean(),
         redeem_code: t.String(),
-        url_image: t.String(),
-        voucher_description: t.Any(),
-        voucher_image: t.String(),
-        voucher_name: t.String(),
         max_usage_per_customer: t.Number(),
+        max_discount: t.Number(),
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
