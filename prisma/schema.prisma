@@ -58,31 +58,6 @@ model countries {
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model customer_user {
-  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  authid                String?   @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  member_no             String?
-  created_at            DateTime  @default(now()) @db.Timestamptz(6)
-  avatar_url            String?
-  gender                String?
-  prefix_name_th        String?
-  name_th               String?
-  prefix_name_en        String?
-  name_en               String?
-  email                 String?
-  phone_no              String?
-  birthday_date         DateTime? @db.Date
-  pdpa_accepted         Boolean?
-  pdpa_accepted_version String?
-  pdpa_accepted_at      DateTime? @db.Timestamptz(6)
-  preferred_contact     String[]
-  fcm_token             String?
-  line_id               String?
-
-  @@schema("3nconnect")
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model event_categories {
   id              Int       @id @default(autoincrement())
   event_cate_name String?
