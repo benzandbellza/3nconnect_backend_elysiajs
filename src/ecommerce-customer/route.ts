@@ -195,3 +195,48 @@ export const ecommerceCustomerRoute = new Elysia({
       },
     }
   )
+  .post(
+    "/myaccount/tier/:customeruser_id",
+    async({ headers, set, params}) => {
+      try{
+        const customeruser_id = params.customeruser_id;
+        const response = await prisma.vw_customer_information.findFirst({
+          where : {
+            user_id: customeruser_id
+          },
+          select: {
+            user_id: true,
+            tier: true,
+            tier_start_at: true,
+            tier_expired_at: true,
+          }
+        })
+
+        if(!response){
+          set.status = 404;
+          return { message: "Cannot find customer tier by customeruser_id" }
+        }
+        return response;
+      } catch (error) {
+        set.status = 500;
+        return {message : error}
+      }
+    },
+    {
+      params: t.Object({
+        customeruser_id: t.String(),
+      }),
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "eCommerce Customer - My Tier",
+        description: `
+          This endpoint use to find customer tier by customeruser_id.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    }
+  )
