@@ -217,6 +217,9 @@ export const publicRoute = new Elysia({
           where: {
             promotion_type: {
               not: 'flash_sale'
+            },
+            is_pre_order: {
+              not: true
             }
           },
           select: {
