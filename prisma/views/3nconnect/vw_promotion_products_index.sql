@@ -32,7 +32,9 @@ SELECT
     flash_sale_table.sale_percent,
     discount_table.sale_percent,
     NULL :: double precision
-  ) AS sale_percent
+  ) AS sale_percent,
+  p.is_online_active,
+  p.is_pre_order
 FROM
   (
     (
@@ -42,9 +44,7 @@ FROM
           JOIN "3nconnect".products p ON (
             (
               (po.product_id = p.id)
-              AND (p.is_online_active = TRUE)
               AND (p.is_active = TRUE)
-              AND (p.is_pre_order = false)
             )
           )
         )

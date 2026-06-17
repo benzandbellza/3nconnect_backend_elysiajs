@@ -265,6 +265,55 @@ export const publicRoute = new Elysia({
     }
   )
   .get(
+    "/products/pre-order",
+    async ({ set }) => {
+      try { 
+        const products = await prisma.vw_products.findMany({
+          where: {
+            is_pre_order: true,
+          },
+          select: {
+            mat_identity: true,
+            product_name: true,
+            unit: true,
+            online_price: true,
+            product_option_id: true,
+            url_image: true,
+            option_name: true,
+          },
+          orderBy: {
+            product_name: 'desc'
+          }
+        });
+
+        return {
+          success: true,
+          message: 'Products Pre-Order',
+          data: {
+            products: products
+          }
+        }
+      } catch (error) {
+        set.status = 500
+        return {
+          success: false,
+          message: 'Internal server error'
+        }
+      }
+    },
+    {
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Products PreOrder - List",
+        description: `
+          This endpoint gets products pre-order.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["Publics"],
+      },
+    }
+  )
+  .get(
     "/product-categories/active",
     async ({ set }) => {
       try {
@@ -605,6 +654,7 @@ export const publicRoute = new Elysia({
               promotion_type: true,
               option_name: true,
               is_accept_overlapse_promotion: true,
+              is_pre_order: true,
             }
           });
 
@@ -631,6 +681,7 @@ export const publicRoute = new Elysia({
               url_image: findPromotionProducts.url_image,
               promotion_type: findPromotionProducts.promotion_type,
               option_name: findPromotionProducts.option_name,
+              is_pre_order: findPromotionProducts.is_pre_order,
               stock_qty: stock_qty,
               get_x_free_y: [] as Array<any>,
               extra_points: 1 as number, // สมมติว่ามีการให้คะแนนสะสมพิเศษสำหรับโปรโมชั่นนี้

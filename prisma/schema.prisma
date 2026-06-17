@@ -579,10 +579,14 @@ view vw_products {
   category_name     String?
   mat_identity      String?
   product_name      String?
+  option_name       String?
   unit              String?
   online_price      Float?
   product_option_id Int?
   url_image         String?
+  is_online_active  Boolean?
+  is_pre_order      Boolean?
+  is_active         Boolean?
 
   @@schema("3nconnect")
 }
@@ -602,6 +606,8 @@ view vw_promotion_products_index {
   is_accept_overlapse_promotion Boolean?
   sale_price                    Float?
   sale_percent                  Float?
+  is_online_active              Boolean?
+  is_pre_order                  Boolean?
 
   @@schema("3nconnect")
 }
