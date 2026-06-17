@@ -411,6 +411,25 @@ model gift_voucher_redeem_code {
   @@schema("3nconnect")
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model customer_address {
+  id              Int      @id @default(autoincrement())
+  customeruser_id String?  @db.Uuid
+  tag_name        String?
+  receiver_name   String?
+  phone_no        String?
+  address_name    String?
+  address_line1   String?
+  address_line2   String?
+  sub_district    String?
+  district        String?
+  province        String?
+  post_code       String?
+  set_default     Boolean?
+
+  @@schema("3nconnect")
+}
+
 view vw_planetone_grouping_stock {
   MATUnit  String?
   grandqty Int?

@@ -1,5 +1,6 @@
 import { Elysia } from "elysia";
 import { ecommerceRoute } from "./ecommerce/route";
+import { ecommerceCustomerRoute } from "./ecommerce-customer/route";
 import { reportsRoute } from "./reports/route";
 import { publicRoute } from "./publics/route";
 import { cors } from "@elysiajs/cors";
@@ -22,6 +23,7 @@ const app = new Elysia()
   .use(cors())
   .use(publicRoute)
   .use(ecommerceRoute)
+  .use(ecommerceCustomerRoute)
   .use(reportsRoute)
   .get("/", async (e) => {
     return { message: "Welcome to 3NConnect ElysiaJS API" };
