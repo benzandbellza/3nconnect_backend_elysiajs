@@ -1,0 +1,10 @@
+SELECT
+  user_id,
+  created_at,
+  expired_at,
+  points,
+  redeem_point,
+  redeem_exp,
+  reason
+FROM
+  reward_points;

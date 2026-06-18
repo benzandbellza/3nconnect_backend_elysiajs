@@ -240,3 +240,85 @@ export const ecommerceCustomerRoute = new Elysia({
       },
     }
   )
+  .post(
+    "/myaccount/total_points/:customeruser_id",
+    async({ headers, set, params}) => {
+      try{
+        const customeruser_id = params.customeruser_id;
+        const response = await prisma.vw_total_points_customeruser.findFirst({
+          where : {
+            user_id: customeruser_id
+          },
+          select: {
+            total_points: true,
+          }
+        })
+
+        if(!response){
+          return { total_points: 0 }
+        }
+        return response;
+      } catch (error) {
+        set.status = 500;
+        return {message : error}
+      }
+    },
+    {
+      params: t.Object({
+        customeruser_id: t.String(),
+      }),
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "eCommerce Customer - Find Total Points by CustomerUserID",
+        description: `
+          This endpoint use to find total points by customeruser_id.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    }
+  )
+  .post(
+    "/myaccount/reward_points/transactions/:customeruser_id",
+    async({ headers, set, params}) => {
+      try{
+        const customeruser_id = params.customeruser_id;
+        const response = await prisma.vw_reward_point_transactions_customeruser.findMany({
+          where : {
+            user_id: customeruser_id
+          },
+          select: {
+            created_at: true,
+            expired_at: true,
+            redeem_point: true,
+            reason: true,
+          }
+        });
+
+        return response;
+      } catch (error) {
+        set.status = 500;
+        return {message : error}
+      }
+    },
+    {
+      params: t.Object({
+        customeruser_id: t.String(),
+      }),
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "eCommerce Customer - Find Reward Points Transactions by CustomerUserID",
+        description: `
+          This endpoint use to find reward points transaction by customeruser_id.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    }
+  )
