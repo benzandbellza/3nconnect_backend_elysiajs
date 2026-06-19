@@ -306,29 +306,31 @@ model promotion_bundle_deal_grand_total_free_products {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model gift_voucher {
-  id                            Int                        @id @default(autoincrement())
+  id                            Int                             @id @default(autoincrement())
   url_image                     String?
   voucher_image                 String?
   voucher_name                  String?
   voucher_description           String?
   voucher_conditions            String?
-  campaign_start                DateTime?                  @db.Timestamptz(6)
-  campaign_end                  DateTime?                  @db.Timestamptz(6)
+  campaign_start                DateTime?                       @db.Timestamptz(6)
+  campaign_end                  DateTime?                       @db.Timestamptz(6)
   customer_tiers                String[]
   specific_customers            String[]
   is_accept_overlapse_promotion Boolean?
   is_limit_voucher              Boolean?
   is_specific_customers         Boolean?
   is_active                     Boolean?
-  created_at                    DateTime                   @default(now()) @db.Timestamptz(6)
-  updated_at                    DateTime?                  @db.Timestamptz(6)
-  gift_voucher_type             String?                    @default("")
+  created_at                    DateTime                        @default(now()) @db.Timestamptz(6)
+  updated_at                    DateTime?                       @db.Timestamptz(6)
+  gift_voucher_type             String?                         @default("")
   gift_voucher_method           String?
-  voucher_uuid                  String                     @db.Uuid
+  voucher_uuid                  String                          @db.Uuid
   limited_total_quantity        Int?
   is_lifetime_period            Boolean?
   usage_period_day              Int?
-  gift_voucher_event            gift_voucher_event[]
+  event_trigger                 String?
+  tier_trigger_name             String?
+  gift_voucher_campaign_voucher gift_voucher_campaign_voucher[]
   gift_voucher_generic          gift_voucher_generic[]
   gift_voucher_redeem_code      gift_voucher_redeem_code[]
 
@@ -366,21 +368,6 @@ model promotion_extra_points_products {
   product_option_id Int?
   points_multiplier Float?
   promotions        promotions? @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "promotion_extra_points_product_point_promotion_id_fkey")
-
-  @@schema("3nconnect")
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model gift_voucher_event {
-  id                 Int           @id @default(autoincrement())
-  gift_voucher_id    Int?
-  event_trigger_type String?
-  discount_type      String?
-  min_purchase       Float?
-  percent_discount   Float?
-  max_discount       Float?
-  tier_trigger_name  String?
-  gift_voucher       gift_voucher? @relation(fields: [gift_voucher_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("3nconnect")
 }
@@ -426,6 +413,16 @@ model customer_address {
   province        String?
   post_code       String?
   set_default     Boolean?
+
+  @@schema("3nconnect")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model gift_voucher_campaign_voucher {
+  id                 Int           @id(map: "gift_voucher_event_pkey") @default(autoincrement())
+  gift_voucher_id    Int?
+  generic_voucher_id Int?
+  gift_voucher       gift_voucher? @relation(fields: [gift_voucher_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("3nconnect")
 }

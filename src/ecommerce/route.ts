@@ -5093,24 +5093,16 @@ export const ecommerceRoute = new Elysia({
     async({ headers, set, body}) => {
       try {
         const {
-          campaign_start,
-          campaign_end,
-          customer_tiers,
           gift_voucher_generic,
           gift_voucher_method,
-          is_accept_overlapse_promotion,
           is_active,
           is_limit_voucher,
-          is_specific_customers,
           limited_total_quantity,
-          specific_customers,
           url_image,
           voucher_conditions,
           voucher_description,
           voucher_name,
           voucher_image,
-          is_lifetime_period,
-          usage_period_day,
         } = body;
 
         const response = await prisma.gift_voucher.create({
@@ -5122,18 +5114,10 @@ export const ecommerceRoute = new Elysia({
             voucher_name: voucher_name,
             voucher_description: voucher_description,
             voucher_conditions: voucher_conditions,
-            campaign_start: campaign_start,
-            campaign_end: campaign_end,
-            customer_tiers: customer_tiers,
-            specific_customers: specific_customers && specific_customers.length > 0 ? specific_customers : [],
-            is_accept_overlapse_promotion: is_accept_overlapse_promotion,
             is_limit_voucher: is_limit_voucher,
-            is_specific_customers: is_specific_customers,
             is_active: is_active,
-            is_lifetime_period: is_lifetime_period,
             limited_total_quantity: limited_total_quantity,
             voucher_uuid: crypto.randomUUID(),
-            usage_period_day: usage_period_day,
             created_at: now,
           },
           select: {
@@ -5173,24 +5157,16 @@ export const ecommerceRoute = new Elysia({
         authorization: t.String(),
       }),
       body: t.Object({
-        campaign_start: t.Any(),
-        campaign_end: t.Any(),
-        customer_tiers: t.Array(t.String()),
         gift_voucher_generic: t.Any(),
         gift_voucher_method: t.String(),
-        is_accept_overlapse_promotion: t.Boolean(),
         is_active: t.Boolean(),
         is_limit_voucher: t.Boolean(),
-        is_specific_customers: t.Any(),
-        is_lifetime_period: t.Boolean(),
         limited_total_quantity: t.Any(),
-        specific_customers: t.Array(t.String()),
         url_image: t.Any(),
         voucher_conditions: t.Any(),
         voucher_description: t.String(),
         voucher_name: t.String(),
         voucher_image: t.Any(),
-        usage_period_day: t.Number(),
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
@@ -5209,24 +5185,16 @@ export const ecommerceRoute = new Elysia({
       try {
         const { gift_voucher_id } = params;
         const {
-          campaign_start,
-          campaign_end,
-          customer_tiers,
           gift_voucher_generic,
           gift_voucher_method,
-          is_accept_overlapse_promotion,
           is_active,
           is_limit_voucher,
-          is_specific_customers,
           limited_total_quantity,
-          specific_customers,
           url_image,
           voucher_conditions,
           voucher_description,
           voucher_name,
           voucher_image,
-          is_lifetime_period,
-          usage_period_day,
         } = body;
 
         const response = await prisma.gift_voucher.update({
@@ -5241,17 +5209,9 @@ export const ecommerceRoute = new Elysia({
             voucher_name: voucher_name,
             voucher_description: voucher_description,
             voucher_conditions: voucher_conditions,
-            campaign_start: campaign_start,
-            campaign_end: campaign_end,
-            customer_tiers: customer_tiers,
-            specific_customers: specific_customers && specific_customers.length > 0 ? specific_customers : [],
-            is_accept_overlapse_promotion: is_accept_overlapse_promotion,
             is_limit_voucher: is_limit_voucher,
-            is_specific_customers: is_specific_customers,
             is_active: is_active,
-            is_lifetime_period: is_lifetime_period,
             limited_total_quantity: limited_total_quantity,
-            usage_period_day: usage_period_day,
             updated_at: now,
           },
           select: {
@@ -5292,9 +5252,6 @@ export const ecommerceRoute = new Elysia({
         gift_voucher_id: t.Number(),
       }),
       body: t.Object({
-        campaign_start: t.Any(),
-        campaign_end: t.Any(),
-        customer_tiers: t.Array(t.String()),
         gift_voucher_generic: t.Object({
           discount_type: t.String(),
           max_discount: t.Any(),
@@ -5302,19 +5259,14 @@ export const ecommerceRoute = new Elysia({
           percent_discount: t.Any(),
         }),
         gift_voucher_method: t.String(),
-        is_accept_overlapse_promotion: t.Boolean(),
         is_active: t.Boolean(),
         is_limit_voucher: t.Boolean(),
-        is_specific_customers: t.Any(),
-        is_lifetime_period: t.Boolean(),
         limited_total_quantity: t.Any(),
-        specific_customers: t.Array(t.String()),
         url_image: t.Any(),
         voucher_conditions: t.Any(),
         voucher_description: t.String(),
         voucher_name: t.String(),
         voucher_image: t.Any(),
-        usage_period_day: t.Number(),
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
@@ -5407,14 +5359,12 @@ export const ecommerceRoute = new Elysia({
             gift_voucher_method: true,
             limited_total_quantity: true,
             usage_period_day: true,
-            gift_voucher_event: {
+            event_trigger: true,
+            tier_trigger_name: true,
+            gift_voucher_campaign_voucher: {
               select: { 
-                event_trigger_type: true,
-                discount_type: true,
-                max_discount: true,
-                min_purchase: true,
-                percent_discount: true,
-                tier_trigger_name: true,
+                gift_voucher_id: true,
+                generic_voucher_id: true,
               }
             }
           }
@@ -5424,8 +5374,13 @@ export const ecommerceRoute = new Elysia({
           set.status = 404;
           return { "message" : "No event gift vouchers found." }
         }
+        
+        const result = {
+          ...response,
+          generic_voucher_ids: response.gift_voucher_campaign_voucher.map(index => index.generic_voucher_id)
+        }
 
-        return response;
+        return result;
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
@@ -5459,28 +5414,23 @@ export const ecommerceRoute = new Elysia({
           campaign_start,
           campaign_end,
           customer_tiers,
-          gift_voucher_event,
-          gift_voucher_method,
           is_accept_overlapse_promotion,
           is_active,
-          is_limit_voucher,
-          is_specific_customers,
-          limited_total_quantity,
-          specific_customers,
           url_image,
           voucher_conditions,
           voucher_description,
           voucher_name,
           voucher_image,
           is_lifetime_period,
-          usage_period_day,
+          generic_voucher_ids,
+          event_trigger,
+          tier_trigger_name,
         } = body;
 
         const response = await prisma.gift_voucher.create({
           data: {
             url_image: url_image,
             gift_voucher_type: 'event',
-            gift_voucher_method: gift_voucher_method,
             voucher_image: voucher_image,
             voucher_name: voucher_name,
             voucher_description: voucher_description,
@@ -5488,15 +5438,12 @@ export const ecommerceRoute = new Elysia({
             campaign_start: campaign_start,
             campaign_end: campaign_end,
             customer_tiers: customer_tiers,
-            specific_customers: specific_customers && specific_customers.length > 0 ? specific_customers : [],
             is_accept_overlapse_promotion: is_accept_overlapse_promotion,
-            is_limit_voucher: is_limit_voucher,
-            is_specific_customers: is_specific_customers,
             is_active: is_active,
             is_lifetime_period: is_lifetime_period,
-            limited_total_quantity: limited_total_quantity,
-            usage_period_day: usage_period_day,
             voucher_uuid: crypto.randomUUID(),
+            event_trigger: event_trigger,
+            tier_trigger_name: tier_trigger_name,
             created_at: now,
           },
           select: {
@@ -5509,21 +5456,15 @@ export const ecommerceRoute = new Elysia({
           return { "message" : "Failed to create event gift voucher." }
         }
 
-        console.log(response.id);
-
-        const giftVoucherId = response.id;
-        
-        await prisma.gift_voucher_event.create({
-          data: {
-            gift_voucher_id: giftVoucherId,
-            event_trigger_type: gift_voucher_event.event_trigger_type,
-            discount_type: gift_voucher_event.discount_type,
-            max_discount: gift_voucher_event.max_discount,
-            min_purchase: gift_voucher_event.min_purchase,
-            percent_discount: gift_voucher_event.percent_discount,
-            tier_trigger_name: gift_voucher_event.tier_trigger_name,
-          }
-        });
+        const gift_voucher_id = response.id;
+        for(const generic_voucher_id of generic_voucher_ids){
+          await prisma.gift_voucher_campaign_voucher.create({
+            data: {
+              gift_voucher_id: gift_voucher_id,
+              generic_voucher_id: generic_voucher_id
+            }
+          })
+        };
 
         return { "message" : "Event gift voucher created successfully." };
       } catch (error) {
@@ -5538,31 +5479,20 @@ export const ecommerceRoute = new Elysia({
         authorization: t.String(),
       }),
       body: t.Object({
-        campaign_start: t.Any(),
         campaign_end: t.Any(),
+        campaign_start: t.Any(),
         customer_tiers: t.Any(),
-        gift_voucher_event: t.Object({
-          event_trigger_type: t.String(),
-          discount_type: t.String(),
-          max_discount: t.Any(),
-          min_purchase: t.Any(),
-          percent_discount: t.Any(),
-          tier_trigger_name: t.Any(),
-        }),
-        gift_voucher_method: t.String(),
+        event_trigger: t.String(),
+        generic_voucher_ids: t.Array(t.Number()),
         is_accept_overlapse_promotion: t.Boolean(),
         is_active: t.Boolean(),
-        is_limit_voucher: t.Boolean(),
-        is_specific_customers: t.Any(),
         is_lifetime_period: t.Boolean(),
-        limited_total_quantity: t.Any(),
-        specific_customers: t.Array(t.String()),
+        tier_trigger_name: t.Any(),
         url_image: t.Any(),
         voucher_conditions: t.Any(),
         voucher_description: t.String(),
         voucher_name: t.String(),
         voucher_image: t.Any(),
-        usage_period_day: t.Number(),
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
@@ -5579,27 +5509,23 @@ export const ecommerceRoute = new Elysia({
     "/gift-voucher/event/:gift_voucher_id",
     async({ headers, set, body, params }) => {
       try {
-        const { gift_voucher_id } = params;
         const {
           campaign_start,
           campaign_end,
           customer_tiers,
-          gift_voucher_event,
-          gift_voucher_method,
           is_accept_overlapse_promotion,
           is_active,
-          is_limit_voucher,
-          is_specific_customers,
-          limited_total_quantity,
-          specific_customers,
           url_image,
           voucher_conditions,
           voucher_description,
           voucher_name,
           voucher_image,
           is_lifetime_period,
-          usage_period_day,
+          generic_voucher_ids,
+          event_trigger,
+          tier_trigger_name,
         } = body;
+        const gift_voucher_id = params.gift_voucher_id;
 
         const response = await prisma.gift_voucher.update({
           where: {
@@ -5608,7 +5534,6 @@ export const ecommerceRoute = new Elysia({
           data: {
             url_image: url_image,
             gift_voucher_type: 'event',
-            gift_voucher_method: gift_voucher_method,
             voucher_image: voucher_image,
             voucher_name: voucher_name,
             voucher_description: voucher_description,
@@ -5616,15 +5541,13 @@ export const ecommerceRoute = new Elysia({
             campaign_start: campaign_start,
             campaign_end: campaign_end,
             customer_tiers: customer_tiers,
-            specific_customers: specific_customers && specific_customers.length > 0 ? specific_customers : [],
             is_accept_overlapse_promotion: is_accept_overlapse_promotion,
-            is_limit_voucher: is_limit_voucher,
-            is_specific_customers: is_specific_customers,
             is_active: is_active,
             is_lifetime_period: is_lifetime_period,
-            limited_total_quantity: limited_total_quantity,
-            usage_period_day: usage_period_day,
-            updated_at: now,
+            voucher_uuid: crypto.randomUUID(),
+            event_trigger: event_trigger,
+            tier_trigger_name: tier_trigger_name,
+            created_at: now,
           },
           select: {
             id: true,
@@ -5635,20 +5558,21 @@ export const ecommerceRoute = new Elysia({
           set.status = 400;
           return { "message" : "Failed to update event gift voucher." }
         }
-        
-        await prisma.gift_voucher_event.updateMany({
+
+        await prisma.gift_voucher_campaign_voucher.deleteMany({
           where: {
             gift_voucher_id: gift_voucher_id,
-          },
-          data: {
-            event_trigger_type: gift_voucher_event.event_trigger_type,
-            discount_type: gift_voucher_event.discount_type,
-            max_discount: gift_voucher_event.max_discount,
-            min_purchase: gift_voucher_event.min_purchase,
-            percent_discount: gift_voucher_event.percent_discount,
-            tier_trigger_name: gift_voucher_event.tier_trigger_name,
           }
         });
+
+        for(const generic_voucher_id of generic_voucher_ids){
+          await prisma.gift_voucher_campaign_voucher.create({
+            data: {
+              gift_voucher_id: gift_voucher_id,
+              generic_voucher_id: generic_voucher_id
+            }
+          })
+        };
 
         return { "message" : "Event gift voucher updated successfully." };
       } catch (error) {
@@ -5666,31 +5590,20 @@ export const ecommerceRoute = new Elysia({
         gift_voucher_id: t.Number(),
       }),
       body: t.Object({
-        campaign_start: t.Any(),
         campaign_end: t.Any(),
+        campaign_start: t.Any(),
         customer_tiers: t.Any(),
-        gift_voucher_event: t.Object({
-          event_trigger_type: t.String(),
-          discount_type: t.String(),
-          max_discount: t.Any(),
-          min_purchase: t.Any(),
-          percent_discount: t.Any(),
-          tier_trigger_name: t.Any(),
-        }),
-        gift_voucher_method: t.String(),
+        event_trigger: t.String(),
+        generic_voucher_ids: t.Array(t.Number()),
         is_accept_overlapse_promotion: t.Boolean(),
         is_active: t.Boolean(),
-        is_limit_voucher: t.Boolean(),
-        is_specific_customers: t.Any(),
         is_lifetime_period: t.Boolean(),
-        limited_total_quantity: t.Any(),
-        specific_customers: t.Array(t.String()),
+        tier_trigger_name: t.Any(),
         url_image: t.Any(),
         voucher_conditions: t.Any(),
         voucher_description: t.String(),
         voucher_name: t.String(),
         voucher_image: t.Any(),
-        usage_period_day: t.Number(),
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
