@@ -4,6 +4,6 @@ SELECT
 FROM
   reward_points
 WHERE
-  (expired_at >= NOW())
+  (redeem_exp >= NOW())
 GROUP BY
   user_id;

@@ -1,4 +1,4 @@
-import { Elysia, t } from "elysia";
+import { Elysia, replaceUrlPath, t } from "elysia";
 import { prisma } from "./prisma_connection";
 import { auth } from "../plugins/auth";
 import "dotenv/config";
@@ -294,6 +294,7 @@ export const ecommerceCustomerRoute = new Elysia({
             created_at: true,
             expired_at: true,
             redeem_point: true,
+            redeem_exp: true,
             reason: true,
           }
         });
@@ -316,6 +317,45 @@ export const ecommerceCustomerRoute = new Elysia({
         summary: "eCommerce Customer - Find Reward Points Transactions by CustomerUserID",
         description: `
           This endpoint use to find reward points transaction by customeruser_id.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    }
+  )
+  .post(
+    "/myaccount/tier_points/:customeruser_id",
+    async({ headers, set, params}) => {
+      try{
+        const customeruser_id = params.customeruser_id;
+        const response = await prisma.vw_tier_points_customeruser.findFirst({
+          where : {
+            user_id: customeruser_id
+          },
+          select: {
+            total_points: true,
+            expired_at: true,
+          }
+        });
+
+        return response;
+      } catch (error) {
+        set.status = 500;
+        return {message : error}
+      }
+    },
+    {
+      params: t.Object({
+        customeruser_id: t.String(),
+      }),
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "eCommerce Customer - Find Tier Points by CustomerUserID",
+        description: `
+          This endpoint use to find tier points transaction by customeruser_id.
         `.trim(),
         security: [{ bearerAuth: [] }],
         tags: ["3NConnect"],

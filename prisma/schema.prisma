@@ -706,3 +706,11 @@ view vw_reward_point_transactions_customeruser {
 
   @@schema("3nconnect")
 }
+
+view vw_tier_points_customeruser {
+  total_points Int?
+  user_id      String?   @db.Uuid
+  expired_at   DateTime? @db.Timestamptz(6)
+
+  @@schema("3nconnect")
+}
