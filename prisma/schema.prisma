@@ -714,3 +714,22 @@ view vw_tier_points_customeruser {
 
   @@schema("3nconnect")
 }
+
+view vw_all_events {
+  event_id         Int?
+  event_image      String?
+  event_cate_name  String?
+  event_name       String?
+  event_detail     String?
+  register_date    DateTime? @db.Date
+  preregister_date DateTime? @db.Date
+  event_startdate  DateTime? @db.Date
+  event_enddate    DateTime? @db.Date
+  location_name    String?
+  tier_register    String[]
+  tier_preregister String[]
+  ref_url          String?
+  is_active        Boolean?
+
+  @@schema("3nconnect")
+}

@@ -1437,3 +1437,36 @@ export const publicRoute = new Elysia({
       },
     },
   )
+  .get(
+    "/events",
+    async ({headers, set}) => {
+      try {
+        const response = await prisma.vw_all_events.findMany({
+          where: {
+            is_active: true
+          },
+        })
+
+        if(!response){
+          set.status = 404;
+          return {message : "Not have any events are active"}
+        }
+
+        return response;
+      } catch (error) {
+        set.status = 500;
+        return {message: error};
+      }
+    },
+    {
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Events - Find all events are active",
+        description: `
+          This endpoint retrieves events are active in 3nconnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["Publics"],
+      },
+    },
+  )
