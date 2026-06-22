@@ -605,6 +605,7 @@ view vw_promotion_products_index {
   sale_percent                  Float?
   is_online_active              Boolean?
   is_pre_order                  Boolean?
+  company_name                  String?
 
   @@schema("3nconnect")
 }

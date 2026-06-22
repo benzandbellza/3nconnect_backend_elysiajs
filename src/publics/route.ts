@@ -648,6 +648,7 @@ export const publicRoute = new Elysia({
               mat_identity: product.mat_identity,
             },
             select: {
+              company_name: true,
               product_option_id: true,
               online_price: true,
               sale_price: true,
@@ -686,6 +687,7 @@ export const publicRoute = new Elysia({
               option_name: findPromotionProducts.option_name,
               is_pre_order: findPromotionProducts.is_pre_order,
               stock_qty: stock_qty,
+              company_name: findPromotionProducts.company_name,
               get_x_free_y: [] as Array<any>,
               extra_points: 1 as number, // สมมติว่ามีการให้คะแนนสะสมพิเศษสำหรับโปรโมชั่นนี้
             }
