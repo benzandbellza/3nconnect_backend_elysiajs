@@ -362,3 +362,54 @@ export const ecommerceCustomerRoute = new Elysia({
       },
     }
   )
+  .post(
+    "/products/payment",
+    async({ headers, set, body}) => {
+      try {
+        const product_option_ids = body.product_option_ids
+        const response = await prisma.vw_product_payment_methods.findMany({
+          where: {
+            product_option_id: {
+              in : product_option_ids
+            }
+          },
+          select: {
+            product_name: true,
+            option_name: true,
+            credit_terms: true,
+            mobile_banking: true,
+            qr_code_promptpay: true,
+            visa_card: true,
+          }
+        });
+
+        if(!response){
+          set.status = 404;
+          return { message: "Cannot read payment products." } ;
+        }
+
+        return response;
+
+      } catch (error) {
+        set.status = 500;
+        return { message: error};
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        product_option_ids: t.Array(t.Number()),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Products Payment - Check Payment Each Products",
+        description: `
+          This endpoint check payment each products.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["Publics"],
+      },
+    }
+  )

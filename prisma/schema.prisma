@@ -733,3 +733,16 @@ view vw_all_events {
 
   @@schema("3nconnect")
 }
+
+view vw_product_payment_methods {
+  product_id        Int?
+  product_option_id Int?
+  product_name      String?
+  option_name       String?
+  credit_terms      Boolean?
+  mobile_banking    Boolean?
+  qr_code_promptpay Boolean?
+  visa_card         Boolean?
+
+  @@schema("3nconnect")
+}
