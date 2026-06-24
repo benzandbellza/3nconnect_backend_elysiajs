@@ -440,6 +440,16 @@ model cart_reviews {
   @@schema("3nconnect")
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model customer_redeem_code {
+  id              Int       @id @default(autoincrement())
+  customeruser_id String?   @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  gift_voucher_id Int?
+  used_at         DateTime? @db.Timestamptz(6)
+
+  @@schema("3nconnect")
+}
+
 view vw_planetone_grouping_stock {
   MATUnit  String?
   grandqty Int?

@@ -930,3 +930,188 @@ export const ecommerceCustomerRoute = new Elysia({
       },
     }
   )
+  .post(
+    "/checkout/review/redeem-code",
+    async({ headers, set, body}) => {
+      try {
+        const { review_token, redeem_code, has_any_promotion } = body;
+        const now = new Date();
+
+        const review = await prisma.cart_reviews.findFirst({
+          where: {
+            review_token: review_token,
+          },
+          select: {
+            customeruser_id: true,
+            expires_at: true,
+          }
+        });
+
+        if(!review){
+          set.status = 404;
+          return { message: "Review token not found." };
+        }
+
+        if(review.expires_at && review.expires_at < now){
+          set.status = 400;
+          return { message: "Review token has expired." };
+        }
+
+        const voucher = await prisma.gift_voucher.findFirst({
+          where: {
+            gift_voucher_type: "redeem_code",
+            is_active: true,
+            ...(has_any_promotion
+              ? { is_accept_overlapse_promotion: true }
+              : {}),
+            OR: [
+              { is_lifetime_period: true },
+              {
+                AND: [
+                  {
+                    OR: [
+                      { campaign_start: null },
+                      { campaign_start: { lte: now } },
+                    ]
+                  },
+                  {
+                    OR: [
+                      { campaign_end: null },
+                      { campaign_end: { gte: now } },
+                    ]
+                  }
+                ]
+              }
+            ],
+            gift_voucher_redeem_code: {
+              some: {
+                redeem_code: redeem_code,
+              }
+            }
+          },
+          select: {
+            id: true,
+            voucher_name: true,
+            limited_total_quantity: true,
+            gift_voucher_redeem_code: {
+              where: {
+                redeem_code: redeem_code,
+              },
+              select: {
+                redeem_code: true,
+                max_discount: true,
+              }
+            },
+            gift_voucher_generic: {
+              select: {
+                discount_type: true,
+                min_purchase: true,
+                max_discount: true,
+                percent_discount: true,
+              }
+            }
+          }
+        });
+
+        if(!voucher){
+          set.status = 400;
+          return {
+            success: false,
+            message: "Redeem Code นี้หมดอายุหรือถูกใช้ไปแล้ว",
+            error_code: "REDEEM_CODE_INVALID"
+          };
+        }
+
+        if(review.customeruser_id){
+          const existingRedeem = await prisma.customer_redeem_code.findFirst({
+            where: {
+              customeruser_id: review.customeruser_id,
+              gift_voucher_id: voucher.id,
+              used_at: {
+                not: null,
+              }
+            },
+            select: {
+              id: true,
+            }
+          });
+
+          if(existingRedeem){
+            set.status = 400;
+            return {
+              success: false,
+              message: "Redeem Code นี้หมดอายุหรือถูกใช้ไปแล้ว",
+              error_code: "REDEEM_CODE_INVALID"
+            };
+          }
+        }
+
+        if(voucher.limited_total_quantity !== null && voucher.limited_total_quantity !== undefined){
+          const totalRedeemed = await prisma.customer_redeem_code.count({
+            where: {
+              gift_voucher_id: voucher.id,
+              used_at: {
+                not: null,
+              }
+            }
+          });
+
+          if(totalRedeemed >= voucher.limited_total_quantity){
+            set.status = 400;
+            return {
+              success: false,
+              message: "Redeem Code นี้หมดอายุหรือถูกใช้ไปแล้ว",
+              error_code: "REDEEM_CODE_INVALID"
+            };
+          }
+        }
+
+        const genericVoucher = voucher.gift_voucher_generic[0];
+        const redeemCodeDetail = voucher.gift_voucher_redeem_code[0];
+        const appliedValue =
+          genericVoucher?.discount_type === "percentage"
+            ? genericVoucher?.percent_discount ?? 0
+            : redeemCodeDetail?.max_discount ?? genericVoucher?.max_discount ?? 0;
+
+        return {
+          success: true,
+          applied_voucher: {
+            voucher_id: String(voucher.id),
+            code: redeemCodeDetail?.redeem_code ?? redeem_code,
+            title: `Redeem Code ${redeemCodeDetail?.redeem_code ?? redeem_code}`,
+            campaign_name: voucher.voucher_name ?? "",
+            value: appliedValue,
+            discount_type: genericVoucher?.discount_type === "percentage" ? "percent" : "thb",
+            max_discount: redeemCodeDetail?.max_discount ?? genericVoucher?.max_discount ?? 0,
+            minimum_spend: genericVoucher?.min_purchase ?? 0,
+          },
+          message: "ใช้โค้ดสำเร็จ"
+        };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error validating redeem code:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        review_token: t.String(),
+        redeem_code: t.String(),
+        has_any_promotion: t.Boolean(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Checkout Review - Redeem Code Validation",
+        description: `
+          This endpoint validates a redeem code for a checkout review token.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["Publics"],
+      },
+    }
+  )
+  
