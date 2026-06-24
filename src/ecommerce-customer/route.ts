@@ -880,12 +880,12 @@ export const ecommerceCustomerRoute = new Elysia({
           })
           .map((voucher) => {
             const genericVoucher = voucher.gift_voucher_generic[0];
+
             const value =
-              genericVoucher?.max_discount ??
-              genericVoucher?.percent_discount ??
-              0;
+              genericVoucher?.discount_type === 'percentage' ? genericVoucher?.percent_discount : genericVoucher?.max_discount;
+              
             const discount_type = 
-              genericVoucher?.max_discount ? 'thb' : 'percent';
+              genericVoucher?.discount_type === 'percentage' ? 'percent' : 'thb';
             
             const min_purchase = genericVoucher?.min_purchase ?? 0;
             const max_discount = genericVoucher?.max_discount;
