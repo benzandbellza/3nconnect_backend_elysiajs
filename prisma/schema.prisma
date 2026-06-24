@@ -427,6 +427,19 @@ model gift_voucher_campaign_voucher {
   @@schema("3nconnect")
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model cart_reviews {
+  id                           Int       @id @default(autoincrement())
+  review_token                 String?
+  expires_at                   DateTime? @db.Timestamptz(6)
+  requires_sign_in_for_voucher Boolean?  @default(true)
+  requires_sign_in_for_payment Boolean?  @default(true)
+  created_at                   DateTime  @default(now()) @db.Timestamptz(6)
+  customeruser_id              String?   @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  @@schema("3nconnect")
+}
+
 view vw_planetone_grouping_stock {
   MATUnit  String?
   grandqty Int?
