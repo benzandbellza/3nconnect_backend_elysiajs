@@ -3,6 +3,7 @@ import { prisma } from "./prisma_connection";
 import { auth } from "../plugins/auth";
 import "dotenv/config";
 import { customer_address, product_payment_method } from "../../prisma/prismabox/barrel";
+import { tryParse } from "elysia/type-system/utils";
 
 export const ecommerceCustomerRoute = new Elysia({
   prefix: "/api/ecommerce-customer",
@@ -686,7 +687,9 @@ export const ecommerceCustomerRoute = new Elysia({
 
         const promotionEligibility = {
           has_any_promotion: productInformation.some(
-            (item) => !!item.promotion_type || item.get_x_free_y.length > 0
+            (item) =>
+              (!!item.promotion_type && item.promotion_type !== "-") ||
+              item.get_x_free_y.length > 0
           ),
           flash_sale: productInformation.some((item) => item.promotion_type === "flash_sale"),
           discount: productInformation.some((item) => item.promotion_type === "discount"),
@@ -741,7 +744,7 @@ export const ecommerceCustomerRoute = new Elysia({
     "/checkout/review/vouchers",
     async({ headers, set, body}) => {
       try {
-        const { review_token } = body;
+        const { review_token, has_any_promotion } = body;
         const now = new Date();
 
         const review = await prisma.cart_reviews.findFirst({
@@ -765,23 +768,54 @@ export const ecommerceCustomerRoute = new Elysia({
           return { message: "Review token has expired." };
         }
 
-        const campaignVouchers = await prisma.gift_voucher_campaign_voucher.findMany({
+        const eventVouchers = await prisma.gift_voucher.findMany({
           where: {
-            generic_voucher_id: {
-              not: null,
-            },
-            gift_voucher: {
-              is_accept_overlapse_promotion: true,
-            }
+            gift_voucher_type: "event",
+            is_active: true,
           },
           select: {
-            generic_voucher_id: true,
+            id: true,
+            voucher_name: true,
           }
         });
 
-        const genericVoucherIds = campaignVouchers
-          .map((campaignVoucher) => campaignVoucher.generic_voucher_id)
-          .filter((voucherId): voucherId is number => voucherId !== null);
+        const eventVoucherIds = eventVouchers.map((voucher) => voucher.id);
+
+        const campaignVouchers = eventVoucherIds.length > 0
+          ? await prisma.gift_voucher_campaign_voucher.findMany({
+              where: {
+                gift_voucher_id: {
+                  in: eventVoucherIds,
+                },
+                generic_voucher_id: {
+                  not: null,
+                },
+              },
+              select: {
+                gift_voucher_id: true,
+                generic_voucher_id: true,
+              }
+            })
+          : [];
+
+        const eventVoucherNameById = new Map(
+          eventVouchers.map((voucher) => [voucher.id, voucher.voucher_name ?? ""])
+        );
+
+        const campaignNameByGenericVoucherId = new Map<number, string>();
+        for (const campaignVoucher of campaignVouchers) {
+          if (
+            campaignVoucher.generic_voucher_id !== null &&
+            !campaignNameByGenericVoucherId.has(campaignVoucher.generic_voucher_id)
+          ) {
+            campaignNameByGenericVoucherId.set(
+              campaignVoucher.generic_voucher_id,
+              eventVoucherNameById.get(campaignVoucher.gift_voucher_id ?? -1) ?? ""
+            );
+          }
+        }
+
+        const genericVoucherIds = [...campaignNameByGenericVoucherId.keys()];
 
         const vouchers = genericVoucherIds.length > 0
           ? await prisma.gift_voucher.findMany({
@@ -791,6 +825,9 @@ export const ecommerceCustomerRoute = new Elysia({
                 },
                 gift_voucher_type: "generic",
                 is_active: true,
+                ...(has_any_promotion
+                  ? { is_accept_overlapse_promotion: true }
+                  : {}),
                 OR: [
                   { is_lifetime_period: true },
                   {
@@ -820,6 +857,7 @@ export const ecommerceCustomerRoute = new Elysia({
                 gift_voucher_generic: {
                   select: {
                     discount_type: true,
+                    min_purchase: true,
                     max_discount: true,
                     percent_discount: true,
                   }
@@ -846,11 +884,20 @@ export const ecommerceCustomerRoute = new Elysia({
               genericVoucher?.max_discount ??
               genericVoucher?.percent_discount ??
               0;
+            const discount_type = 
+              genericVoucher?.max_discount ? 'thb' : 'percent';
+            
+            const min_purchase = genericVoucher?.min_purchase ?? 0;
+            const max_discount = genericVoucher?.max_discount;
 
             return {
               code: voucher.voucher_uuid,
               title: voucher.voucher_name,
+              campaignName: campaignNameByGenericVoucherId.get(voucher.id) ?? "",
               value: value,
+              discount_type: discount_type,
+              max_discount: max_discount,
+              min_purchase: min_purchase,
             };
           });
 
@@ -870,6 +917,7 @@ export const ecommerceCustomerRoute = new Elysia({
       }),
       body: t.Object({
         review_token: t.String(),
+        has_any_promotion: t.Boolean(),
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
