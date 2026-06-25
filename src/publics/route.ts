@@ -3,8 +3,9 @@ import { prisma } from "./prisma_connection";
 import { auth } from "../plugins/auth";
 import "dotenv/config";
 import { createClient } from '@supabase/supabase-js'
-import { bundlerModuleNameResolver } from "typescript";
+import { bundlerModuleNameResolver, isPartiallyEmittedExpression } from "typescript";
 import { tryParse } from "elysia/type-system/utils";
+import { responsePathAsArray } from "graphql";
 
 const now: Date = new Date();
 
@@ -1466,6 +1467,139 @@ export const publicRoute = new Elysia({
         summary: "Events - Find all events are active",
         description: `
           This endpoint retrieves events are active in 3nconnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["Publics"],
+      },
+    },
+  )
+  .get(
+    "/campaign-voucher",
+    async({ headers, set }) => {
+      try { 
+        const response = await prisma.gift_voucher.findMany({
+          where: {
+            gift_voucher_type: 'event',
+            campaign_start: {
+              lte: now
+            },
+            campaign_end: {
+              gte: now
+            }
+          }
+        })
+
+        if(!response){
+          set.status = 404;
+          return { message: "Failed to read Campaign Voucher." }
+        }
+
+        return response;
+      } catch (error) {
+        set.status =500;
+        return { message: error };
+      }
+    },
+    {
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Campaign Voucher - Find All",
+        description: `
+          This endpoint retrieves campaign voucher in 3nconnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["Publics"],
+      },
+    },
+  )
+  .get(
+    "/campaign-voucher/:gift_voucher_id",
+    async({ headers, set, params}) => {
+      try{
+        const gift_voucher_id = params.gift_voucher_id
+
+        const resGiftVoucher = await prisma.gift_voucher.findFirst({
+          where : {
+            id : gift_voucher_id,
+            gift_voucher_type: 'event',
+            is_active: true,
+          },
+          select: {
+            url_image: true,
+            voucher_name: true,
+            voucher_description: true,
+            voucher_conditions: true,
+            campaign_start: true,
+            campaign_end: true,
+            customer_tiers: true,
+            is_accept_overlapse_promotion: true,
+          }
+        })
+
+        if(!resGiftVoucher){
+          set.status = 404;
+          return { message: "Failed to read master campaign voucher detail." }
+        }
+
+        const resCampaignVoucher = await prisma.gift_voucher_campaign_voucher.findMany({
+          where: {
+            gift_voucher_id : gift_voucher_id
+          },
+          select: {
+            generic_voucher_id: true
+          }
+        })
+
+        if(!resCampaignVoucher){
+          set.status = 404;
+          return { message: "Failed to read campaign gift voucher" }
+        }
+
+        const generic_voucher_ids: Array[number] = resCampaignVoucher.map((index)=> index.generic_voucher_id);
+
+        const response = await prisma.gift_voucher.findMany({
+          where: {
+            id: {
+              in: generic_voucher_ids
+            }
+          },
+          select: {
+            voucher_uuid: true,
+            url_image: true,
+            voucher_name: true,
+            voucher_description: true,
+            voucher_conditions: true,
+            is_accept_overlapse_promotion: true,
+            is_limit_voucher: true,
+            gift_voucher_method: true,
+            limited_total_quantity: true,
+            gift_voucher_generic: {
+              select: {
+                discount_type: true,
+                min_purchase: true,
+                percent_discount: true,
+                max_discount: true,
+              }
+            }
+          }
+        })
+
+        return response;
+
+      } catch (error) {
+        set.status = 500;
+        return { message: error }
+      }
+    },
+    {
+      params: t.Object({
+        gift_voucher_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Campaign Voucher - View detail campaign by gift_voucher_id",
+        description: `
+          This endpoint retrieves detail of campaign voucher.
         `.trim(),
         security: [{ bearerAuth: [] }],
         tags: ["Publics"],
