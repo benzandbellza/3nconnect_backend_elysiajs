@@ -1,11 +1,7 @@
 import { Elysia, t } from "elysia";
 import { prisma } from "./prisma_connection";
-import { auth } from "../plugins/auth";
 import "dotenv/config";
 import { createClient } from '@supabase/supabase-js'
-import { bundlerModuleNameResolver, isPartiallyEmittedExpression } from "typescript";
-import { tryParse } from "elysia/type-system/utils";
-import { responsePathAsArray } from "graphql";
 
 const now: Date = new Date();
 
