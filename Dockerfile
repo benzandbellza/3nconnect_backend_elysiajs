@@ -10,6 +10,7 @@ RUN bun install --frozen-lockfile
 COPY . .
 
 # Generate Prisma clients for all schemas (Linux-compatible binaries)
+
 RUN bunx prisma db pull
 RUN bunx prisma generate
 
