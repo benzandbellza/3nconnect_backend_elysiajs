@@ -21,7 +21,7 @@ RUN apk add --no-cache ca-certificates openssl
 ENV NODE_ENV=production
 
 # Copy only what is needed to run
-# COPY --from=builder /app ./.env
+COPY --from=builder /app ./.env
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/src ./src
 COPY --from=builder /app/prisma ./prisma

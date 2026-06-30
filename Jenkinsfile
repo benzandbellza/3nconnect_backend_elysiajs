@@ -17,6 +17,15 @@ pipeline {
             steps {
                 echo 'Building Docker image...'
                 // Prisma generate จะรันใน Dockerfile builder stage อยู่แล้ว
+                sh 'docker build -t 3nconnect_backend_elysiajs .'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo 'Deploying ElysiaJS container...'
+                // หยุด container เก่า (ถ้ามี) แล้วรัน container ใหม่พร้อม env file
+
                 sh "echo 'APP_HOSTNAME'=localhost > .env"
                 sh "echo 'APP_PORT'=3000 >> .env"
                 sh "echo 'APP_API_PREFIX'= >> .env"
@@ -27,15 +36,6 @@ pipeline {
                 sh "echo 'SUPABASE_URL=${env.PROD_SUPABASE_URL}' >> .env"
                 sh "echo 'SUPABASE_ANON_KEY=${env.PROD_SUPABASE_ANON_KEY}' >> .env"
 
-                sh 'docker build -t 3nconnect_backend_elysiajs .'
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                echo 'Deploying ElysiaJS container...'
-                // หยุด container เก่า (ถ้ามี) แล้วรัน container ใหม่พร้อม env file
-                
                 sh "cat .env"
 
                 sh '''
