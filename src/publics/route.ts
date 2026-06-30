@@ -8,14 +8,12 @@ const now: Date = new Date();
 const supabaseUrl = process.env.SUPABASE_URL
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY
 
-console.log(supabaseUrl, supabaseAnonKey)
-
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase URL or Anon Key in environment variables')
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
-
+console.log(prisma)
 export const publicRoute = new Elysia({
   prefix: "/api/publics",
 })
