@@ -36,6 +36,9 @@ pipeline {
                 sh "echo 'SUPABASE_URL=${env.PROD_SUPABASE_URL}' >> .env"
                 sh "echo 'SUPABASE_ANON_KEY=${env.PROD_SUPABASE_ANON_KEY}' >> .env"
 
+                sh "bunx prisma db pull"
+                sh "bunx prisma generate"
+                
                 sh "cat .env"
 
                 sh '''
