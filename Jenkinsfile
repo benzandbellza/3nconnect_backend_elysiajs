@@ -26,20 +26,22 @@ pipeline {
                 echo 'Deploying ElysiaJS container...'
                 // หยุด container เก่า (ถ้ามี) แล้วรัน container ใหม่พร้อม env file
 
-                sh "echo 'APP_HOSTNAME'=${env.PROD_ELYSIAJS_PORT} > .env"
-                sh "echo 'APP_JWT_SECRET_TOKEN=${env.PROD_JWT_SECRET_TOKEN}' >> .env"
-                sh "echo 'APP_JWT_ALGO=${env.APP_JWT_ALGO}' >> .env"
-                sh "echo 'DATABASE_URL=${env.PROD_CONNECTION_DATABASE_URL}' >> .env"
-                sh "echo 'DIRECT_URL=${env.PROD_CONNECTION_DIRECT_DATABASE_URL}' >> .env"
-                sh "echo 'SUPABASE_URL=${env.PROD_SUPABASE_URL}' >> .env"
-                sh "echo 'SUPABASE_ANON_KEY=${env.PROD_SUPABASE_ANON_KEY}' >> .env"
+                sh "echo 'APP_HOSTNAME'=${env.PROD_ELYSIAJS_PORT} > .env.production"
+                sh "echo 'APP_JWT_SECRET_TOKEN=${env.PROD_JWT_SECRET_TOKEN}' >> .env.production"
+                sh "echo 'APP_JWT_ALGO=${env.APP_JWT_ALGO}' >> .env.production"
+                sh "echo 'DATABASE_URL=${env.PROD_CONNECTION_DATABASE_URL}' >> .env.production"
+                sh "echo 'DIRECT_URL=${env.PROD_CONNECTION_DIRECT_DATABASE_URL}' >> .env.production"
+                sh "echo 'SUPABASE_URL=${env.PROD_SUPABASE_URL}' >> .env.production"
+                sh "echo 'SUPABASE_ANON_KEY=${env.PROD_SUPABASE_ANON_KEY}' >> .env.production"
+
+                sh "cat .env.production"
 
                 sh '''
                     docker stop 3nconnect_backend_elysiajs || true
                     docker rm 3nconnect_backend_elysiajs || true
                     docker run -d \
                         --name 3nconnect_backend_elysiajs \
-                        --env-file .env \
+                        --env-file .env.production \
                         -p 3000:3000 \
                         --restart unless-stopped \
                         3nconnect_backend_elysiajs
