@@ -5,7 +5,6 @@ WORKDIR /app
 # Copy package files and install dependencies (leverages Docker layer cache)
 COPY package.json bun.lockb* ./
 RUN bun install --frozen-lockfile
-RUN npm install
 
 # Copy source and Prisma schemas
 COPY . .
@@ -20,7 +19,7 @@ FROM oven/bun:1-alpine AS runner
 WORKDIR /app
 RUN apk add --no-cache ca-certificates openssl
 
-ENV NODE_ENV=production
+# ENV NODE_ENV=production
 
 # Copy only what is needed to run
 COPY --from=builder /app/node_modules ./node_modules
