@@ -26,7 +26,9 @@ pipeline {
                 echo 'Deploying ElysiaJS container...'
                 // หยุด container เก่า (ถ้ามี) แล้วรัน container ใหม่พร้อม env file
 
-                sh "echo 'APP_HOSTNAME'=${env.PROD_ELYSIAJS_PORT} > .env.production"
+                sh "echo 'APP_HOSTNAME'=localhost > .env.production"
+                sh "echo 'APP_PORT'=3000 >> .env.production"
+                sh "echo 'APP_API_PREFIX'= >> .env.production"
                 sh "echo 'APP_JWT_SECRET_TOKEN=${env.PROD_JWT_SECRET_TOKEN}' >> .env.production"
                 sh "echo 'APP_JWT_ALGO=${env.APP_JWT_ALGO}' >> .env.production"
                 sh "echo 'DATABASE_URL=${env.PROD_CONNECTION_DATABASE_URL}' >> .env.production"
