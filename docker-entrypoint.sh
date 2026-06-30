@@ -11,8 +11,6 @@ if [ -z "${DATABASE_URL:-}" ]; then
   exit 1
 fi
 
-echo ${DATABASE_URL}
-
 echo "Refreshing Prisma schema from database..."
 bunx prisma db pull
 

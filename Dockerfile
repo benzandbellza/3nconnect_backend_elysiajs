@@ -5,6 +5,7 @@ WORKDIR /app
 # Copy package files and install dependencies (leverages Docker layer cache)
 COPY package.json bun.lockb* ./
 RUN bun install --frozen-lockfile
+RUN npm install
 
 # Copy source and Prisma schemas
 COPY . .
