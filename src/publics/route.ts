@@ -13,7 +13,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
-console.log(prisma)
+
 export const publicRoute = new Elysia({
   prefix: "/api/publics",
 })
