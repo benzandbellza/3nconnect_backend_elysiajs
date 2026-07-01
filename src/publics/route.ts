@@ -1551,12 +1551,12 @@ export const publicRoute = new Elysia({
           return { message: "Failed to read campaign gift voucher" }
         }
 
-        const generic_voucher_ids: Array[number] = resCampaignVoucher.map((index)=> index.generic_voucher_id);
+        const generic_voucher_ids = resCampaignVoucher.map((index)=> index.generic_voucher_id);
 
         const response = await prisma.gift_voucher.findMany({
           where: {
             id: {
-              in: generic_voucher_ids
+              in: generic_voucher_ids as Array<number>
             }
           },
           select: {

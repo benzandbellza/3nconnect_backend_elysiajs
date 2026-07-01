@@ -16,7 +16,31 @@ datasource db {
   schemas  = ["3nconnect"]
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model attribute_groups {
+  id                     Int          @id @default(autoincrement())
+  attr_group_name        String?
+  attr_group_description String?
+  is_active              Boolean?
+  created_at             DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime?    @db.Timestamptz(6)
+  attributes             attributes[]
+
+  @@schema("3nconnect")
+}
+
+model attributes {
+  id               Int               @id @default(autoincrement())
+  attr_group_id    Int?
+  attr_name        String?
+  attr_description String?
+  is_active        Boolean?
+  created_at       DateTime          @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime?         @db.Timestamptz(6)
+  attribute_groups attribute_groups? @relation(fields: [attr_group_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("3nconnect")
+}
+
 model brands {
   id          Int        @id @default(autoincrement())
   brand_image String?
@@ -31,7 +55,18 @@ model brands {
   @@schema("3nconnect")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model cart_reviews {
+  id                           Int       @id @default(autoincrement())
+  review_token                 String?
+  expires_at                   DateTime? @db.Timestamptz(6)
+  requires_sign_in_for_voucher Boolean?  @default(true)
+  requires_sign_in_for_payment Boolean?  @default(true)
+  created_at                   DateTime  @default(now()) @db.Timestamptz(6)
+  customeruser_id              String?   @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  @@schema("3nconnect")
+}
+
 model companies {
   id            Int        @id @default(autoincrement())
   company_image String?
@@ -45,7 +80,6 @@ model companies {
   @@schema("3nconnect")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model countries {
   id           Int       @id @default(autoincrement())
   country_name String?
@@ -57,7 +91,33 @@ model countries {
   @@schema("3nconnect")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model customer_address {
+  id              Int      @id @default(autoincrement())
+  customeruser_id String?  @db.Uuid
+  tag_name        String?
+  receiver_name   String?
+  phone_no        String?
+  address_name    String?
+  address_line1   String?
+  address_line2   String?
+  sub_district    String?
+  district        String?
+  province        String?
+  post_code       String?
+  set_default     Boolean?
+
+  @@schema("3nconnect")
+}
+
+model customer_redeem_code {
+  id              Int       @id @default(autoincrement())
+  customeruser_id String?   @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  gift_voucher_id Int?
+  used_at         DateTime? @db.Timestamptz(6)
+
+  @@schema("3nconnect")
+}
+
 model event_categories {
   id              Int       @id @default(autoincrement())
   event_cate_name String?
@@ -69,7 +129,6 @@ model event_categories {
   @@schema("3nconnect")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model events {
   id                Int               @id @default(autoincrement())
   event_name        String?
@@ -92,219 +151,6 @@ model events {
   @@schema("3nconnect")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model product_categories {
-  id                       String               @id(map: "categories_pkey")
-  name                     String
-  slug                     String               @unique(map: "categories_slug_unique")
-  parent_id                String?
-  ancestors                String[]             @default([])
-  level                    Int                  @default(0) @db.SmallInt
-  sort_order               Int                  @default(0) @db.SmallInt
-  image_url                String?
-  is_active                Boolean              @default(true)
-  created_at               DateTime             @default(now()) @db.Timestamptz(6)
-  updated_at               DateTime?            @db.Timestamptz(6)
-  product_categories       product_categories?  @relation("product_categoriesToproduct_categories", fields: [parent_id], references: [id], onUpdate: NoAction, map: "categories_parent_id_fkey")
-  other_product_categories product_categories[] @relation("product_categoriesToproduct_categories")
-  products                 products[]
-
-  @@index([ancestors], map: "idx_categories_ancestors", type: Gin)
-  @@index([is_active], map: "idx_categories_is_active")
-  @@index([level], map: "idx_categories_level")
-  @@index([parent_id], map: "idx_categories_parent_id")
-  @@index([sort_order], map: "idx_categories_sort_order")
-  @@schema("3nconnect")
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model product_images {
-  id         Int       @id @default(autoincrement())
-  product_id Int?
-  url_image  String?
-  is_show    Boolean?
-  created_at DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at DateTime? @db.Timestamptz(6)
-  products   products? @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@schema("3nconnect")
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model product_options {
-  id                   Int       @id @default(autoincrement())
-  product_id           Int?
-  mat_identity         String?
-  option_name          String?
-  online_price         Float?
-  min_price            Float?
-  created_at           DateTime  @default(now()) @db.Timestamptz(6)
-  row_no               Int?
-  updated_at           DateTime? @db.Timestamptz(6)
-  is_stock             Boolean?
-  attributes_hierarchy Int[]
-  products             products? @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@schema("3nconnect")
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model product_payment_method {
-  id                Int       @id @default(autoincrement())
-  product_id        Int?
-  qr_code_promptpay Boolean?
-  visa_card         Boolean?
-  mobile_banking    Boolean?
-  credit_terms      Boolean?
-  created_at        DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at        DateTime? @db.Timestamptz(6)
-  products          products? @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@schema("3nconnect")
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model products {
-  id                     Int                      @id @default(autoincrement())
-  product_name           String?
-  product_description    String?
-  company_id             Int?
-  brand_id               Int?
-  created_at             DateTime                 @default(now()) @db.Timestamptz(6)
-  updated_at             DateTime?                @db.Timestamptz(6)
-  is_active              Boolean?
-  category_hierarchy     String[]
-  unit                   String?
-  is_online_active       Boolean?
-  category_id            String?
-  video_product          String?
-  condition_description  String?
-  warranty_description   String?
-  youtube_url            String?
-  is_pre_order           Boolean?
-  is_custom_options      Boolean?
-  product_images         product_images[]
-  product_options        product_options[]
-  product_payment_method product_payment_method[]
-  brands                 brands?                  @relation(fields: [brand_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  product_categories     product_categories?      @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  companies              companies?               @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-
-  @@schema("3nconnect")
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model attribute_groups {
-  id                     Int          @id @default(autoincrement())
-  attr_group_name        String?
-  attr_group_description String?
-  is_active              Boolean?
-  created_at             DateTime     @default(now()) @db.Timestamptz(6)
-  updated_at             DateTime?    @db.Timestamptz(6)
-  attributes             attributes[]
-
-  @@schema("3nconnect")
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model attributes {
-  id               Int               @id @default(autoincrement())
-  attr_group_id    Int?
-  attr_name        String?
-  attr_description String?
-  is_active        Boolean?
-  created_at       DateTime          @default(now()) @db.Timestamptz(6)
-  updated_at       DateTime?         @db.Timestamptz(6)
-  attribute_groups attribute_groups? @relation(fields: [attr_group_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@schema("3nconnect")
-}
-
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model promotion_discount_products {
-  id                Int         @id(map: "discount_products_pkey") @default(autoincrement())
-  promotion_id      Int?
-  product_option_id Int?
-  sale_price        Float?
-  sale_percent      Float?
-  promotions        promotions? @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "discount_products_promotion_id_fkey")
-
-  @@schema("3nconnect")
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model promotion_flashsale_products {
-  id                Int         @id(map: "flashsale_products_pkey") @default(autoincrement())
-  promotion_id      Int?
-  product_option_id Int?
-  sale_price        Float?
-  sale_percent      Float?
-  promotions        promotions? @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "flashsale_products_promotion_id_fkey")
-
-  @@schema("3nconnect")
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model promotions {
-  id                                      Int                                       @id @default(autoincrement())
-  url_image                               String?
-  promotion_image                         String?
-  promotion_name                          String?
-  promotion_type                          String?
-  promotion_start                         DateTime?                                 @db.Timestamptz(6)
-  promotion_end                           DateTime?                                 @db.Timestamptz(6)
-  created_at                              DateTime                                  @default(now()) @db.Timestamptz(6)
-  updated_at                              DateTime?                                 @db.Timestamptz(6)
-  is_active                               Boolean?
-  is_accept_overlapse_promotion           Boolean?
-  promotion_description                   String?
-  customer_tiers                          String[]
-  promotion_bundle_deal_get_products      promotion_bundle_deal_get_products[]
-  promotion_bundle_deal_grand_total_tiers promotion_bundle_deal_grand_total_tiers[]
-  promotion_discount_products             promotion_discount_products[]
-  promotion_extra_points_products         promotion_extra_points_products[]
-  promotion_extra_points_tier_rules       promotion_extra_points_tier_rules[]
-  promotion_flashsale_products            promotion_flashsale_products[]
-
-  @@schema("3nconnect")
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model promotion_bundle_deal_free_products {
-  id                                 Int                                 @id @default(autoincrement())
-  bundle_deal_get_id                 Int?
-  product_option_id                  Int?
-  free_quantity                      Int?
-  promotion_bundle_deal_get_products promotion_bundle_deal_get_products? @relation(fields: [bundle_deal_get_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "promotion_bundle_deal_free_products_bundle_get_id_fkey")
-
-  @@schema("3nconnect")
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model promotion_bundle_deal_get_products {
-  id                                  Int                                   @id(map: "promotion_bundle_deal_products_pkey") @default(autoincrement())
-  promotion_id                        Int?
-  product_option_id                   Int?
-  get_quantity                        Int?
-  promotion_bundle_deal_free_products promotion_bundle_deal_free_products[]
-  promotions                          promotions?                           @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "promotion_bundle_deal_products_promotion_id_fkey")
-
-  @@schema("3nconnect")
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model promotion_bundle_deal_grand_total_free_products {
-  id                                      Int                                      @id(map: "promotion_bundle_deal_grand_total_free_pkey") @default(autoincrement())
-  bundle_deal_grand_total_tiers_id        Int?
-  product_option_id                       Int?
-  free_quantity                           Int?
-  promotion_bundle_deal_grand_total_tiers promotion_bundle_deal_grand_total_tiers? @relation(fields: [bundle_deal_grand_total_tiers_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "promotion_bundle_deal_grand_t_bundle_deal_grand_total_tier_fkey")
-
-  @@schema("3nconnect")
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model gift_voucher {
   id                            Int                             @id @default(autoincrement())
   url_image                     String?
@@ -337,42 +183,15 @@ model gift_voucher {
   @@schema("3nconnect")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model promotion_bundle_deal_grand_total_tiers {
-  id                                              Int                                               @id @default(autoincrement())
-  promotion_id                                    Int?
-  level_no                                        Int?
-  minimum_grand_total                             Float?
-  promotion_bundle_deal_grand_total_free_products promotion_bundle_deal_grand_total_free_products[]
-  promotions                                      promotions?                                       @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+model gift_voucher_campaign_voucher {
+  id                 Int           @id(map: "gift_voucher_event_pkey") @default(autoincrement())
+  gift_voucher_id    Int?
+  generic_voucher_id Int?
+  gift_voucher       gift_voucher? @relation(fields: [gift_voucher_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("3nconnect")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model promotion_extra_points_tier_rules {
-  id                Int         @id @default(autoincrement())
-  promotion_id      Int?
-  level_no          Int?
-  min_amount        Float?
-  points_multiplier Float?
-  promotions        promotions? @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@schema("3nconnect")
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model promotion_extra_points_products {
-  id                Int         @id(map: "promotion_extra_points_product_point_pkey") @default(autoincrement())
-  promotion_id      Int?
-  product_option_id Int?
-  points_multiplier Float?
-  promotions        promotions? @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "promotion_extra_points_product_point_promotion_id_fkey")
-
-  @@schema("3nconnect")
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model gift_voucher_generic {
   id               Int           @id @default(autoincrement())
   gift_voucher_id  Int?
@@ -386,7 +205,6 @@ model gift_voucher_generic {
   @@schema("3nconnect")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model gift_voucher_redeem_code {
   id                     Int           @id @default(autoincrement())
   gift_voucher_id        Int?
@@ -398,62 +216,308 @@ model gift_voucher_redeem_code {
   @@schema("3nconnect")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model customer_address {
-  id              Int      @id @default(autoincrement())
-  customeruser_id String?  @db.Uuid
-  tag_name        String?
-  receiver_name   String?
+model product_categories {
+  id                       String               @id(map: "categories_pkey")
+  name                     String
+  slug                     String               @unique(map: "categories_slug_unique")
+  parent_id                String?
+  ancestors                String[]             @default([])
+  level                    Int                  @default(0) @db.SmallInt
+  sort_order               Int                  @default(0) @db.SmallInt
+  image_url                String?
+  is_active                Boolean              @default(true)
+  created_at               DateTime             @default(now()) @db.Timestamptz(6)
+  updated_at               DateTime?            @db.Timestamptz(6)
+  product_categories       product_categories?  @relation("product_categoriesToproduct_categories", fields: [parent_id], references: [id], onUpdate: NoAction, map: "categories_parent_id_fkey")
+  other_product_categories product_categories[] @relation("product_categoriesToproduct_categories")
+  products                 products[]
+
+  @@index([ancestors], map: "idx_categories_ancestors", type: Gin)
+  @@index([is_active], map: "idx_categories_is_active")
+  @@index([level], map: "idx_categories_level")
+  @@index([parent_id], map: "idx_categories_parent_id")
+  @@index([sort_order], map: "idx_categories_sort_order")
+  @@schema("3nconnect")
+}
+
+model product_images {
+  id         Int       @id @default(autoincrement())
+  product_id Int?
+  url_image  String?
+  is_show    Boolean?
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @db.Timestamptz(6)
+  products   products? @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("3nconnect")
+}
+
+model product_options {
+  id                   Int       @id @default(autoincrement())
+  product_id           Int?
+  mat_identity         String?
+  option_name          String?
+  online_price         Float?
+  min_price            Float?
+  created_at           DateTime  @default(now()) @db.Timestamptz(6)
+  row_no               Int?
+  updated_at           DateTime? @db.Timestamptz(6)
+  is_stock             Boolean?
+  attributes_hierarchy Int[]
+  products             products? @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("3nconnect")
+}
+
+model product_payment_method {
+  id                Int       @id @default(autoincrement())
+  product_id        Int?
+  qr_code_promptpay Boolean?
+  visa_card         Boolean?
+  mobile_banking    Boolean?
+  credit_terms      Boolean?
+  created_at        DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime? @db.Timestamptz(6)
+  products          products? @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("3nconnect")
+}
+
+model products {
+  id                     Int                      @id @default(autoincrement())
+  product_name           String?
+  product_description    String?
+  company_id             Int?
+  brand_id               Int?
+  created_at             DateTime                 @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime?                @db.Timestamptz(6)
+  is_active              Boolean?
+  category_hierarchy     String[]
+  unit                   String?
+  is_online_active       Boolean?
+  category_id            String?
+  video_product          String?
+  condition_description  String?
+  warranty_description   String?
+  youtube_url            String?
+  is_pre_order           Boolean?
+  is_custom_options      Boolean?
+  product_images         product_images[]
+  product_options        product_options[]
+  product_payment_method product_payment_method[]
+  brands                 brands?                  @relation(fields: [brand_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  product_categories     product_categories?      @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  companies              companies?               @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@schema("3nconnect")
+}
+
+model promotion_bundle_deal_free_products {
+  id                                 Int                                 @id @default(autoincrement())
+  bundle_deal_get_id                 Int?
+  product_option_id                  Int?
+  free_quantity                      Int?
+  promotion_bundle_deal_get_products promotion_bundle_deal_get_products? @relation(fields: [bundle_deal_get_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "promotion_bundle_deal_free_products_bundle_get_id_fkey")
+
+  @@schema("3nconnect")
+}
+
+model promotion_bundle_deal_get_products {
+  id                                  Int                                   @id(map: "promotion_bundle_deal_products_pkey") @default(autoincrement())
+  promotion_id                        Int?
+  product_option_id                   Int?
+  get_quantity                        Int?
+  promotion_bundle_deal_free_products promotion_bundle_deal_free_products[]
+  promotions                          promotions?                           @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "promotion_bundle_deal_products_promotion_id_fkey")
+
+  @@schema("3nconnect")
+}
+
+model promotion_bundle_deal_grand_total_free_products {
+  id                                      Int                                      @id(map: "promotion_bundle_deal_grand_total_free_pkey") @default(autoincrement())
+  bundle_deal_grand_total_tiers_id        Int?
+  product_option_id                       Int?
+  free_quantity                           Int?
+  promotion_bundle_deal_grand_total_tiers promotion_bundle_deal_grand_total_tiers? @relation(fields: [bundle_deal_grand_total_tiers_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "promotion_bundle_deal_grand_t_bundle_deal_grand_total_tier_fkey")
+
+  @@schema("3nconnect")
+}
+
+model promotion_bundle_deal_grand_total_tiers {
+  id                                              Int                                               @id @default(autoincrement())
+  promotion_id                                    Int?
+  level_no                                        Int?
+  minimum_grand_total                             Float?
+  promotion_bundle_deal_grand_total_free_products promotion_bundle_deal_grand_total_free_products[]
+  promotions                                      promotions?                                       @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("3nconnect")
+}
+
+model promotion_discount_products {
+  id                Int         @id(map: "discount_products_pkey") @default(autoincrement())
+  promotion_id      Int?
+  product_option_id Int?
+  sale_price        Float?
+  sale_percent      Float?
+  promotions        promotions? @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("3nconnect")
+}
+
+model promotion_extra_points_products {
+  id                Int         @id(map: "promotion_extra_points_product_point_pkey") @default(autoincrement())
+  promotion_id      Int?
+  product_option_id Int?
+  points_multiplier Float?
+  promotions        promotions? @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "promotion_extra_points_product_point_promotion_id_fkey")
+
+  @@schema("3nconnect")
+}
+
+model promotion_extra_points_tier_rules {
+  id                Int         @id @default(autoincrement())
+  promotion_id      Int?
+  level_no          Int?
+  min_amount        Float?
+  points_multiplier Float?
+  promotions        promotions? @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("3nconnect")
+}
+
+model promotion_flashsale_products {
+  id                Int         @id(map: "flashsale_products_pkey") @default(autoincrement())
+  promotion_id      Int?
+  product_option_id Int?
+  sale_price        Float?
+  sale_percent      Float?
+  promotions        promotions? @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("3nconnect")
+}
+
+model promotions {
+  id                                      Int                                       @id @default(autoincrement())
+  url_image                               String?
+  promotion_image                         String?
+  promotion_name                          String?
+  promotion_type                          String?
+  promotion_start                         DateTime?                                 @db.Timestamptz(6)
+  promotion_end                           DateTime?                                 @db.Timestamptz(6)
+  created_at                              DateTime                                  @default(now()) @db.Timestamptz(6)
+  updated_at                              DateTime?                                 @db.Timestamptz(6)
+  is_active                               Boolean?
+  is_accept_overlapse_promotion           Boolean?
+  promotion_description                   String?
+  customer_tiers                          String[]
+  promotion_bundle_deal_get_products      promotion_bundle_deal_get_products[]
+  promotion_bundle_deal_grand_total_tiers promotion_bundle_deal_grand_total_tiers[]
+  promotion_discount_products             promotion_discount_products[]
+  promotion_extra_points_products         promotion_extra_points_products[]
+  promotion_extra_points_tier_rules       promotion_extra_points_tier_rules[]
+  promotion_flashsale_products            promotion_flashsale_products[]
+
+  @@schema("3nconnect")
+}
+
+view vw_all_events {
+  event_id         Int?
+  event_image      String?
+  event_cate_name  String?
+  event_name       String?
+  event_detail     String?
+  register_date    DateTime? @db.Date
+  preregister_date DateTime? @db.Date
+  event_startdate  DateTime? @db.Date
+  event_enddate    DateTime? @db.Date
+  location_name    String?
+  tier_register    String[]
+  tier_preregister String[]
+  ref_url          String?
+  is_active        Boolean?
+
+  @@schema("3nconnect")
+}
+
+view vw_bundle_deal_get_x_free_y {
+  promotion_type        String?
+  promotion_name        String?
+  get_company_name      String?
+  get_brand_name        String?
+  get_product_category  String?
+  get_mat_identity      String?
+  get_product_name      String?
+  get_product_unit      String?
+  get_quantity          Int?
+  free_company_name     String?
+  free_brand_name       String?
+  free_product_category String?
+  free_mat_identity     String?
+  free_product_name     String?
+  free_product_unit     String?
+  free_quantity         Int?
+  promotion_start       DateTime? @db.Timestamptz(6)
+  promotion_end         DateTime? @db.Timestamptz(6)
+
+  @@schema("3nconnect")
+}
+
+view vw_customer_information {
+  user_id         String?   @db.Uuid
+  auth_id         String?   @db.Uuid
+  member_no       String?
+  gender          String?
+  prefix_th       String?
+  fullname_th     String?
+  email           String?
   phone_no        String?
-  address_name    String?
-  address_line1   String?
-  address_line2   String?
-  sub_district    String?
-  district        String?
-  province        String?
-  post_code       String?
-  set_default     Boolean?
+  birthday        DateTime? @db.Date
+  pdpa_accepted   Boolean?
+  pdpa_version    String?
+  tier            String?   @db.VarChar(20)
+  tier_start_at   DateTime? @db.Timestamptz(6)
+  tier_expired_at DateTime? @db.Timestamptz(6)
 
   @@schema("3nconnect")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model gift_voucher_campaign_voucher {
-  id                 Int           @id(map: "gift_voucher_event_pkey") @default(autoincrement())
-  gift_voucher_id    Int?
-  generic_voucher_id Int?
-  gift_voucher       gift_voucher? @relation(fields: [gift_voucher_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+view vw_discount_products_list {
+  promotion_type  String?
+  promotion_name  String?
+  company_name    String?
+  brand_name      String?
+  category_name   String?
+  mat_identity    String?
+  product_name    String?
+  unit            String?
+  online_price    Float?
+  sale_price      Float?
+  sale_percent    Float?
+  promotion_start DateTime? @db.Timestamptz(6)
+  promotion_end   DateTime? @db.Timestamptz(6)
 
   @@schema("3nconnect")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model cart_reviews {
-  id                           Int       @id @default(autoincrement())
-  review_token                 String?
-  expires_at                   DateTime? @db.Timestamptz(6)
-  requires_sign_in_for_voucher Boolean?  @default(true)
-  requires_sign_in_for_payment Boolean?  @default(true)
-  created_at                   DateTime  @default(now()) @db.Timestamptz(6)
-  customeruser_id              String?   @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-
-  @@schema("3nconnect")
-}
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model customer_redeem_code {
-  id              Int       @id @default(autoincrement())
-  customeruser_id String?   @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  gift_voucher_id Int?
-  used_at         DateTime? @db.Timestamptz(6)
-
-  @@schema("3nconnect")
-}
-
-view vw_planetone_grouping_stock {
-  MATUnit  String?
-  grandqty Int?
-  company  String?
+view vw_flashsale_products_list {
+  promotion_type      String?
+  promotion_name      String?
+  company_name        String?
+  brand_name          String?
+  category_name       String?
+  mat_identity        String?
+  product_name        String?
+  unit                String?
+  online_price        Float?
+  sale_price          Float?
+  sale_percent        Float?
+  promotion_start     DateTime? @db.Timestamptz(6)
+  promotion_end       DateTime? @db.Timestamptz(6)
+  product_option_id   Int?
+  url_image           String?
+  promotion_id        Int?
+  is_promotion_active Boolean?
 
   @@schema("3nconnect")
 }
@@ -489,106 +553,15 @@ view vw_planetone_stocks {
   @@schema("3nconnect")
 }
 
-view vw_sync_stock_ecommerce {
-  id                     Int?
-  created_at             DateTime? @db.Timestamptz(6)
-  mat_unit_identity      String?
-  ecommerce_mat_identity String?
-  mat_name               String?
-  mat_category_text      String?
-  mat_status             String?
-  mat_qty_unit           String?
-  mat_agqty_unit         String?
-  company_id             Int?
-  company_name           String?
-  min_price              Float?
-  online_price           Float?
-  sale_option_name       String?
-  is_stock               Boolean?
-  attributes_hierarchy   Int[]
-  is_online_status       Boolean?
-
-  @@schema("3nconnect")
-}
-
-view vw_customer_information {
-  user_id         String?   @db.Uuid
-  auth_id         String?   @db.Uuid
-  member_no       String?
-  gender          String?
-  prefix_th       String?
-  fullname_th     String?
-  email           String?
-  phone_no        String?
-  birthday        DateTime? @db.Date
-  pdpa_accepted   Boolean?
-  pdpa_version    String?
-  tier            String?   @db.VarChar(20)
-  tier_start_at   DateTime? @db.Timestamptz(6)
-  tier_expired_at DateTime? @db.Timestamptz(6)
-
-  @@schema("3nconnect")
-}
-
-view vw_flashsale_products_list {
-  promotion_type      String?
-  promotion_name      String?
-  company_name        String?
-  brand_name          String?
-  category_name       String?
-  mat_identity        String?
-  product_name        String?
-  unit                String?
-  online_price        Float?
-  sale_price          Float?
-  sale_percent        Float?
-  promotion_start     DateTime? @db.Timestamptz(6)
-  promotion_end       DateTime? @db.Timestamptz(6)
-  product_option_id   Int?
-  url_image           String?
-  promotion_id        Int?
-  is_promotion_active Boolean?
-
-  @@schema("3nconnect")
-}
-
-view vw_discount_products_list {
-  promotion_type  String?
-  promotion_name  String?
-  company_name    String?
-  brand_name      String?
-  category_name   String?
-  mat_identity    String?
-  product_name    String?
-  unit            String?
-  online_price    Float?
-  sale_price      Float?
-  sale_percent    Float?
-  promotion_start DateTime? @db.Timestamptz(6)
-  promotion_end   DateTime? @db.Timestamptz(6)
-
-  @@schema("3nconnect")
-}
-
-view vw_bundle_deal_get_x_free_y {
-  promotion_type        String?
-  promotion_name        String?
-  get_company_name      String?
-  get_brand_name        String?
-  get_product_category  String?
-  get_mat_identity      String?
-  get_product_name      String?
-  get_product_unit      String?
-  get_quantity          Int?
-  free_company_name     String?
-  free_brand_name       String?
-  free_product_category String?
-  free_mat_identity     String?
-  free_product_name     String?
-  free_product_unit     String?
-  free_quantity         Int?
-  promotion_start       DateTime? @db.Timestamptz(6)
-  promotion_end         DateTime? @db.Timestamptz(6)
+view vw_product_payment_methods {
+  product_id        Int?
+  product_option_id Int?
+  product_name      String?
+  option_name       String?
+  credit_terms      Boolean?
+  mobile_banking    Boolean?
+  qr_code_promptpay Boolean?
+  visa_card         Boolean?
 
   @@schema("3nconnect")
 }
@@ -611,28 +584,6 @@ view vw_products {
   @@schema("3nconnect")
 }
 
-view vw_promotion_products_index {
-  product_id                    Int?
-  product_option_id             Int?
-  url_image                     String?
-  category_hierarchy            String[]
-  product_name                  String?
-  unit                          String?
-  mat_identity                  String?
-  option_name                   String?
-  promotion_type                String?
-  online_price                  Float?
-  promotion_id                  Int?
-  is_accept_overlapse_promotion Boolean?
-  sale_price                    Float?
-  sale_percent                  Float?
-  is_online_active              Boolean?
-  is_pre_order                  Boolean?
-  company_name                  String?
-
-  @@schema("3nconnect")
-}
-
 view vw_promotion_bundle_deal_index {
   promotion_id                  Int?
   promotion_name                String?
@@ -650,6 +601,21 @@ view vw_promotion_bundle_deal_index {
   free_product_price            Float?
   free_quantity                 Int?
   free_product_unit             String?
+
+  @@schema("3nconnect")
+}
+
+view vw_promotion_extra_points_bill_index {
+  url_promotion_image           String?
+  promotion_id                  Int?
+  promotion_name                String?
+  promotion_description         String?
+  promotion_start               DateTime? @db.Timestamptz(6)
+  promotion_end                 DateTime? @db.Timestamptz(6)
+  is_accept_overlapse_promotion Boolean?
+  level_no                      Int?
+  min_amount                    Float?
+  points_multiplier             Float?
 
   @@schema("3nconnect")
 }
@@ -696,24 +662,24 @@ view vw_promotion_grandtotal_bill_index {
   @@schema("3nconnect")
 }
 
-view vw_promotion_extra_points_bill_index {
-  url_promotion_image           String?
+view vw_promotion_products_index {
+  product_id                    Int?
+  product_option_id             Int?
+  url_image                     String?
+  category_hierarchy            String[]
+  product_name                  String?
+  unit                          String?
+  mat_identity                  String?
+  option_name                   String?
+  promotion_type                String?
+  online_price                  Float?
   promotion_id                  Int?
-  promotion_name                String?
-  promotion_description         String?
-  promotion_start               DateTime? @db.Timestamptz(6)
-  promotion_end                 DateTime? @db.Timestamptz(6)
   is_accept_overlapse_promotion Boolean?
-  level_no                      Int?
-  min_amount                    Float?
-  points_multiplier             Float?
-
-  @@schema("3nconnect")
-}
-
-view vw_total_points_customeruser {
-  total_points Decimal? @db.Decimal
-  user_id      String?  @db.Uuid
+  sale_price                    Float?
+  sale_percent                  Float?
+  is_online_active              Boolean?
+  is_pre_order                  Boolean?
+  company_name                  String?
 
   @@schema("3nconnect")
 }
@@ -730,6 +696,28 @@ view vw_reward_point_transactions_customeruser {
   @@schema("3nconnect")
 }
 
+view vw_sync_stock_ecommerce {
+  id                     Int?
+  created_at             DateTime? @db.Timestamptz(6)
+  mat_unit_identity      String?
+  ecommerce_mat_identity String?
+  mat_name               String?
+  mat_category_text      String?
+  mat_status             String?
+  mat_qty_unit           String?
+  mat_agqty_unit         String?
+  company_id             Int?
+  company_name           String?
+  min_price              Float?
+  online_price           Float?
+  sale_option_name       String?
+  is_stock               Boolean?
+  attributes_hierarchy   Int[]
+  is_online_status       Boolean?
+
+  @@schema("3nconnect")
+}
+
 view vw_tier_points_customeruser {
   total_points Int?
   user_id      String?   @db.Uuid
@@ -738,34 +726,17 @@ view vw_tier_points_customeruser {
   @@schema("3nconnect")
 }
 
-view vw_all_events {
-  event_id         Int?
-  event_image      String?
-  event_cate_name  String?
-  event_name       String?
-  event_detail     String?
-  register_date    DateTime? @db.Date
-  preregister_date DateTime? @db.Date
-  event_startdate  DateTime? @db.Date
-  event_enddate    DateTime? @db.Date
-  location_name    String?
-  tier_register    String[]
-  tier_preregister String[]
-  ref_url          String?
-  is_active        Boolean?
+view vw_total_points_customeruser {
+  total_points Decimal? @db.Decimal
+  user_id      String?  @db.Uuid
 
   @@schema("3nconnect")
 }
 
-view vw_product_payment_methods {
-  product_id        Int?
-  product_option_id Int?
-  product_name      String?
-  option_name       String?
-  credit_terms      Boolean?
-  mobile_banking    Boolean?
-  qr_code_promptpay Boolean?
-  visa_card         Boolean?
+view vw_planetone_grouping_stock {
+  MATUnit  String?
+  grandqty Int?
+  company  String?
 
   @@schema("3nconnect")
 }

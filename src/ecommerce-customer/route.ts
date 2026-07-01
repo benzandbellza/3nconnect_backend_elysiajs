@@ -2,8 +2,6 @@ import { Elysia, replaceUrlPath, t } from "elysia";
 import { prisma } from "./prisma_connection";
 import { auth } from "../plugins/auth";
 import "dotenv/config";
-import { customer_address, product_payment_method } from "../../prisma/prismabox/barrel";
-import { tryParse } from "elysia/type-system/utils";
 
 export const ecommerceCustomerRoute = new Elysia({
   prefix: "/api/ecommerce-customer",
