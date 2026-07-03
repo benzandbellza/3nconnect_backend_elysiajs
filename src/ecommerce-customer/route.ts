@@ -1112,4 +1112,348 @@ export const ecommerceCustomerRoute = new Elysia({
       },
     }
   )
-  
+  .post(
+    "/delivery-address/:customeruser_id",
+    async({ headers, set, params}) => {
+      try{
+        const customeruser_id = params.customeruser_id;
+        const response = await prisma.customer_address.findFirst({
+          where: {
+            customeruser_id: customeruser_id,
+            set_default: true,
+          },
+          select: {
+            id: true,
+            receiver_name: true,
+            phone_no: true,
+            address_name: true,
+            address_line1: true,
+            address_line2: true,
+            sub_district: true,
+            district: true,
+            province: true,
+            post_code: true,
+          }
+        });
+
+        if(!response){
+          set.status = 404;
+          return { message: "Not found customer address." }
+        }
+
+        return response;
+      }catch(error){
+        set.status = 500;
+        return { message : error };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      params: t.Object({
+        customeruser_id: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Delivery Address - Find by customeruser_id",
+        description: `
+          This endpoint find delivery address find by customeruser_id.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["Publics"],
+      },
+    }
+  )
+  .post(
+    "/monthly_order_count",
+    async ({ headers, set }) => {
+      try {
+        const orderCount = await prisma.order_billing.count({
+          where : {
+            created_at: {
+              gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+              lt: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1)
+            }
+          }
+        });
+
+        return { count: orderCount };
+      }catch(error) {
+        set.status = 500;
+        return { message : error };
+      }
+    }
+  )
+  .post(
+    "/order-submit",
+    async ({ headers, body, set }) => {
+      try {
+        const toDateTime = (value?: string | null) => (value ? new Date(value) : null);
+        const toDate = (value?: string | null) => (value ? new Date(value) : null);
+
+        const result = await prisma.$transaction(async (tx) => {
+          const createdOrders: Array<{
+            order_billing_id: number;
+            order_no: string;
+            invoice_no: string | null;
+          }> = [];
+
+          for (const entry of body.order_billing) {
+            const detail = entry.billing_detail;
+
+            const createdBilling = await tx.order_billing.create({
+              data: {
+                order_no: detail.order_no,
+                buyer_customeruser_id: detail.buyer_customeruser_id,
+                payment_method_id: detail.payment_method,
+                order_status: detail.order_status,
+                im_no: detail.im_no,
+                order_type: detail.order_type,
+                invoice_id: detail.invoice_id,
+                shipping_address_id: detail.shipping_address_id,
+                payment_status: detail.payment_status,
+                log_payment: toDateTime(detail.log_payment),
+                order_uuid: detail.order_uuid,
+                created_at: new Date(detail.created_at),
+                updated_at: toDateTime(detail.updated_at),
+                admin_updated_by: detail.admin_updated_by,
+                admin_updated_at: toDateTime(detail.admin_updated_at),
+                order_created_by: detail.order_created_by,
+                contact_id: detail.contact_id,
+                company_id: detail.company_id,
+                credit_term_days: detail.credit_term_days,
+                credit_payment_duedate: toDate(detail.credit_payment_duedate),
+                shipping_cost: detail.shipping_cost,
+              },
+              select: {
+                id: true,
+              },
+            });
+
+            if (detail.order_items.length > 0) {
+              await tx.order_billing_items.createMany({
+                data: detail.order_items.map((item) => ({
+                  order_billing_id: createdBilling.id,
+                  product_option_id: item.product_option_id,
+                  order_product_quantity: item.order_product_quantity,
+                  item_status: item.item_status,
+                  mr_code: item.mr_code,
+                  localtion_code: item.location_code,
+                  product_owner: item.product_owner,
+                  expire_date: toDate(item.expire_date),
+                  lot_code: item.lot_number,
+                  order_price: item.order_price,
+                  sale_price: item.sale_price,
+                  waiting_out_quantity: item.waiting_out_quantity,
+                  admin_updated_by: item.admin_updated_by,
+                  admin_updated_at: toDateTime(item.admin_updated_at),
+                  is_free: item.is_free,
+                  promotion_from_product_option_id: item.promotion_from_product_option_id,
+                })),
+              });
+            }
+
+            if (detail.voucher_usage.length > 0) {
+              await tx.order_billing_voucher_usage.createMany({
+                data: detail.voucher_usage.map((voucher) => ({
+                  order_billing_id: createdBilling.id,
+                  gift_voucher_code: voucher.gift_voucher_code,
+                  promotion_id: voucher.promotion_id,
+                  usaged_at: toDateTime(voucher.usaged_at),
+                })),
+              });
+            }
+
+
+            createdOrders.push({
+              order_billing_id: createdBilling.id,
+              order_no: detail.order_no,
+              invoice_no: body.payment_2c2p.invoiceNo,
+            });
+          }
+
+          await tx.order_billing_payment.create({
+            data: {
+              invoice_no: body.payment_2c2p.invoiceNo,
+              merchant_id: body.payment_2c2p.merchantID,
+              description: null,
+              amount: body.payment_2c2p.amount,
+              currency_code: body.payment_2c2p.currencyCode,
+              payment_channel_code: body.payment_2c2p.channelCode,
+              payment_agent_code: body.payment_2c2p.agentCode,
+              response_url: null,
+              backend_url: null,
+            },
+          });
+
+          await tx.order_billing_payment_response.create({
+            data: {
+              invoice_no: body.payment_2c2p.invoiceNo,
+              amount: body.payment_2c2p.amount,
+              currency_code: body.payment_2c2p.currencyCode,
+              tran_ref: body.payment_2c2p.tranRef,
+              reference_no: body.payment_2c2p.referenceNo,
+              payment_agent_code: body.payment_2c2p.agentCode,
+              payment_channel_code: body.payment_2c2p.channelCode,
+              approval_code: body.payment_2c2p.approvalCode,
+              datetime: toDateTime(body.payment_2c2p.dateTime),
+              response_code: body.payment_2c2p.respCode,
+              response_description: body.payment_2c2p.respDesc,
+              card_info: body.payment_2c2p.cardInfo,
+            },
+          });
+
+          return createdOrders;
+        });
+
+        return {
+          message: "Order submit success",
+          data: result,
+        };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        order_billing: t.Array(
+          t.Object({
+            billing_detail: t.Object({
+              order_no: t.String(),
+              payment_invoice_no: t.String(),
+              buyer_customeruser_id: t.String(),
+              payment_method: t.Nullable(t.String()),
+              order_status: t.Nullable(t.String()),
+              admin_verify_status: t.Optional(t.Nullable(t.String())),
+              im_no: t.Nullable(t.String()),
+              order_type: t.Nullable(t.String()),
+              invoice_id: t.Nullable(t.Number()),
+              shipping_address_id: t.Nullable(t.Number()),
+              payment_status: t.Nullable(t.String()),
+              log_payment: t.Nullable(t.String()),
+              order_uuid: t.Nullable(t.String()),
+              created_at: t.String(),
+              updated_at: t.String(),
+              admin_updated_by: t.Nullable(t.String()),
+              admin_updated_at: t.Nullable(t.String()),
+              order_created_by: t.Nullable(t.String()),
+              contact_id: t.Nullable(t.Number()),
+              company_id: t.Nullable(t.Number()),
+              credit_term_days: t.Nullable(t.Number()),
+              credit_payment_duedate: t.Nullable(t.String()),
+              shipping_cost: t.Nullable(t.Number()),
+              order_items: t.Array(
+                t.Object({
+                  product_option_id: t.Nullable(t.Number()),
+                  order_product_quantity: t.Nullable(t.Number()),
+                  item_status: t.Nullable(t.String()),
+                  mr_code: t.Nullable(t.String()),
+                  location_code: t.Nullable(t.String()),
+                  product_owner: t.Nullable(t.String()),
+                  expire_date: t.Nullable(t.String()),
+                  lot_number: t.Nullable(t.String()),
+                  order_price: t.Nullable(t.Number()),
+                  sale_price: t.Nullable(t.Number()),
+                  waiting_out_quantity: t.Nullable(t.Number()),
+                  admin_updated_by: t.Nullable(t.String()),
+                  admin_updated_at: t.Nullable(t.String()),
+                  is_free: t.Boolean(),
+                  promotion_from_product_option_id: t.Nullable(t.Number()),
+                })
+              ),
+              voucher_usage: t.Array(
+                t.Object({
+                  gift_voucher_code: t.Nullable(t.String()),
+                  promotion_id: t.Nullable(t.Number()),
+                  usaged_at: t.Nullable(t.String()),
+                })
+              ),
+            }),
+          })
+        ),
+        payment_2c2p: t.Object({
+          merchantID: t.Nullable(t.String()),
+          invoiceNo: t.String(),
+          amount: t.Nullable(t.Number()),
+          currencyCode: t.Nullable(t.String()),
+          tranRef: t.Nullable(t.String()),
+          referenceNo: t.Nullable(t.String()),
+          agentCode: t.Nullable(t.String()),
+          channelCode: t.Nullable(t.String()),
+          approvalCode: t.Nullable(t.String()),
+          dateTime: t.Nullable(t.String()),
+          respCode: t.Nullable(t.String()),
+          respDesc: t.Nullable(t.String()),
+          cardInfo: t.Any(),
+        }),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Order Submit",
+        description: `Create order_billing, items, voucher usage, payment request, and payment response from one payload.`,
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    }
+  )
+  .get(
+    "/order-billing",
+    async({headers, set}) => {
+      try{
+        const response = await prisma.order_billing.findMany({
+          select: {
+            id: true,
+            order_no: true,
+            buyer_customeruser_id: true,
+            payment_method_id: true,
+            order_status: true,
+            im_no: true,
+            order_type: true,
+            invoice_id: true,
+            shipping_address_id: true,
+            payment_status: true,
+            log_payment: true,
+            order_uuid: true,
+            created_at: true,
+            updated_at: true,
+            admin_updated_by: true,
+            admin_updated_at: true,
+            order_created_by: true,
+            contact_id: true,
+            company_id: true,
+            credit_term_days: true,
+            credit_payment_duedate: true,
+            shipping_cost: true,
+          }
+        });
+
+        if(!response){
+          set.status = 404;
+          return { message: "Not found order billings."}
+        }
+
+        return response
+      }catch(error){
+        set.status = 500;
+        return { message : error };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Order Billing - Find All",
+        description: `Find all order billings.`,
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    }
+  )

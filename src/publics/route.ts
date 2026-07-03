@@ -647,6 +647,7 @@ export const publicRoute = new Elysia({
               mat_identity: product.mat_identity,
             },
             select: {
+              company_id: true,
               company_name: true,
               product_option_id: true,
               online_price: true,
@@ -654,6 +655,7 @@ export const publicRoute = new Elysia({
               sale_percent: true,
               mat_identity: true,
               url_image: true,
+              promotion_id: true,
               promotion_type: true,
               option_name: true,
               is_accept_overlapse_promotion: true,
@@ -682,11 +684,13 @@ export const publicRoute = new Elysia({
               sale_percent: findPromotionProducts.sale_percent,
               mat_identity: findPromotionProducts.mat_identity,
               url_image: findPromotionProducts.url_image,
+              promotion_id: findPromotionProducts.promotion_id,
               promotion_type: findPromotionProducts.promotion_type,
               option_name: findPromotionProducts.option_name,
               is_pre_order: findPromotionProducts.is_pre_order,
               stock_qty: stock_qty,
               company_name: findPromotionProducts.company_name,
+              company_id: findPromotionProducts.company_id,
               get_x_free_y: [] as Array<any>,
               extra_points: 1 as number, // สมมติว่ามีการให้คะแนนสะสมพิเศษสำหรับโปรโมชั่นนี้
             }
@@ -701,6 +705,7 @@ export const publicRoute = new Elysia({
                     is_accept_overlapse_promotion: true,
                   },
                   select: {
+                    promotion_id: true,
                     get_quantity: true,
                     get_product_unit: true,
                     free_url_image: true,
@@ -714,6 +719,7 @@ export const publicRoute = new Elysia({
                 });
                 if(bundleDeal.length > 0){
                   promotion.get_x_free_y = bundleDeal.map(deal => ({
+                    promotion_id: deal.promotion_id,
                     get_quantity: deal.get_quantity,
                     get_product_unit: deal.get_product_unit,
                     free_url_image: deal.free_url_image,
@@ -749,6 +755,7 @@ export const publicRoute = new Elysia({
                     is_accept_overlapse_promotion: true,
                   },
                   select: {
+                    promotion_id: true,
                     get_quantity: true,
                     get_product_unit: true,
                     free_url_image: true,
@@ -762,6 +769,7 @@ export const publicRoute = new Elysia({
                 });
               if(bundleDeal.length > 0){
                 promotion.get_x_free_y = bundleDeal.map(deal => ({
+                  promotion_id: deal.promotion_id,
                   get_quantity: deal.get_quantity,
                   get_product_unit: deal.get_product_unit,
                   free_url_image: deal.free_url_image,

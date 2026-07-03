@@ -421,6 +421,105 @@ model promotions {
   @@schema("3nconnect")
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model order_billing {
+  id                     Int       @id(map: "customer_order_billing_pkey") @default(autoincrement())
+  order_no               String?
+  buyer_customeruser_id  String    @db.Uuid
+  payment_method_id      String?
+  order_status           String?
+  im_no                  String?
+  order_type             String?
+  invoice_id             Int?
+  shipping_address_id    Int?
+  payment_status         String?
+  log_payment            DateTime? @db.Timestamptz(6)
+  order_uuid             String?   @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at             DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime? @db.Timestamptz(6)
+  admin_updated_by       String?   @db.Uuid
+  admin_updated_at       DateTime? @db.Timestamptz(6)
+  order_created_by       String?   @db.Uuid
+  contact_id             Int?
+  company_id             Int?
+  credit_term_days       Int?
+  credit_payment_duedate DateTime? @db.Date
+  shipping_cost          Float?
+  admin_verify_status    String?
+  payment_invoice_no     String?
+
+  @@schema("3nconnect")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model order_billing_items {
+  id                               Int       @id @default(autoincrement())
+  order_billing_id                 Int?
+  product_option_id                Int?
+  order_product_quantity           Int?
+  item_status                      String?
+  mr_code                          String?
+  localtion_code                   String?
+  product_owner                    String?
+  expire_date                      DateTime? @db.Date
+  lot_code                         String?
+  sale_price                       Float?
+  order_price                      Float?
+  waiting_out_quantity             Int?
+  admin_updated_by                 String?   @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  admin_updated_at                 DateTime? @db.Timestamptz(6)
+  is_free                          Boolean?
+  promotion_from_product_option_id Int?
+
+  @@schema("3nconnect")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model order_billing_payment {
+  id                   Int     @id @default(autoincrement())
+  invoice_no           String?
+  merchant_id          String?
+  description          String?
+  amount               Float?
+  currency_code        String? @default("THB")
+  payment_channel_code String?
+  payment_agent_code   String?
+  response_url         String?
+  backend_url          String?
+
+  @@schema("3nconnect")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model order_billing_payment_response {
+  id                   Int       @id @default(autoincrement())
+  invoice_no           String
+  amount               Float?
+  currency_code        String?   @default("THB")
+  tran_ref             String?
+  reference_no         String?
+  payment_agent_code   String?
+  payment_channel_code String?
+  approval_code        String?
+  datetime             DateTime? @db.Timestamptz(6)
+  response_code        String?
+  response_description String?
+  card_info            Json?     @db.Json
+
+  @@schema("3nconnect")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model order_billing_voucher_usage {
+  id                Int       @id @default(autoincrement())
+  order_billing_id  Int?
+  gift_voucher_code String?
+  promotion_id      Int?
+  usaged_at         DateTime? @db.Timestamptz(6)
+
+  @@schema("3nconnect")
+}
+
 view vw_all_events {
   event_id         Int?
   event_image      String?
@@ -680,6 +779,7 @@ view vw_promotion_products_index {
   is_online_active              Boolean?
   is_pre_order                  Boolean?
   company_name                  String?
+  company_id                    Int?
 
   @@schema("3nconnect")
 }

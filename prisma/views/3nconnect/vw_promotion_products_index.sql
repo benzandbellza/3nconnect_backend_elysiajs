@@ -35,7 +35,8 @@ SELECT
   ) AS sale_percent,
   p.is_online_active,
   p.is_pre_order,
-  com.company_name
+  com.company_name,
+  com.id AS company_id
 FROM
   (
     (
