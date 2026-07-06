@@ -1306,6 +1306,17 @@ export const ecommerceCustomerRoute = new Elysia({
             },
           });
 
+          if(body.payment_2c2p.respCode === "0000"){
+            await tx.order_billing.updateMany({
+              where: {
+                payment_invoice_no: body.payment_2c2p.invoiceNo,
+              },
+              data: {
+                payment_status: "Paid",
+              },
+            });
+          }
+
           return createdOrders;
         });
 
