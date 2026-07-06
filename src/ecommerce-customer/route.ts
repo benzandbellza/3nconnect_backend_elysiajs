@@ -1226,6 +1226,7 @@ export const ecommerceCustomerRoute = new Elysia({
                 credit_term_days: detail.credit_term_days,
                 credit_payment_duedate: toDate(detail.credit_payment_duedate),
                 shipping_cost: detail.shipping_cost,
+                payment_invoice_no: body.payment_2c2p.invoiceNo,
               },
               select: {
                 id: true,
