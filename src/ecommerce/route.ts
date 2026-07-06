@@ -6090,3 +6090,49 @@ export const ecommerceRoute = new Elysia({
         tags: ["3NConnect"],
     }}
   )
+  .get(
+    "/orders",
+    async ({ headers, set }) => {
+      const response = await prisma.order_billing.findMany({
+        where: {
+          admin_verify_status: "Pending",
+        },
+        select: {
+          order_no : true,
+          payment_method_type: true,
+          order_status: true,
+          im_no: true,
+          order_type: true,
+          payment_status: true,
+          created_at: true,
+          order_uuid: true,
+          companies: {
+            select: {
+              company_name: true,
+            }
+          }
+        }
+      })
+
+      if(!response){
+        set.status = 404;
+        return { "message" : "No orders found." }
+      }
+
+      return response;
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Order - Find All",
+        description: `
+          This endpoint retrieves all orders from the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+    }}
+
+  )

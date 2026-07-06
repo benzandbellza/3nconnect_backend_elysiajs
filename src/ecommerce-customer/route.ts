@@ -1191,7 +1191,7 @@ export const ecommerceCustomerRoute = new Elysia({
       try {
         const toDateTime = (value?: string | null) => (value ? new Date(value) : null);
         const toDate = (value?: string | null) => (value ? new Date(value) : null);
-
+        console.log(body)
         const result = await prisma.$transaction(async (tx) => {
           const createdOrders: Array<{
             order_billing_id: number;
@@ -1206,7 +1206,7 @@ export const ecommerceCustomerRoute = new Elysia({
               data: {
                 order_no: detail.order_no,
                 buyer_customeruser_id: detail.buyer_customeruser_id,
-                payment_method_id: detail.payment_method,
+                payment_method_type: detail.payment_method,
                 order_status: detail.order_status,
                 im_no: detail.im_no,
                 order_type: detail.order_type,
@@ -1219,6 +1219,7 @@ export const ecommerceCustomerRoute = new Elysia({
                 updated_at: toDateTime(detail.updated_at),
                 admin_updated_by: detail.admin_updated_by,
                 admin_updated_at: toDateTime(detail.admin_updated_at),
+                admin_verify_status: "Pending",
                 order_created_by: detail.order_created_by,
                 contact_id: detail.contact_id,
                 company_id: detail.company_id,
@@ -1411,7 +1412,7 @@ export const ecommerceCustomerRoute = new Elysia({
             id: true,
             order_no: true,
             buyer_customeruser_id: true,
-            payment_method_id: true,
+            payment_method_type: true,
             order_status: true,
             im_no: true,
             order_type: true,

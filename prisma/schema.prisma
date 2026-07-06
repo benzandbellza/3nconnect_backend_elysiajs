@@ -68,13 +68,14 @@ model cart_reviews {
 }
 
 model companies {
-  id            Int        @id @default(autoincrement())
+  id            Int             @id @default(autoincrement())
   company_image String?
   url_image     String?
   company_name  String?
-  created_at    DateTime   @default(now()) @db.Timestamptz(6)
-  updated_at    DateTime?  @db.Timestamptz(6)
+  created_at    DateTime        @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime?       @db.Timestamptz(6)
   is_active     Boolean
+  order_billing order_billing[]
   products      products[]
 
   @@schema("3nconnect")
@@ -423,30 +424,31 @@ model promotions {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model order_billing {
-  id                     Int       @id(map: "customer_order_billing_pkey") @default(autoincrement())
+  id                     Int        @id(map: "customer_order_billing_pkey") @default(autoincrement())
   order_no               String?
-  buyer_customeruser_id  String    @db.Uuid
-  payment_method_id      String?
+  buyer_customeruser_id  String     @db.Uuid
+  payment_method_type    String?
   order_status           String?
   im_no                  String?
   order_type             String?
   invoice_id             Int?
   shipping_address_id    Int?
   payment_status         String?
-  log_payment            DateTime? @db.Timestamptz(6)
-  order_uuid             String?   @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  created_at             DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at             DateTime? @db.Timestamptz(6)
-  admin_updated_by       String?   @db.Uuid
-  admin_updated_at       DateTime? @db.Timestamptz(6)
-  order_created_by       String?   @db.Uuid
+  log_payment            DateTime?  @db.Timestamptz(6)
+  order_uuid             String?    @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at             DateTime   @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime?  @db.Timestamptz(6)
+  admin_updated_by       String?    @db.Uuid
+  admin_updated_at       DateTime?  @db.Timestamptz(6)
+  order_created_by       String?    @db.Uuid
   contact_id             Int?
   company_id             Int?
   credit_term_days       Int?
-  credit_payment_duedate DateTime? @db.Date
+  credit_payment_duedate DateTime?  @db.Date
   shipping_cost          Float?
   admin_verify_status    String?
   payment_invoice_no     String?
+  companies              companies? @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@schema("3nconnect")
 }
