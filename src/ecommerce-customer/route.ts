@@ -1472,3 +1472,60 @@ export const ecommerceCustomerRoute = new Elysia({
       },
     }
   )
+  .get(
+    "/orders/:customeruser_id",
+    async ({ headers, set, params }) => {
+      const customeruser_id = params.customeruser_id;
+      const response = await prisma.order_billing.findMany({
+        where: {
+          OR:[
+            { 
+              admin_updated_by: null,
+            },
+            {
+              buyer_customeruser_id: customeruser_id,
+            }
+          ]
+        },
+        select: {
+          order_no : true,
+          payment_method_type: true,
+          order_status: true,
+          im_no: true,
+          order_type: true,
+          payment_status: true,
+          payment_invoice_no: true,
+          created_at: true,
+          order_uuid: true,
+          companies: {
+            select: {
+              company_name: true,
+            }
+          }
+        }
+      })
+
+      if(!response){
+        set.status = 404;
+        return { "message" : "No orders found." }
+      }
+
+      return response;
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      params: t.Object({
+        customeruser_id: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Order - Find All",
+        description: `
+          This endpoint retrieves all orders from the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+    }}
+  )
