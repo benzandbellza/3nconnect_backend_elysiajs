@@ -6617,13 +6617,21 @@ export const ecommerceRoute = new Elysia({
               order_no: body.order_no,
               admin_verify_status: body.admin_verify_status,
               admin_updated_by: body.admin_updated_by,
-              order_status: body.admin_verify_status === "Pending" || body.admin_verify_status === "Paid" ? "Open" : body.admin_verify_status === "Cancelled" ? "Cancelled" : "Processing" ,
+              order_status: 
+                body.admin_verify_status === "Pending" || body.admin_verify_status === "Paid" ? "Open" : 
+                body.admin_verify_status === "Cancelled" ? "Cancelled" : 
+                body.admin_verify_status === "Tranferring" ? "Tranferring" : 
+                body.admin_verify_status === "Completed" ? "Completed" :
+                "Processing" ,
               im_no: body.im_no,
               shipping_cost: body.shipping_cost,
               shipping_address_id: body.shipping_address_id,
               log_payment: loggedAt,
               updated_at: loggedAt,
               admin_updated_at: loggedAt,
+              credit_payment_duedate: body.credit_payment_duedate,
+              credit_term_days: body.credit_term_days,
+
             },
             select: {
               id: true,
@@ -6708,6 +6716,8 @@ export const ecommerceRoute = new Elysia({
       body: t.Object({
         order_uuid: t.String(),
         order_no: t.String(),
+        credit_payment_duedate: t.Any(),
+        credit_term_days: t.Any(),
         admin_verify_status: t.String(),
         admin_updated_by: t.String(),
         im_no: t.Optional(t.Nullable(t.String())),
