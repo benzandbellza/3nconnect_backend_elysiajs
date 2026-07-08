@@ -1191,7 +1191,6 @@ export const ecommerceCustomerRoute = new Elysia({
       try {
         const toDateTime = (value?: string | null) => (value ? new Date(value) : null);
         const toDate = (value?: string | null) => (value ? new Date(value) : null);
-        console.log(body)
         const result = await prisma.$transaction(async (tx) => {
           const createdOrders: Array<{
             order_billing_id: number;
@@ -1226,7 +1225,7 @@ export const ecommerceCustomerRoute = new Elysia({
                 credit_term_days: detail.credit_term_days,
                 credit_payment_duedate: toDate(detail.credit_payment_duedate),
                 shipping_cost: detail.shipping_cost,
-                payment_invoice_no: body.payment_2c2p.invoiceNo,
+                payment_invoice_no: detail.payment_method !== "credit_terms" ? body.payment_2c2p.invoiceNo : null,
               },
               select: {
                 id: true,
@@ -1275,47 +1274,49 @@ export const ecommerceCustomerRoute = new Elysia({
             });
           }
 
-          await tx.order_billing_payment.create({
-            data: {
-              invoice_no: body.payment_2c2p.invoiceNo,
-              merchant_id: body.payment_2c2p.merchantID,
-              description: null,
-              amount: body.payment_2c2p.amount,
-              currency_code: body.payment_2c2p.currencyCode,
-              payment_channel_code: body.payment_2c2p.channelCode,
-              payment_agent_code: body.payment_2c2p.agentCode,
-              response_url: null,
-              backend_url: null,
-            },
-          });
-
-          await tx.order_billing_payment_response.create({
-            data: {
-              invoice_no: body.payment_2c2p.invoiceNo,
-              amount: body.payment_2c2p.amount,
-              currency_code: body.payment_2c2p.currencyCode,
-              tran_ref: body.payment_2c2p.tranRef,
-              reference_no: body.payment_2c2p.referenceNo,
-              payment_agent_code: body.payment_2c2p.agentCode,
-              payment_channel_code: body.payment_2c2p.channelCode,
-              approval_code: body.payment_2c2p.approvalCode,
-              datetime: toDateTime(body.payment_2c2p.dateTime),
-              response_code: body.payment_2c2p.respCode,
-              response_description: body.payment_2c2p.respDesc,
-              card_info: body.payment_2c2p.cardInfo,
-            },
-          });
-
-          if(body.payment_2c2p.respCode === "0000"){
-            await tx.order_billing.updateMany({
-              where: {
-                payment_invoice_no: body.payment_2c2p.invoiceNo,
-              },
+          if(body.payment_2c2p.invoiceNo){
+            await tx.order_billing_payment.create({
               data: {
-                payment_status: "Paid",
-                admin_verify_status: "Paid",
+                invoice_no: body.payment_2c2p.invoiceNo,
+                merchant_id: body.payment_2c2p.merchantID,
+                description: null,
+                amount: body.payment_2c2p.amount,
+                currency_code: body.payment_2c2p.currencyCode,
+                payment_channel_code: body.payment_2c2p.channelCode,
+                payment_agent_code: body.payment_2c2p.agentCode,
+                response_url: null,
+                backend_url: null,
               },
             });
+
+            await tx.order_billing_payment_response.create({
+              data: {
+                invoice_no: body.payment_2c2p.invoiceNo,
+                amount: body.payment_2c2p.amount,
+                currency_code: body.payment_2c2p.currencyCode,
+                tran_ref: body.payment_2c2p.tranRef,
+                reference_no: body.payment_2c2p.referenceNo,
+                payment_agent_code: body.payment_2c2p.agentCode,
+                payment_channel_code: body.payment_2c2p.channelCode,
+                approval_code: body.payment_2c2p.approvalCode,
+                datetime: toDateTime(body.payment_2c2p.dateTime),
+                response_code: body.payment_2c2p.respCode,
+                response_description: body.payment_2c2p.respDesc,
+                card_info: body.payment_2c2p.cardInfo,
+              },
+            });
+
+            if(body.payment_2c2p.respCode === "0000"){
+              await tx.order_billing.updateMany({
+                where: {
+                  payment_invoice_no: body.payment_2c2p.invoiceNo,
+                },
+                data: {
+                  payment_status: "Paid",
+                  admin_verify_status: "Paid",
+                },
+              });
+            }
           }
 
           return createdOrders;
@@ -1340,7 +1341,7 @@ export const ecommerceCustomerRoute = new Elysia({
           t.Object({
             billing_detail: t.Object({
               order_no: t.String(),
-              payment_invoice_no: t.String(),
+              payment_invoice_no: t.Any(),
               buyer_customeruser_id: t.String(),
               payment_method: t.Nullable(t.String()),
               order_status: t.Nullable(t.String()),
@@ -1391,9 +1392,9 @@ export const ecommerceCustomerRoute = new Elysia({
             }),
           })
         ),
-        payment_2c2p: t.Object({
+        payment_2c2p: t.Any({
           merchantID: t.Nullable(t.String()),
-          invoiceNo: t.String(),
+          invoiceNo: t.Any(),
           amount: t.Nullable(t.Number()),
           currencyCode: t.Nullable(t.String()),
           tranRef: t.Nullable(t.String()),
