@@ -1313,6 +1313,7 @@ export const ecommerceCustomerRoute = new Elysia({
               },
               data: {
                 payment_status: "Paid",
+                admin_verify_status: "Paid",
               },
             });
           }

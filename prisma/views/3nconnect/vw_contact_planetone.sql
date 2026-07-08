@@ -1,0 +1,19 @@
+SELECT
+  (id) :: integer AS id,
+  created_at,
+  namesurname,
+  company,
+  tel,
+  note,
+  address1,
+  address2,
+  addresssubdestrict,
+  addressdestrict,
+  addressprovince,
+  addresspostel,
+  create_by,
+  prefix,
+  email,
+  division
+FROM
+  contact;

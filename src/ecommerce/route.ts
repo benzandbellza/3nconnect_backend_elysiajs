@@ -6090,12 +6090,20 @@ export const ecommerceRoute = new Elysia({
         tags: ["3NConnect"],
     }}
   )
-  .get(
+  .post(
     "/orders",
-    async ({ headers, set }) => {
+    async ({ headers, set, body }) => {
+      const admin_customeruser_id = body.admin_customeruser_id;
       const response = await prisma.order_billing.findMany({
         where: {
-          admin_verify_status: "Pending",
+          OR:[
+            { 
+              admin_updated_by: null,
+            },
+            {
+              admin_updated_by: admin_customeruser_id,
+            }
+          ]
         },
         select: {
           order_no : true,
@@ -6104,6 +6112,7 @@ export const ecommerceRoute = new Elysia({
           im_no: true,
           order_type: true,
           payment_status: true,
+          payment_invoice_no: true,
           created_at: true,
           order_uuid: true,
           companies: {
@@ -6125,6 +6134,9 @@ export const ecommerceRoute = new Elysia({
       headers: t.Object({
         authorization: t.String(),
       }),
+      body: t.Object({
+        admin_customeruser_id: t.String(),
+      }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
         summary: "Order - Find All",
@@ -6134,5 +6146,655 @@ export const ecommerceRoute = new Elysia({
         security: [{ bearerAuth: [] }],
         tags: ["3NConnect"],
     }}
+  )
+  .get(
+    "/orders/:order_uuid",
+    async({headers, set, params}) => {
+      try{
+        const order_uuid = params.order_uuid;
+        const response = await prisma.order_billing.findFirst({
+          where: {
+            order_uuid: order_uuid,
+          },
+          select: {
+            order_no: true,
+            buyer_customeruser_id: true,
+            payment_method_type: true,
+            order_status: true,
+            im_no: true,
+            order_type: true,
+            invoice_id: true,
+            shipping_address_id: true,
+            payment_status: true,
+            log_payment: true,
+            order_uuid: true,
+            created_at: true,
+            updated_at: true,
+            order_created_by: true,
+            contact_id: true,
+            company_id: true,
+            credit_term_days: true,
+            credit_payment_duedate: true,
+            shipping_cost: true,
+            payment_invoice_no: true,
+            admin_verify_status: true,
+            order_billing_items: {
+              select: {
+                product_option_id: true,
+                order_product_quantity: true,
+                item_status: true,
+                mr_code: true,
+                localtion_code: true,
+                product_owner: true,
+                expire_date: true,
+                lot_code: true,
+                sale_price: true,
+                order_price: true,
+                waiting_out_quantity: true,
+                is_free: true,
+                promotion_from_product_option_id: true,
+              }
+            }
+          }
+        });
 
+        const company_id = response?.company_id as number;
+        const buyer_customeruser_id = response?.buyer_customeruser_id as string;
+        const shipping_address_id = response?.shipping_address_id as number;
+
+        const resShippingAddress = await prisma.customer_address.findFirst({
+          where: {
+            id: shipping_address_id,
+          },
+          select: {
+            receiver_name: true,
+            phone_no: true,
+            address_name: true,
+            address_line1: true,
+            address_line2: true,
+            sub_district: true,
+            district: true,
+            province: true,
+            post_code: true,
+          }
+        });
+
+        const resCustomer = await prisma.vw_customer_information.findFirst({
+          where: {
+            user_id: buyer_customeruser_id,
+          },
+          select: {
+            member_no: true,
+            prefix_th: true,
+            fullname_th: true,
+            email: true,
+            phone_no: true,
+          }
+        });
+
+        const resCompany = await prisma.companies.findFirst({
+          where: {
+            id: company_id,
+          },
+          select: {
+            company_name: true,
+          }
+        });
+
+        if(!response){
+          set.status = 404;
+          return { message: "Not found order billing."}
+        }
+
+        const orderItems = response.order_billing_items.map(async (item) => {
+          const resProducts = await prisma.vw_products.findFirst({
+            where: {
+              product_option_id: item.product_option_id,
+            },
+            select: {
+              product_option_id: true,
+              mat_identity: true,
+              product_name: true,
+              option_name: true,
+              unit: true,
+              online_price: true,
+              url_image: true,
+            }
+          });
+          return {...resProducts}
+        })
+
+        const result = {
+          ...response,
+          company_name: resCompany?.company_name || null,
+          buyer_customer_info: resCustomer,
+          shipping_address_info: resShippingAddress,
+          order_items_info: await Promise.all(orderItems),
+        }
+
+        return result
+      }catch(error){
+        set.status = 500;
+        return { message : error };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      params: t.Object({
+        order_uuid: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Order Billing - Find by Order UUID",
+        description: `Find order billing by order_uuid.`,
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    }
+  )
+  .get(
+    "/products-online/active",
+    async ({ headers, set }) => {
+      try {
+        const response = await prisma.products.findMany({
+          where: {
+            is_active: true,
+            is_online_active: true,
+          },
+          select: {
+            id: true,
+            product_name: true,
+            product_description: true,
+            unit: true,
+            brands: {
+              select: {
+                brand_name: true,
+              },
+            },
+            product_categories: {
+              select: {
+                name: true,
+              },
+            },
+            companies: {
+              select: {
+                company_name: true,
+              },
+            },
+            product_images: {
+              select: {
+                url_image: true,
+              },
+              where: {
+                is_show: true,
+              },
+            },
+            is_pre_order: true,
+            is_custom_options: true,
+            product_options: {
+              select: {
+                id: true,
+                mat_identity: true,
+                option_name: true,
+                online_price: true,
+                min_price: true,
+              },
+              orderBy: {
+                row_no: "asc",
+              },
+            },
+          },
+        });
+
+        if (!response) {
+          set.status = 404;
+          return { message: "No valid products found" };
+        }
+        return response;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching products:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Products - Find All",
+        description: `
+          This endpoint retrieves all valid products in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
+  .post(
+    "/products-online/company",
+    async ({ headers, set, body }) => {
+      try {
+        const company_id = body.company_id;
+        const response = await prisma.products.findMany({
+          where: {
+            is_active: true,
+            is_online_active: true,
+            // company_id: company_id,
+          },
+          select: {
+            id: true,
+            product_name: true,
+            product_description: true,
+            unit: true,
+            brands: {
+              select: {
+                brand_name: true,
+              },
+            },
+            product_categories: {
+              select: {
+                name: true,
+              },
+            },
+            companies: {
+              select: {
+                company_name: true,
+              },
+            },
+            product_images: {
+              select: {
+                url_image: true,
+              },
+              where: {
+                is_show: true,
+              },
+            },
+            is_pre_order: true,
+            is_custom_options: true,
+            product_options: {
+              select: {
+                id: true,
+                mat_identity: true,
+                option_name: true,
+                online_price: true,
+                min_price: true,
+              },
+              orderBy: {
+                row_no: "asc",
+              },
+            },
+          },
+        });
+
+        if (!response) {
+          set.status = 404;
+          return { message: "No valid products found" };
+        }
+        return response;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching products:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        company_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Products - Find products by Company ID",
+        description: `
+          This endpoint retrieves all valid products in the 3NConnect for a specific company.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
+  .post(
+    "/stock-inventory/product-mat-identity",
+    async ({ headers, set, body }) => {
+      try {
+        const mat_identity = body.mat_identity;
+        const stock = await prisma.vw_planetone_stocks.findFirst({
+          where: {
+            MATUnit: {
+              startsWith: mat_identity,
+            }
+          },
+          select: {
+            qty_total: true,
+          }
+        });
+        const stock_qty: number = stock?.qty_total || 0;
+        
+        return stock_qty;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching stock inventory:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        mat_identity: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Stock Inventory - Find stock by Material Identity",
+        description: `
+          This endpoint retrieves the stock quantity for a specific material identity.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
+  .post(
+    "/product-locations",
+    async ({ headers, set, body }) => {
+      try {
+        const mat_identity = body.mat_identity;
+
+        const response = await prisma.vw_planetone_stocks.findMany({
+          where: {
+            MATUnit: {
+              startsWith: mat_identity,
+            },
+            qty_total: {
+              gt: 0
+            }
+          },
+          select: {
+            Lot: true,
+            location_id: true,
+            purchaser_personnel: true,
+            expired: true,
+            invoice_id_mat_in: true,
+            qty_total: true,
+            age: true,
+          },
+          orderBy: {
+            age: "desc"
+          }
+        })
+
+        if(!response){
+          set.status = 404;
+          return { message: "Failed to get product locations." }
+        }
+
+        return response;
+      } catch (error) {
+        set.status = 500;
+        return { message: error }
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        mat_identity: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Stock Inventory - Find stock by Material Identity",
+        description: `
+          This endpoint retrieves the stock quantity for a specific material identity.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
+  .post(
+    "/orders-update/submit",
+    async ({ headers, set, body }) => {
+      try {
+        const parseNullableDate = (value?: string | null) => {
+          if (!value || value === "-") return null;
+
+          const slashDateMatch = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value);
+          if (slashDateMatch) {
+            const [, dd, mm, yyyy] = slashDateMatch;
+            const christianYear = Number(yyyy) > 2400 ? Number(yyyy) - 543 : Number(yyyy);
+            return new Date(`${christianYear}-${mm}-${dd}`);
+          }
+
+          const date = new Date(value);
+          return Number.isNaN(date.getTime()) ? null : date;
+        };
+
+        const parseNullableDateTime = (value?: string | null) => {
+          if (!value || value === "-") return null;
+
+          const date = new Date(value);
+          return Number.isNaN(date.getTime()) ? null : date;
+        };
+
+        const loggedAt = parseNullableDateTime(body.logged_at);
+
+        const result = await prisma.$transaction(async (tx) => {
+          const existingOrder = await tx.order_billing.findFirst({
+            where: {
+              order_uuid: body.order_uuid,
+            },
+            select: {
+              id: true,
+              order_uuid: true,
+              order_no: true,
+            },
+          });
+
+          if (!existingOrder) {
+            throw new Error("Not found order billing.");
+          }
+
+          const updatedOrder = await tx.order_billing.update({
+            where: {
+              id: existingOrder.id,
+            },
+            data: {
+              order_no: body.order_no,
+              admin_verify_status: body.admin_verify_status,
+              admin_updated_by: body.admin_updated_by,
+              order_status: body.admin_verify_status === "Pending" || body.admin_verify_status === "Paid" ? "Open" : body.admin_verify_status === "Cancelled" ? "Cancelled" : "Processing" ,
+              im_no: body.im_no,
+              shipping_cost: body.shipping_cost,
+              shipping_address_id: body.shipping_address_id,
+              log_payment: loggedAt,
+              updated_at: loggedAt,
+              admin_updated_at: loggedAt,
+            },
+            select: {
+              id: true,
+              order_uuid: true,
+              order_no: true,
+              admin_verify_status: true,
+              im_no: true,
+              shipping_cost: true,
+            },
+          });
+
+          await tx.order_billing_items.deleteMany({
+            where: {
+              order_billing_id: existingOrder.id,
+            },
+          });
+
+          if (body.billing_items.length > 0) {
+            await tx.order_billing_items.createMany({
+              data: body.billing_items.map((item) => ({
+                order_billing_id: existingOrder.id,
+                product_option_id: item.product_option_id,
+                order_product_quantity: item.order_product_quantity,
+                item_status: item.item_status,
+                mr_code: item.mr_code,
+                localtion_code: item.localtion_code,
+                product_owner: item.product_owner,
+                expire_date: parseNullableDate(item.expire_date),
+                lot_code: item.lot_code,
+                sale_price: item.sale_price,
+                order_price: item.order_price,
+                waiting_out_quantity: item.waiting_out_quantity,
+                admin_updated_at: loggedAt,
+                is_free: item.is_free,
+                promotion_from_product_option_id: item.promotion_from_product_option_id,
+              })),
+            });
+          }
+
+          const updatedItems = await tx.order_billing_items.findMany({
+            where: {
+              order_billing_id: existingOrder.id,
+            },
+            select: {
+              product_option_id: true,
+              order_product_quantity: true,
+              item_status: true,
+              mr_code: true,
+              localtion_code: true,
+              product_owner: true,
+              expire_date: true,
+              lot_code: true,
+              sale_price: true,
+              order_price: true,
+              waiting_out_quantity: true,
+              is_free: true,
+              promotion_from_product_option_id: true,
+            },
+          });
+
+          return {
+            ...updatedOrder,
+            billing_items: updatedItems,
+            logged_at: body.logged_at,
+          };
+        });
+
+        return {
+          message: "Order update success",
+          data: result,
+        };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = errorMessage === "Not found order billing." ? 404 : 500;
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        order_uuid: t.String(),
+        order_no: t.String(),
+        admin_verify_status: t.String(),
+        admin_updated_by: t.String(),
+        im_no: t.Optional(t.Nullable(t.String())),
+        shipping_cost: t.Optional(t.Nullable(t.Number())),
+        shipping_address_id: t.Number(),
+        billing_items: t.Array(
+          t.Object({
+            product_option_id: t.Number(),
+            order_product_quantity: t.Number(),
+            item_status: t.Optional(t.Nullable(t.String())),
+            mr_code: t.Optional(t.Nullable(t.String())),
+            localtion_code: t.Optional(t.Nullable(t.String())),
+            product_owner: t.Optional(t.Nullable(t.String())),
+            expire_date: t.Optional(t.Nullable(t.String())),
+            lot_code: t.Optional(t.Nullable(t.String())),
+            sale_price: t.Number(),
+            order_price: t.Number(),
+            waiting_out_quantity: t.Optional(t.Nullable(t.Number())),
+            is_free: t.Boolean(),
+            promotion_from_product_option_id: t.Optional(t.Nullable(t.Number())),
+            invoice_id_mat_in: t.Optional(t.Nullable(t.String())),
+            stock_age: t.Optional(t.Nullable(t.String())),
+          })
+        ),
+        logged_at: t.Optional(t.Nullable(t.String())),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Orders - Update Order",
+        description: `
+          This endpoint updates order header and billing items by order UUID.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
+  .post(
+    "/payment-information",
+    async({ headers, set, body}) => {
+      try{
+        const payment_invoice_no = body.payment_invoice_no;
+        const response = await prisma.order_billing_payment_response.findFirst({
+          where: {
+            invoice_no: payment_invoice_no
+          },
+          select: {
+            invoice_no: true,
+            amount: true,
+            currency_code: true,
+            tran_ref: true,
+            reference_no: true,
+            payment_agent_code: true,
+            payment_channel_code: true,
+            datetime: true,
+            response_code: true,
+            response_description: true,
+            card_info: true
+          }
+        })
+        if(!response){
+          set.status = 404;
+          return { message: "Failed to get payment information" }
+        }
+        return response
+      } catch (error) {
+        set.status = 500;
+        return { message: error }
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        payment_invoice_no: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Payment Information - Find By Invoice No.",
+        description: `
+          This endpoint use to get payment information with invoice no.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
   )
