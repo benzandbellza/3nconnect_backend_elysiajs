@@ -2,6 +2,7 @@ import { Elysia, replaceUrlPath, t } from "elysia";
 import { prisma } from "./prisma_connection";
 import { auth } from "../plugins/auth";
 import "dotenv/config";
+const now: Date = new Date();
 
 export const ecommerceCustomerRoute = new Elysia({
   prefix: "/api/ecommerce-customer",
@@ -1524,6 +1525,213 @@ export const ecommerceCustomerRoute = new Elysia({
         summary: "Order - Find All",
         description: `
           This endpoint retrieves all orders from the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+    }}
+  )
+  .post(
+    "/favorite-product/byproduct",
+    async({headers, set, body}) => {
+      try{ 
+        const product_option_id = body.product_option_id;
+        const customeruser_id = body.customeruser_id;
+
+        const count = await prisma.favorite_products.count({
+          where: {
+            product_option_id: product_option_id,
+            customeruser_id: customeruser_id
+          }
+        })
+
+        if(count >> 0){
+          return { favorite_status : true}
+        }else{
+          return { favorite_status: false }
+        }
+
+      } catch (error) {
+        set.status = 500
+        return {message: error}
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        product_option_id: t.Number(),
+        customeruser_id: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Favorite Products - Find by product_option_id",
+        description: `
+          This endpoint find favorite products by product_option_id.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+    }}
+  )
+  .get(
+    "/favorite-products/:customeruser_id",
+    async({ headers, set, params }) => {
+      try {
+        const { customeruser_id } = params;
+        const favorites = await prisma.favorite_products.findMany({
+          where: {
+            customeruser_id: customeruser_id,
+          },
+          select: {
+            product_option_id: true,
+            created_at: true,
+          },
+          orderBy: {
+            created_at: "desc",
+          },
+        });
+
+        if (favorites.length === 0) {
+          return {
+            success: true,
+            message: "Favorite products",
+            data: {
+              products: [],
+            },
+          };
+        }
+
+        const productOptionIds = favorites
+          .map((favorite) => favorite.product_option_id)
+          .filter((productOptionId): productOptionId is number => productOptionId !== null);
+
+        if (productOptionIds.length === 0) {
+          return {
+            success: true,
+            message: "Favorite products",
+            data: {
+              products: [],
+            },
+          };
+        }
+
+        const productCards = await prisma.vw_promotion_products_index.findMany({
+          where: {
+            product_option_id: {
+              in: productOptionIds,
+            },
+          },
+          select: {
+            product_option_id: true,
+            product_name: true,
+            promotion_type: true,
+            unit: true,
+            online_price: true,
+            sale_price: true,
+            sale_percent: true,
+            url_image: true,
+            option_name: true,
+            mat_identity: true,
+            is_accept_overlapse_promotion: true,
+          },
+        });
+
+        const productCardMap = new Map(
+          productCards.map((productCard) => [productCard.product_option_id, productCard]),
+        );
+
+        const products = favorites
+          .map((favorite) => {
+            const productCard = productCardMap.get(favorite.product_option_id);
+
+            if (!productCard) {
+              return null;
+            }
+
+            return {
+              ...productCard,
+              favorite_created_at: favorite.created_at,
+            };
+          })
+          .filter((product): product is NonNullable<typeof product> => product !== null);
+
+        return {
+          success: true,
+          message: "Favorite products",
+          data: {
+            products: products,
+          },
+        };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching favorite products:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      params: t.Object({
+        customeruser_id: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Favorite Products - List by customeruser_id",
+        description: `
+          This endpoint gets favorite products as product cards by customeruser_id.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+    }}
+  )
+  .post(
+    "/favorite-product/submit",
+    async({ headers, set, body}) => {
+      try { 
+        const customeruser_id = body.customeruser_id;
+        const product_option_id = body.product_option_id;
+        const favorite_status = body.favorite_status;
+
+        if(favorite_status){
+          await prisma.favorite_products.create({
+            data: {
+              product_option_id: product_option_id,
+              customeruser_id: customeruser_id,
+              created_at: now
+            }
+          })
+        }else{
+          await prisma.favorite_products.deleteMany({
+            where: {
+              product_option_id: product_option_id,
+              customeruser_id: customeruser_id
+            }
+          })
+        }
+
+        return { message : "Favorite process successfully."}
+
+      } catch (error) {
+        set.status = 500;
+        return {message: error}
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        customeruser_id: t.String(),
+        product_option_id: t.Number(),
+        favorite_status: t.Boolean(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Favorite Products - Submit Favorite",
+        description: `
+          This endpoint for submit favorite in 3NConnect.
         `.trim(),
         security: [{ bearerAuth: [] }],
         tags: ["3NConnect"],
