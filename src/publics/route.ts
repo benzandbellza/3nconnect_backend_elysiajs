@@ -649,6 +649,7 @@ export const publicRoute = new Elysia({
             select: {
               company_id: true,
               company_name: true,
+              product_name: true,
               product_option_id: true,
               online_price: true,
               sale_price: true,
@@ -679,6 +680,7 @@ export const publicRoute = new Elysia({
           if(findPromotionProducts){
             const promotion = {
               product_option_id: findPromotionProducts.product_option_id,
+              product_name: findPromotionProducts.product_name,
               online_price: findPromotionProducts.online_price,
               sale_price: findPromotionProducts.sale_price,
               sale_percent: findPromotionProducts.sale_percent,
