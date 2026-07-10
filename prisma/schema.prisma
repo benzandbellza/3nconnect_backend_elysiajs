@@ -426,7 +426,7 @@ model promotions {
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model order_billing {
   id                     Int                   @id(map: "customer_order_billing_pkey") @default(autoincrement())
-  order_no               String?
+  order_no               String?              @unique(map: "order_billing_order_no_key")
   buyer_customeruser_id  String                @db.Uuid
   payment_method_type    String?
   order_status           String?

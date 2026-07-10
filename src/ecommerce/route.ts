@@ -1,10 +1,42 @@
 import { Elysia, t } from "elysia";
 import { prisma } from "./prisma_connection";
+import { allocateNextOrderNumber } from "./order-number";
 import { auth } from "../plugins/auth";
 import "dotenv/config";
 
 const now: Date = new Date();
 // const utc7: Date = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+
+const parseNullableDate = (value?: string | null) => {
+  if (!value || value === "-" || value === "0") return null;
+
+  const slashDateMatch = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value);
+  if (slashDateMatch) {
+    const [, dd, mm, yyyy] = slashDateMatch;
+    const christianYear =
+      Number(yyyy) > 2400 ? Number(yyyy) - 543 : Number(yyyy);
+    return new Date(`${christianYear}-${mm}-${dd}`);
+  }
+
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const parseNullableDateTime = (value?: string | null) => {
+  if (!value || value === "-" || value === "0") return null;
+
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const mapAdminVerifyStatusToOrderStatus = (status?: string | null) => {
+  if (status === "Pending" || status === "Paid" || status === "Approved")
+    return "Open";
+  if (status === "Cancelled") return "Cancelled";
+  if (status === "Tranferring") return "Tranferring";
+  if (status === "Completed") return "Completed";
+  return "Processing";
+};
 
 export const ecommerceRoute = new Elysia({
   prefix: "/api/ecommerce",
@@ -6385,7 +6417,7 @@ export const ecommerceRoute = new Elysia({
           where: {
             is_active: true,
             is_online_active: true,
-            // company_id: company_id,
+            company_id: company_id,
           },
           select: {
             id: true,
@@ -6567,30 +6599,191 @@ export const ecommerceRoute = new Elysia({
     },
   )
   .post(
+    "/orders-create/submit",
+    async ({ headers, set, body }) => {
+      try {
+        const loggedAt = parseNullableDateTime(body.logged_at);
+        const orderDate = new Date();
+
+        const result = await prisma.$transaction(async (tx) => {
+          if (body.order_uuid) {
+            const duplicateOrder = await tx.order_billing.findFirst({
+              where: {
+                order_uuid: body.order_uuid,
+              },
+              select: {
+                id: true,
+              },
+            });
+
+            if (duplicateOrder) {
+              throw new Error("Order uuid already exists.");
+            }
+          }
+
+          const orderNo = await allocateNextOrderNumber(tx, orderDate);
+
+          const createdOrder = await tx.order_billing.create({
+            data: {
+              order_no: orderNo,
+              buyer_customeruser_id: body.buyer_customeruser_id,
+              payment_method_type: body.payment_method_type,
+              order_status: mapAdminVerifyStatusToOrderStatus(body.admin_verify_status),
+              im_no: body.im_no,
+              order_type: body.order_type,
+              invoice_id: body.invoice_id,
+              shipping_address_id: body.shipping_address_id,
+              payment_status: body.payment_status,
+              log_payment: loggedAt,
+              ...(body.order_uuid ? { order_uuid: body.order_uuid } : {}),
+              updated_at: loggedAt,
+              admin_updated_by: body.admin_updated_by,
+              admin_updated_at: loggedAt,
+              order_created_by: body.order_created_by,
+              contact_id: body.contact_id,
+              company_id: body.company_id,
+              credit_term_days: body.credit_term_days,
+              credit_payment_duedate:
+                typeof body.credit_payment_duedate === "string"
+                  ? parseNullableDate(body.credit_payment_duedate)
+                  : body.credit_payment_duedate,
+              shipping_cost: body.shipping_cost,
+              admin_verify_status: body.admin_verify_status,
+            },
+            select: {
+              id: true,
+              order_uuid: true,
+              order_no: true,
+              admin_verify_status: true,
+              im_no: true,
+              shipping_cost: true,
+            },
+          });
+
+          if (body.billing_items.length > 0) {
+            await tx.order_billing_items.createMany({
+              data: body.billing_items.map((item) => ({
+                order_billing_id: createdOrder.id,
+                product_option_id: item.product_option_id,
+                order_product_quantity: item.order_product_quantity,
+                item_status: item.item_status,
+                mr_code: item.mr_code,
+                localtion_code: item.localtion_code,
+                product_owner: item.product_owner,
+                expire_date: parseNullableDate(item.expire_date),
+                lot_code: item.lot_code === "0" ? null : item.lot_code,
+                sale_price: item.sale_price,
+                order_price: item.order_price,
+                waiting_out_quantity: item.waiting_out_quantity,
+                admin_updated_at: loggedAt,
+                is_free: item.is_free,
+                promotion_from_product_option_id:
+                  item.promotion_from_product_option_id,
+              })),
+            });
+          }
+
+          const createdItems = await tx.order_billing_items.findMany({
+            where: {
+              order_billing_id: createdOrder.id,
+            },
+            select: {
+              product_option_id: true,
+              order_product_quantity: true,
+              item_status: true,
+              mr_code: true,
+              localtion_code: true,
+              product_owner: true,
+              expire_date: true,
+              lot_code: true,
+              sale_price: true,
+              order_price: true,
+              waiting_out_quantity: true,
+              is_free: true,
+              promotion_from_product_option_id: true,
+            },
+          });
+
+          return {
+            ...createdOrder,
+            billing_items: createdItems,
+            logged_at: body.logged_at,
+          };
+        });
+
+        return {
+          message: "Order create success",
+          data: result,
+        };
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
+        set.status =
+          errorMessage === "Order uuid already exists."
+            ? 409
+            : errorMessage === "Monthly order number limit exceeded."
+              ? 422
+              : 500;
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        order_uuid: t.Optional(t.Nullable(t.String())),
+        buyer_customeruser_id: t.String(),
+        admin_updated_by: t.Optional(t.Nullable(t.String())),
+        admin_verify_status: t.String(),
+        im_no: t.Optional(t.Nullable(t.String())),
+        credit_term_days: t.Any(),
+        credit_payment_duedate: t.Any(),
+        shipping_address_id: t.Number(),
+        shipping_cost: t.Optional(t.Nullable(t.Number())),
+        payment_method_type: t.Optional(t.Nullable(t.String())),
+        order_type: t.Optional(t.Nullable(t.String())),
+        invoice_id: t.Optional(t.Nullable(t.Number())),
+        payment_status: t.Optional(t.Nullable(t.String())),
+        order_created_by: t.Optional(t.Nullable(t.String())),
+        contact_id: t.Optional(t.Nullable(t.Number())),
+        company_id: t.Optional(t.Nullable(t.Number())),
+        billing_items: t.Array(
+          t.Object({
+            product_option_id: t.Number(),
+            order_product_quantity: t.Number(),
+            item_status: t.Optional(t.Nullable(t.String())),
+            mr_code: t.Optional(t.Nullable(t.String())),
+            localtion_code: t.Optional(t.Nullable(t.String())),
+            product_owner: t.Optional(t.Nullable(t.String())),
+            expire_date: t.Optional(t.Nullable(t.String())),
+            lot_code: t.Optional(t.Nullable(t.String())),
+            sale_price: t.Number(),
+            order_price: t.Number(),
+            waiting_out_quantity: t.Optional(t.Nullable(t.Number())),
+            is_free: t.Boolean(),
+            promotion_from_product_option_id: t.Optional(t.Nullable(t.Number())),
+            invoice_id_mat_in: t.Optional(t.Nullable(t.String())),
+            stock_age: t.Optional(t.Nullable(t.String())),
+          })
+        ),
+        logged_at: t.Optional(t.Nullable(t.String())),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Orders - Create Order",
+        description: `
+          This endpoint creates order header and billing items in one transaction.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    },
+  )
+  .post(
     "/orders-update/submit",
     async ({ headers, set, body }) => {
       try {
-        const parseNullableDate = (value?: string | null) => {
-          if (!value || value === "-") return null;
-
-          const slashDateMatch = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value);
-          if (slashDateMatch) {
-            const [, dd, mm, yyyy] = slashDateMatch;
-            const christianYear = Number(yyyy) > 2400 ? Number(yyyy) - 543 : Number(yyyy);
-            return new Date(`${christianYear}-${mm}-${dd}`);
-          }
-
-          const date = new Date(value);
-          return Number.isNaN(date.getTime()) ? null : date;
-        };
-
-        const parseNullableDateTime = (value?: string | null) => {
-          if (!value || value === "-") return null;
-
-          const date = new Date(value);
-          return Number.isNaN(date.getTime()) ? null : date;
-        };
-
         const loggedAt = parseNullableDateTime(body.logged_at);
 
         const result = await prisma.$transaction(async (tx) => {
@@ -6614,15 +6807,11 @@ export const ecommerceRoute = new Elysia({
               id: existingOrder.id,
             },
             data: {
-              order_no: body.order_no,
               admin_verify_status: body.admin_verify_status,
               admin_updated_by: body.admin_updated_by,
-              order_status: 
-                body.admin_verify_status === "Pending" || body.admin_verify_status === "Paid" ? "Open" : 
-                body.admin_verify_status === "Cancelled" ? "Cancelled" : 
-                body.admin_verify_status === "Tranferring" ? "Tranferring" : 
-                body.admin_verify_status === "Completed" ? "Completed" :
-                "Processing" ,
+              order_status: mapAdminVerifyStatusToOrderStatus(
+                body.admin_verify_status
+              ),
               im_no: body.im_no,
               shipping_cost: body.shipping_cost,
               shipping_address_id: body.shipping_address_id,
@@ -6715,7 +6904,6 @@ export const ecommerceRoute = new Elysia({
       }),
       body: t.Object({
         order_uuid: t.String(),
-        order_no: t.String(),
         credit_payment_duedate: t.Any(),
         credit_term_days: t.Any(),
         admin_verify_status: t.String(),
@@ -6795,6 +6983,66 @@ export const ecommerceRoute = new Elysia({
       }),
       body: t.Object({
         payment_invoice_no: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Payment Information - Find By Invoice No.",
+        description: `
+          This endpoint use to get payment information with invoice no.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
+  .post(
+    "/customers/search",
+    async({ headers, set, body}) => {
+      try{
+        const search = body.search;
+        const response = await prisma.vw_customer_information.findMany({
+          where : {
+            pdpa_accepted: true,
+            OR: [
+              {
+                fullname_th: {
+                  contains: search
+                }
+              },
+              {
+                phone_no: {
+                  contains: search
+                }
+              }
+            ]
+          },
+          select: {
+            user_id: true,
+            auth_id: true,
+            member_no: true,
+            gender: true,
+            prefix_th: true,
+            fullname_th: true,
+            email: true,
+            birthday: true,
+            phone_no: true,
+            tier: true,
+          }
+        })
+        return response;
+
+      }catch (error) {
+        set.status = 500;
+        return { message: error }
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        search: t.String(),
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
