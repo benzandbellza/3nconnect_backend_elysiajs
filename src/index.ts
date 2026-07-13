@@ -6,6 +6,9 @@ import { publicRoute } from "./publics/route";
 import { cors } from "@elysiajs/cors";
 import { openapi } from "@elysiajs/openapi";
 
+(BigInt.prototype as any).toJSON = function () {
+  return Number(this);
+};
 
 const app = new Elysia()
   .use(

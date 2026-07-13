@@ -2,6 +2,7 @@ import { Elysia, replaceUrlPath, t } from "elysia";
 import { prisma } from "./prisma_connection";
 import { auth } from "../plugins/auth";
 import "dotenv/config";
+
 const now: Date = new Date();
 
 export const ecommerceCustomerRoute = new Elysia({
