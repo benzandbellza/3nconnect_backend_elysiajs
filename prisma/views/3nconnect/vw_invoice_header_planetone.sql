@@ -1,5 +1,5 @@
 SELECT
-  (id) :: integer AS id,
+  id,
   created_at,
   company_name,
   "Entity ID",

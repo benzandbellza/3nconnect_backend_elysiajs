@@ -2,6 +2,7 @@ import { Elysia, t } from "elysia";
 import { prisma } from "./prisma_connection";
 import "dotenv/config";
 import { createClient } from '@supabase/supabase-js'
+import { responsePathAsArray } from "graphql";
 
 const now: Date = new Date();
 
@@ -1601,6 +1602,41 @@ export const publicRoute = new Elysia({
       params: t.Object({
         gift_voucher_id: t.Number(),
       }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Campaign Voucher - View detail campaign by gift_voucher_id",
+        description: `
+          This endpoint retrieves detail of campaign voucher.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["Publics"],
+      },
+    },
+  )
+  .get(
+    "/gibstock",
+    async({ headers, set}) => {
+      try{
+        const response = await prisma.product_options.findMany({
+          where: {
+            online_price: {
+              not : null
+            }
+          }
+        });
+
+        if(!response){
+          set.status = 404;
+          return { message : "Failed to get Gib stocks." }
+        }
+
+        return response;
+      } catch (error) {
+        set.status = 500;
+        return { message: error }
+      }
+    },
+    {
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
         summary: "Campaign Voucher - View detail campaign by gift_voucher_id",
