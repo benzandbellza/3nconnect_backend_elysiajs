@@ -20,7 +20,10 @@ export const customer_addressPlain = t.Object(
     post_code: __nullable__(t.String()),
     set_default: __nullable__(t.Boolean()),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const customer_addressRelations = t.Object(
@@ -61,7 +64,10 @@ export const customer_addressRelations = t.Object(
       { additionalProperties: false },
     ),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const customer_addressPlainInputCreate = t.Object(
@@ -78,7 +84,10 @@ export const customer_addressPlainInputCreate = t.Object(
     post_code: t.Optional(__nullable__(t.String())),
     set_default: t.Optional(__nullable__(t.Boolean())),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const customer_addressPlainInputUpdate = t.Object(
@@ -95,7 +104,10 @@ export const customer_addressPlainInputUpdate = t.Object(
     post_code: t.Optional(__nullable__(t.String())),
     set_default: t.Optional(__nullable__(t.Boolean())),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const customer_addressRelationsInputCreate = t.Object(
@@ -117,7 +129,10 @@ export const customer_addressRelationsInputCreate = t.Object(
       ),
     ),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const customer_addressRelationsInputUpdate = t.Partial(
@@ -149,7 +164,10 @@ export const customer_addressRelationsInputUpdate = t.Partial(
         ),
       ),
     },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 
@@ -175,7 +193,10 @@ export const customer_addressWhere = t.Partial(
           post_code: t.String(),
           set_default: t.Boolean(),
         },
-        { additionalProperties: false },
+        {
+          additionalProperties: false,
+          description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+        },
       ),
     { $id: "customer_address" },
   ),
@@ -186,7 +207,13 @@ export const customer_addressWhereUnique = t.Recursive(
     t.Intersect(
       [
         t.Partial(
-          t.Object({ id: t.Integer() }, { additionalProperties: false }),
+          t.Object(
+            { id: t.Integer() },
+            {
+              additionalProperties: false,
+              description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+            },
+          ),
           { additionalProperties: false },
         ),
         t.Union([t.Object({ id: t.Integer() })], {
@@ -251,14 +278,20 @@ export const customer_addressSelect = t.Partial(
       order_billing: t.Boolean(),
       _count: t.Boolean(),
     },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 
 export const customer_addressInclude = t.Partial(
   t.Object(
     { order_billing: t.Boolean(), _count: t.Boolean() },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 
@@ -305,7 +338,10 @@ export const customer_addressOrderBy = t.Partial(
         additionalProperties: false,
       }),
     },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 

@@ -12,7 +12,10 @@ export const promotion_extra_points_tier_rulesPlain = t.Object(
     min_amount: __nullable__(t.Number()),
     points_multiplier: __nullable__(t.Number()),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const promotion_extra_points_tier_rulesRelations = t.Object(
@@ -34,11 +37,17 @@ export const promotion_extra_points_tier_rulesRelations = t.Object(
           promotion_description: __nullable__(t.String()),
           customer_tiers: t.Array(t.String(), { additionalProperties: false }),
         },
-        { additionalProperties: false },
+        {
+          additionalProperties: false,
+          description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+        },
       ),
     ),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const promotion_extra_points_tier_rulesPlainInputCreate = t.Object(
@@ -47,7 +56,10 @@ export const promotion_extra_points_tier_rulesPlainInputCreate = t.Object(
     min_amount: t.Optional(__nullable__(t.Number())),
     points_multiplier: t.Optional(__nullable__(t.Number())),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const promotion_extra_points_tier_rulesPlainInputUpdate = t.Object(
@@ -56,7 +68,10 @@ export const promotion_extra_points_tier_rulesPlainInputUpdate = t.Object(
     min_amount: t.Optional(__nullable__(t.Number())),
     points_multiplier: t.Optional(__nullable__(t.Number())),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const promotion_extra_points_tier_rulesRelationsInputCreate = t.Object(
@@ -75,7 +90,10 @@ export const promotion_extra_points_tier_rulesRelationsInputCreate = t.Object(
       ),
     ),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const promotion_extra_points_tier_rulesRelationsInputUpdate = t.Partial(
@@ -96,7 +114,10 @@ export const promotion_extra_points_tier_rulesRelationsInputUpdate = t.Partial(
         ),
       ),
     },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 
@@ -114,7 +135,10 @@ export const promotion_extra_points_tier_rulesWhere = t.Partial(
           min_amount: t.Number(),
           points_multiplier: t.Number(),
         },
-        { additionalProperties: false },
+        {
+          additionalProperties: false,
+          description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+        },
       ),
     { $id: "promotion_extra_points_tier_rules" },
   ),
@@ -125,7 +149,13 @@ export const promotion_extra_points_tier_rulesWhereUnique = t.Recursive(
     t.Intersect(
       [
         t.Partial(
-          t.Object({ id: t.Integer() }, { additionalProperties: false }),
+          t.Object(
+            { id: t.Integer() },
+            {
+              additionalProperties: false,
+              description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+            },
+          ),
           { additionalProperties: false },
         ),
         t.Union([t.Object({ id: t.Integer() })], {
@@ -174,14 +204,20 @@ export const promotion_extra_points_tier_rulesSelect = t.Partial(
       promotions: t.Boolean(),
       _count: t.Boolean(),
     },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 
 export const promotion_extra_points_tier_rulesInclude = t.Partial(
   t.Object(
     { promotions: t.Boolean(), _count: t.Boolean() },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 
@@ -204,7 +240,10 @@ export const promotion_extra_points_tier_rulesOrderBy = t.Partial(
         additionalProperties: false,
       }),
     },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 

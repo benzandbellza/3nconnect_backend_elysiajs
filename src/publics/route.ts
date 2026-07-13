@@ -1613,32 +1613,32 @@ export const publicRoute = new Elysia({
       },
     },
   )
-  .get(
-    "/gibstock",
-    async({ headers, set}) => {
-      try{
-        const response = await prisma.gibstock.findMany();
+  // .get(
+  //   "/gibstock",
+  //   async({ headers, set}) => {
+  //     try{
+  //       const response = await prisma.gibstock.findMany();
 
-        if(!response){
-          set.status = 404;
-          return { message : "Failed to get Gib stocks." }
-        }
+  //       if(!response){
+  //         set.status = 404;
+  //         return { message : "Failed to get Gib stocks." }
+  //       }
 
-        return response;
-      } catch (error) {
-        set.status = 500;
-        return { message: error }
-      }
-    },
-    {
-      detail: {
-        servers: [{ url: process.env.APP_API_PREFIX || "" }],
-        summary: "Campaign Voucher - View detail campaign by gift_voucher_id",
-        description: `
-          This endpoint retrieves detail of campaign voucher.
-        `.trim(),
-        security: [{ bearerAuth: [] }],
-        tags: ["Publics"],
-      },
-    },
-  )
+  //       return response;
+  //     } catch (error) {
+  //       set.status = 500;
+  //       return { message: error }
+  //     }
+  //   },
+  //   {
+  //     detail: {
+  //       servers: [{ url: process.env.APP_API_PREFIX || "" }],
+  //       summary: "Campaign Voucher - View detail campaign by gift_voucher_id",
+  //       description: `
+  //         This endpoint retrieves detail of campaign voucher.
+  //       `.trim(),
+  //       security: [{ bearerAuth: [] }],
+  //       tags: ["Publics"],
+  //     },
+  //   },
+  // )

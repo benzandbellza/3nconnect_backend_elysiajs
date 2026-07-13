@@ -14,12 +14,18 @@ export const cart_reviewsPlain = t.Object(
     created_at: t.Date(),
     customeruser_id: __nullable__(t.String()),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const cart_reviewsRelations = t.Object(
   {},
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const cart_reviewsPlainInputCreate = t.Object(
@@ -30,7 +36,10 @@ export const cart_reviewsPlainInputCreate = t.Object(
     requires_sign_in_for_payment: t.Optional(__nullable__(t.Boolean())),
     created_at: t.Optional(t.Date()),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const cart_reviewsPlainInputUpdate = t.Object(
@@ -41,16 +50,28 @@ export const cart_reviewsPlainInputUpdate = t.Object(
     requires_sign_in_for_payment: t.Optional(__nullable__(t.Boolean())),
     created_at: t.Optional(t.Date()),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const cart_reviewsRelationsInputCreate = t.Object(
   {},
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const cart_reviewsRelationsInputUpdate = t.Partial(
-  t.Object({}, { additionalProperties: false }),
+  t.Object(
+    {},
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
+  ),
 );
 
 export const cart_reviewsWhere = t.Partial(
@@ -69,7 +90,10 @@ export const cart_reviewsWhere = t.Partial(
           created_at: t.Date(),
           customeruser_id: t.String(),
         },
-        { additionalProperties: false },
+        {
+          additionalProperties: false,
+          description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+        },
       ),
     { $id: "cart_reviews" },
   ),
@@ -80,7 +104,13 @@ export const cart_reviewsWhereUnique = t.Recursive(
     t.Intersect(
       [
         t.Partial(
-          t.Object({ id: t.Integer() }, { additionalProperties: false }),
+          t.Object(
+            { id: t.Integer() },
+            {
+              additionalProperties: false,
+              description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+            },
+          ),
           { additionalProperties: false },
         ),
         t.Union([t.Object({ id: t.Integer() })], {
@@ -132,12 +162,21 @@ export const cart_reviewsSelect = t.Partial(
       customeruser_id: t.Boolean(),
       _count: t.Boolean(),
     },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 
 export const cart_reviewsInclude = t.Partial(
-  t.Object({ _count: t.Boolean() }, { additionalProperties: false }),
+  t.Object(
+    { _count: t.Boolean() },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
+  ),
 );
 
 export const cart_reviewsOrderBy = t.Partial(
@@ -167,7 +206,10 @@ export const cart_reviewsOrderBy = t.Partial(
         additionalProperties: false,
       }),
     },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 

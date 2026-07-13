@@ -11,7 +11,10 @@ export const promotion_bundle_deal_free_productsPlain = t.Object(
     product_option_id: __nullable__(t.Integer()),
     free_quantity: __nullable__(t.Integer()),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const promotion_bundle_deal_free_productsRelations = t.Object(
@@ -24,21 +27,33 @@ export const promotion_bundle_deal_free_productsRelations = t.Object(
           product_option_id: __nullable__(t.Integer()),
           get_quantity: __nullable__(t.Integer()),
         },
-        { additionalProperties: false },
+        {
+          additionalProperties: false,
+          description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+        },
       ),
     ),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const promotion_bundle_deal_free_productsPlainInputCreate = t.Object(
   { free_quantity: t.Optional(__nullable__(t.Integer())) },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const promotion_bundle_deal_free_productsPlainInputUpdate = t.Object(
   { free_quantity: t.Optional(__nullable__(t.Integer())) },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const promotion_bundle_deal_free_productsRelationsInputCreate = t.Object(
@@ -57,7 +72,10 @@ export const promotion_bundle_deal_free_productsRelationsInputCreate = t.Object(
       ),
     ),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const promotion_bundle_deal_free_productsRelationsInputUpdate =
@@ -79,7 +97,10 @@ export const promotion_bundle_deal_free_productsRelationsInputUpdate =
           ),
         ),
       },
-      { additionalProperties: false },
+      {
+        additionalProperties: false,
+        description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+      },
     ),
   );
 
@@ -96,7 +117,10 @@ export const promotion_bundle_deal_free_productsWhere = t.Partial(
           product_option_id: t.Integer(),
           free_quantity: t.Integer(),
         },
-        { additionalProperties: false },
+        {
+          additionalProperties: false,
+          description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+        },
       ),
     { $id: "promotion_bundle_deal_free_products" },
   ),
@@ -107,7 +131,13 @@ export const promotion_bundle_deal_free_productsWhereUnique = t.Recursive(
     t.Intersect(
       [
         t.Partial(
-          t.Object({ id: t.Integer() }, { additionalProperties: false }),
+          t.Object(
+            { id: t.Integer() },
+            {
+              additionalProperties: false,
+              description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+            },
+          ),
           { additionalProperties: false },
         ),
         t.Union([t.Object({ id: t.Integer() })], {
@@ -154,14 +184,20 @@ export const promotion_bundle_deal_free_productsSelect = t.Partial(
       promotion_bundle_deal_get_products: t.Boolean(),
       _count: t.Boolean(),
     },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 
 export const promotion_bundle_deal_free_productsInclude = t.Partial(
   t.Object(
     { promotion_bundle_deal_get_products: t.Boolean(), _count: t.Boolean() },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 
@@ -181,7 +217,10 @@ export const promotion_bundle_deal_free_productsOrderBy = t.Partial(
         additionalProperties: false,
       }),
     },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 

@@ -15,7 +15,10 @@ export const brandsPlain = t.Object(
     created_at: t.Date(),
     updated_at: __nullable__(t.Date()),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const brandsRelations = t.Object(
@@ -44,12 +47,18 @@ export const brandsRelations = t.Object(
           is_pre_order: __nullable__(t.Boolean()),
           is_custom_options: __nullable__(t.Boolean()),
         },
-        { additionalProperties: false },
+        {
+          additionalProperties: false,
+          description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+        },
       ),
       { additionalProperties: false },
     ),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const brandsPlainInputCreate = t.Object(
@@ -61,7 +70,10 @@ export const brandsPlainInputCreate = t.Object(
     created_at: t.Optional(t.Date()),
     updated_at: t.Optional(__nullable__(t.Date())),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const brandsPlainInputUpdate = t.Object(
@@ -73,7 +85,10 @@ export const brandsPlainInputUpdate = t.Object(
     created_at: t.Optional(t.Date()),
     updated_at: t.Optional(__nullable__(t.Date())),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const brandsRelationsInputCreate = t.Object(
@@ -95,7 +110,10 @@ export const brandsRelationsInputCreate = t.Object(
       ),
     ),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const brandsRelationsInputUpdate = t.Partial(
@@ -127,7 +145,10 @@ export const brandsRelationsInputUpdate = t.Partial(
         ),
       ),
     },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 
@@ -148,7 +169,10 @@ export const brandsWhere = t.Partial(
           created_at: t.Date(),
           updated_at: t.Date(),
         },
-        { additionalProperties: false },
+        {
+          additionalProperties: false,
+          description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+        },
       ),
     { $id: "brands" },
   ),
@@ -159,7 +183,13 @@ export const brandsWhereUnique = t.Recursive(
     t.Intersect(
       [
         t.Partial(
-          t.Object({ id: t.Integer() }, { additionalProperties: false }),
+          t.Object(
+            { id: t.Integer() },
+            {
+              additionalProperties: false,
+              description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+            },
+          ),
           { additionalProperties: false },
         ),
         t.Union([t.Object({ id: t.Integer() })], {
@@ -214,14 +244,20 @@ export const brandsSelect = t.Partial(
       products: t.Boolean(),
       _count: t.Boolean(),
     },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 
 export const brandsInclude = t.Partial(
   t.Object(
     { products: t.Boolean(), _count: t.Boolean() },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 
@@ -253,7 +289,10 @@ export const brandsOrderBy = t.Partial(
         additionalProperties: false,
       }),
     },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 

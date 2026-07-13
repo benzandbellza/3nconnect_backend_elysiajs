@@ -50,7 +50,10 @@ export const order_billingRelations = t.Object(
           updated_at: __nullable__(t.Date()),
           is_active: t.Boolean(),
         },
-        { additionalProperties: false },
+        {
+          additionalProperties: false,
+          description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+        },
       ),
     ),
     customer_address: __nullable__(
@@ -70,7 +73,10 @@ export const order_billingRelations = t.Object(
           post_code: __nullable__(t.String()),
           set_default: __nullable__(t.Boolean()),
         },
-        { additionalProperties: false },
+        {
+          additionalProperties: false,
+          description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+        },
       ),
     ),
     order_billing_items: t.Array(

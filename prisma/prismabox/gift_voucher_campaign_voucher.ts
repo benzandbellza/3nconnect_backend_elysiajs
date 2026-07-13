@@ -10,7 +10,10 @@ export const gift_voucher_campaign_voucherPlain = t.Object(
     gift_voucher_id: __nullable__(t.Integer()),
     generic_voucher_id: __nullable__(t.Integer()),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const gift_voucher_campaign_voucherRelations = t.Object(
@@ -45,21 +48,33 @@ export const gift_voucher_campaign_voucherRelations = t.Object(
           event_trigger: __nullable__(t.String()),
           tier_trigger_name: __nullable__(t.String()),
         },
-        { additionalProperties: false },
+        {
+          additionalProperties: false,
+          description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+        },
       ),
     ),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const gift_voucher_campaign_voucherPlainInputCreate = t.Object(
   {},
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const gift_voucher_campaign_voucherPlainInputUpdate = t.Object(
   {},
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const gift_voucher_campaign_voucherRelationsInputCreate = t.Object(
@@ -78,7 +93,10 @@ export const gift_voucher_campaign_voucherRelationsInputCreate = t.Object(
       ),
     ),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const gift_voucher_campaign_voucherRelationsInputUpdate = t.Partial(
@@ -99,7 +117,10 @@ export const gift_voucher_campaign_voucherRelationsInputUpdate = t.Partial(
         ),
       ),
     },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 
@@ -115,7 +136,10 @@ export const gift_voucher_campaign_voucherWhere = t.Partial(
           gift_voucher_id: t.Integer(),
           generic_voucher_id: t.Integer(),
         },
-        { additionalProperties: false },
+        {
+          additionalProperties: false,
+          description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+        },
       ),
     { $id: "gift_voucher_campaign_voucher" },
   ),
@@ -126,7 +150,13 @@ export const gift_voucher_campaign_voucherWhereUnique = t.Recursive(
     t.Intersect(
       [
         t.Partial(
-          t.Object({ id: t.Integer() }, { additionalProperties: false }),
+          t.Object(
+            { id: t.Integer() },
+            {
+              additionalProperties: false,
+              description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+            },
+          ),
           { additionalProperties: false },
         ),
         t.Union([t.Object({ id: t.Integer() })], {
@@ -171,14 +201,20 @@ export const gift_voucher_campaign_voucherSelect = t.Partial(
       gift_voucher: t.Boolean(),
       _count: t.Boolean(),
     },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 
 export const gift_voucher_campaign_voucherInclude = t.Partial(
   t.Object(
     { gift_voucher: t.Boolean(), _count: t.Boolean() },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 
@@ -195,7 +231,10 @@ export const gift_voucher_campaign_voucherOrderBy = t.Partial(
         additionalProperties: false,
       }),
     },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 

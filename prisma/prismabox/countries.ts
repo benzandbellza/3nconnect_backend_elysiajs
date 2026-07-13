@@ -13,10 +13,19 @@ export const countriesPlain = t.Object(
     is_active: __nullable__(t.Boolean()),
     short_name: __nullable__(t.String()),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
-export const countriesRelations = t.Object({}, { additionalProperties: false });
+export const countriesRelations = t.Object(
+  {},
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
+);
 
 export const countriesPlainInputCreate = t.Object(
   {
@@ -26,7 +35,10 @@ export const countriesPlainInputCreate = t.Object(
     is_active: t.Optional(__nullable__(t.Boolean())),
     short_name: t.Optional(__nullable__(t.String())),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const countriesPlainInputUpdate = t.Object(
@@ -37,16 +49,28 @@ export const countriesPlainInputUpdate = t.Object(
     is_active: t.Optional(__nullable__(t.Boolean())),
     short_name: t.Optional(__nullable__(t.String())),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const countriesRelationsInputCreate = t.Object(
   {},
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const countriesRelationsInputUpdate = t.Partial(
-  t.Object({}, { additionalProperties: false }),
+  t.Object(
+    {},
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
+  ),
 );
 
 export const countriesWhere = t.Partial(
@@ -64,7 +88,10 @@ export const countriesWhere = t.Partial(
           is_active: t.Boolean(),
           short_name: t.String(),
         },
-        { additionalProperties: false },
+        {
+          additionalProperties: false,
+          description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+        },
       ),
     { $id: "countries" },
   ),
@@ -75,7 +102,13 @@ export const countriesWhereUnique = t.Recursive(
     t.Intersect(
       [
         t.Partial(
-          t.Object({ id: t.Integer() }, { additionalProperties: false }),
+          t.Object(
+            { id: t.Integer() },
+            {
+              additionalProperties: false,
+              description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+            },
+          ),
           { additionalProperties: false },
         ),
         t.Union([t.Object({ id: t.Integer() })], {
@@ -125,12 +158,21 @@ export const countriesSelect = t.Partial(
       short_name: t.Boolean(),
       _count: t.Boolean(),
     },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 
 export const countriesInclude = t.Partial(
-  t.Object({ _count: t.Boolean() }, { additionalProperties: false }),
+  t.Object(
+    { _count: t.Boolean() },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
+  ),
 );
 
 export const countriesOrderBy = t.Partial(
@@ -155,7 +197,10 @@ export const countriesOrderBy = t.Partial(
         additionalProperties: false,
       }),
     },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 

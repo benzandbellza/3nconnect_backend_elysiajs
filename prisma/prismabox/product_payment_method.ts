@@ -15,7 +15,10 @@ export const product_payment_methodPlain = t.Object(
     created_at: t.Date(),
     updated_at: __nullable__(t.Date()),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const product_payment_methodRelations = t.Object(
@@ -44,11 +47,17 @@ export const product_payment_methodRelations = t.Object(
           is_pre_order: __nullable__(t.Boolean()),
           is_custom_options: __nullable__(t.Boolean()),
         },
-        { additionalProperties: false },
+        {
+          additionalProperties: false,
+          description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+        },
       ),
     ),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const product_payment_methodPlainInputCreate = t.Object(
@@ -60,7 +69,10 @@ export const product_payment_methodPlainInputCreate = t.Object(
     created_at: t.Optional(t.Date()),
     updated_at: t.Optional(__nullable__(t.Date())),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const product_payment_methodPlainInputUpdate = t.Object(
@@ -72,7 +84,10 @@ export const product_payment_methodPlainInputUpdate = t.Object(
     created_at: t.Optional(t.Date()),
     updated_at: t.Optional(__nullable__(t.Date())),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const product_payment_methodRelationsInputCreate = t.Object(
@@ -91,7 +106,10 @@ export const product_payment_methodRelationsInputCreate = t.Object(
       ),
     ),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const product_payment_methodRelationsInputUpdate = t.Partial(
@@ -112,7 +130,10 @@ export const product_payment_methodRelationsInputUpdate = t.Partial(
         ),
       ),
     },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 
@@ -133,7 +154,10 @@ export const product_payment_methodWhere = t.Partial(
           created_at: t.Date(),
           updated_at: t.Date(),
         },
-        { additionalProperties: false },
+        {
+          additionalProperties: false,
+          description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+        },
       ),
     { $id: "product_payment_method" },
   ),
@@ -144,7 +168,13 @@ export const product_payment_methodWhereUnique = t.Recursive(
     t.Intersect(
       [
         t.Partial(
-          t.Object({ id: t.Integer() }, { additionalProperties: false }),
+          t.Object(
+            { id: t.Integer() },
+            {
+              additionalProperties: false,
+              description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+            },
+          ),
           { additionalProperties: false },
         ),
         t.Union([t.Object({ id: t.Integer() })], {
@@ -199,14 +229,20 @@ export const product_payment_methodSelect = t.Partial(
       products: t.Boolean(),
       _count: t.Boolean(),
     },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 
 export const product_payment_methodInclude = t.Partial(
   t.Object(
     { products: t.Boolean(), _count: t.Boolean() },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 
@@ -238,7 +274,10 @@ export const product_payment_methodOrderBy = t.Partial(
         additionalProperties: false,
       }),
     },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 

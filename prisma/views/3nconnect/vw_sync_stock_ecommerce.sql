@@ -1,5 +1,5 @@
 SELECT
-  (p.id) :: integer AS id,
+  p.id,
   p.created_at,
   p."MM_RPTMAT_MATUnit ID" AS mat_unit_identity,
   product_ecommerce.mat_identity AS ecommerce_mat_identity,

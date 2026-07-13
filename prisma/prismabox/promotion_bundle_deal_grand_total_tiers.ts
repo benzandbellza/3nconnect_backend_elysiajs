@@ -11,7 +11,10 @@ export const promotion_bundle_deal_grand_total_tiersPlain = t.Object(
     level_no: __nullable__(t.Integer()),
     minimum_grand_total: __nullable__(t.Number()),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const promotion_bundle_deal_grand_total_tiersRelations = t.Object(
@@ -24,7 +27,10 @@ export const promotion_bundle_deal_grand_total_tiersRelations = t.Object(
           product_option_id: __nullable__(t.Integer()),
           free_quantity: __nullable__(t.Integer()),
         },
-        { additionalProperties: false },
+        {
+          additionalProperties: false,
+          description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+        },
       ),
       { additionalProperties: false },
     ),
@@ -45,11 +51,17 @@ export const promotion_bundle_deal_grand_total_tiersRelations = t.Object(
           promotion_description: __nullable__(t.String()),
           customer_tiers: t.Array(t.String(), { additionalProperties: false }),
         },
-        { additionalProperties: false },
+        {
+          additionalProperties: false,
+          description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+        },
       ),
     ),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const promotion_bundle_deal_grand_total_tiersPlainInputCreate = t.Object(
@@ -57,7 +69,10 @@ export const promotion_bundle_deal_grand_total_tiersPlainInputCreate = t.Object(
     level_no: t.Optional(__nullable__(t.Integer())),
     minimum_grand_total: t.Optional(__nullable__(t.Number())),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const promotion_bundle_deal_grand_total_tiersPlainInputUpdate = t.Object(
@@ -65,7 +80,10 @@ export const promotion_bundle_deal_grand_total_tiersPlainInputUpdate = t.Object(
     level_no: t.Optional(__nullable__(t.Integer())),
     minimum_grand_total: t.Optional(__nullable__(t.Number())),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const promotion_bundle_deal_grand_total_tiersRelationsInputCreate =
@@ -101,7 +119,10 @@ export const promotion_bundle_deal_grand_total_tiersRelationsInputCreate =
         ),
       ),
     },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   );
 
 export const promotion_bundle_deal_grand_total_tiersRelationsInputUpdate =
@@ -148,7 +169,10 @@ export const promotion_bundle_deal_grand_total_tiersRelationsInputUpdate =
           ),
         ),
       },
-      { additionalProperties: false },
+      {
+        additionalProperties: false,
+        description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+      },
     ),
   );
 
@@ -165,7 +189,10 @@ export const promotion_bundle_deal_grand_total_tiersWhere = t.Partial(
           level_no: t.Integer(),
           minimum_grand_total: t.Number(),
         },
-        { additionalProperties: false },
+        {
+          additionalProperties: false,
+          description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+        },
       ),
     { $id: "promotion_bundle_deal_grand_total_tiers" },
   ),
@@ -176,7 +203,13 @@ export const promotion_bundle_deal_grand_total_tiersWhereUnique = t.Recursive(
     t.Intersect(
       [
         t.Partial(
-          t.Object({ id: t.Integer() }, { additionalProperties: false }),
+          t.Object(
+            { id: t.Integer() },
+            {
+              additionalProperties: false,
+              description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+            },
+          ),
           { additionalProperties: false },
         ),
         t.Union([t.Object({ id: t.Integer() })], {
@@ -224,7 +257,10 @@ export const promotion_bundle_deal_grand_total_tiersSelect = t.Partial(
       promotions: t.Boolean(),
       _count: t.Boolean(),
     },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 
@@ -235,7 +271,10 @@ export const promotion_bundle_deal_grand_total_tiersInclude = t.Partial(
       promotions: t.Boolean(),
       _count: t.Boolean(),
     },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 
@@ -255,7 +294,10 @@ export const promotion_bundle_deal_grand_total_tiersOrderBy = t.Partial(
         additionalProperties: false,
       }),
     },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 

@@ -13,7 +13,10 @@ export const attribute_groupsPlain = t.Object(
     created_at: t.Date(),
     updated_at: __nullable__(t.Date()),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const attribute_groupsRelations = t.Object(
@@ -29,12 +32,18 @@ export const attribute_groupsRelations = t.Object(
           created_at: t.Date(),
           updated_at: __nullable__(t.Date()),
         },
-        { additionalProperties: false },
+        {
+          additionalProperties: false,
+          description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+        },
       ),
       { additionalProperties: false },
     ),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const attribute_groupsPlainInputCreate = t.Object(
@@ -45,7 +54,10 @@ export const attribute_groupsPlainInputCreate = t.Object(
     created_at: t.Optional(t.Date()),
     updated_at: t.Optional(__nullable__(t.Date())),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const attribute_groupsPlainInputUpdate = t.Object(
@@ -56,7 +68,10 @@ export const attribute_groupsPlainInputUpdate = t.Object(
     created_at: t.Optional(t.Date()),
     updated_at: t.Optional(__nullable__(t.Date())),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const attribute_groupsRelationsInputCreate = t.Object(
@@ -78,7 +93,10 @@ export const attribute_groupsRelationsInputCreate = t.Object(
       ),
     ),
   },
-  { additionalProperties: false },
+  {
+    additionalProperties: false,
+    description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+  },
 );
 
 export const attribute_groupsRelationsInputUpdate = t.Partial(
@@ -110,7 +128,10 @@ export const attribute_groupsRelationsInputUpdate = t.Partial(
         ),
       ),
     },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 
@@ -129,7 +150,10 @@ export const attribute_groupsWhere = t.Partial(
           created_at: t.Date(),
           updated_at: t.Date(),
         },
-        { additionalProperties: false },
+        {
+          additionalProperties: false,
+          description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+        },
       ),
     { $id: "attribute_groups" },
   ),
@@ -140,7 +164,13 @@ export const attribute_groupsWhereUnique = t.Recursive(
     t.Intersect(
       [
         t.Partial(
-          t.Object({ id: t.Integer() }, { additionalProperties: false }),
+          t.Object(
+            { id: t.Integer() },
+            {
+              additionalProperties: false,
+              description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+            },
+          ),
           { additionalProperties: false },
         ),
         t.Union([t.Object({ id: t.Integer() })], {
@@ -191,14 +221,20 @@ export const attribute_groupsSelect = t.Partial(
       attributes: t.Boolean(),
       _count: t.Boolean(),
     },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 
 export const attribute_groupsInclude = t.Partial(
   t.Object(
     { attributes: t.Boolean(), _count: t.Boolean() },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 
@@ -224,7 +260,10 @@ export const attribute_groupsOrderBy = t.Partial(
         additionalProperties: false,
       }),
     },
-    { additionalProperties: false },
+    {
+      additionalProperties: false,
+      description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+    },
   ),
 );
 
