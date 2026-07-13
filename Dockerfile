@@ -10,8 +10,8 @@ RUN bun install --frozen-lockfile
 COPY . .
 
 # Generate Prisma clients for all schemas (Linux-compatible binaries)
-RUN bunx prisma db pull
-RUN bunx prisma generate
+# RUN bunx prisma db pull
+# RUN bunx prisma generate
 
 # --- Stage 2: Runner Stage (Production) ---
 FROM oven/bun:1-alpine AS runner

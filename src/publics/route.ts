@@ -1617,13 +1617,7 @@ export const publicRoute = new Elysia({
     "/gibstock",
     async({ headers, set}) => {
       try{
-        const response = await prisma.product_options.findMany({
-          where: {
-            online_price: {
-              not : null
-            }
-          }
-        });
+        const response = await prisma.gibstock.findMany();
 
         if(!response){
           set.status = 404;
