@@ -54,11 +54,11 @@ export const order_billing_itemsRelations = t.Object(
           order_created_by: __nullable__(t.String()),
           contact_id: __nullable__(t.Integer()),
           company_id: __nullable__(t.Integer()),
-          credit_term_days: __nullable__(t.Integer()),
-          credit_payment_duedate: __nullable__(t.Date()),
           shipping_cost: __nullable__(t.Number()),
           admin_verify_status: __nullable__(t.String()),
           payment_invoice_no: __nullable__(t.String()),
+          credit_terms_day: __nullable__(t.Integer()),
+          is_admin_order_created: __nullable__(t.Boolean()),
         },
         {
           additionalProperties: false,

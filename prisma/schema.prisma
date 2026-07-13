@@ -263,11 +263,11 @@ model order_billing {
   order_created_by       String?               @db.Uuid
   contact_id             Int?
   company_id             Int?
-  credit_term_days       Int?
-  credit_payment_duedate DateTime?             @db.Date
   shipping_cost          Float?
   admin_verify_status    String?
   payment_invoice_no     String?
+  credit_terms_day       Int?
+  is_admin_order_created Boolean?
   companies              companies?            @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   customer_address       customer_address?     @relation(fields: [shipping_address_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   order_billing_items    order_billing_items[]

@@ -6184,6 +6184,7 @@ export const ecommerceRoute = new Elysia({
     async({headers, set, params}) => {
       try{
         const order_uuid = params.order_uuid;
+        
         const response = await prisma.order_billing.findFirst({
           where: {
             order_uuid: order_uuid,
@@ -6205,8 +6206,7 @@ export const ecommerceRoute = new Elysia({
             order_created_by: true,
             contact_id: true,
             company_id: true,
-            credit_term_days: true,
-            credit_payment_duedate: true,
+            credit_terms_day: true,
             shipping_cost: true,
             payment_invoice_no: true,
             admin_verify_status: true,
@@ -6642,13 +6642,10 @@ export const ecommerceRoute = new Elysia({
               order_created_by: body.order_created_by,
               contact_id: body.contact_id,
               company_id: body.company_id,
-              credit_term_days: body.credit_term_days,
-              credit_payment_duedate:
-                typeof body.credit_payment_duedate === "string"
-                  ? parseNullableDate(body.credit_payment_duedate)
-                  : body.credit_payment_duedate,
+              credit_terms_day: body.credit_terms_day,
               shipping_cost: body.shipping_cost,
               admin_verify_status: body.admin_verify_status,
+              is_admin_order_created: true,
             },
             select: {
               id: true,
@@ -6737,8 +6734,7 @@ export const ecommerceRoute = new Elysia({
         admin_updated_by: t.Optional(t.Nullable(t.String())),
         admin_verify_status: t.String(),
         im_no: t.Optional(t.Nullable(t.String())),
-        credit_term_days: t.Any(),
-        credit_payment_duedate: t.Any(),
+        credit_terms_day: t.Any(),
         shipping_address_id: t.Number(),
         shipping_cost: t.Optional(t.Nullable(t.Number())),
         payment_method_type: t.Optional(t.Nullable(t.String())),
@@ -6818,8 +6814,7 @@ export const ecommerceRoute = new Elysia({
               log_payment: loggedAt,
               updated_at: loggedAt,
               admin_updated_at: loggedAt,
-              credit_payment_duedate: body.credit_payment_duedate,
-              credit_term_days: body.credit_term_days,
+              credit_terms_day: body.credit_terms_day,
 
             },
             select: {
@@ -6904,8 +6899,7 @@ export const ecommerceRoute = new Elysia({
       }),
       body: t.Object({
         order_uuid: t.String(),
-        credit_payment_duedate: t.Any(),
-        credit_term_days: t.Any(),
+        credit_terms_day: t.Any(),
         admin_verify_status: t.String(),
         admin_updated_by: t.String(),
         im_no: t.Optional(t.Nullable(t.String())),

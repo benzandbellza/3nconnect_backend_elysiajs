@@ -1224,8 +1224,7 @@ export const ecommerceCustomerRoute = new Elysia({
                 order_created_by: detail.order_created_by,
                 contact_id: detail.contact_id,
                 company_id: detail.company_id,
-                credit_term_days: detail.credit_term_days,
-                credit_payment_duedate: toDate(detail.credit_payment_duedate),
+                credit_terms_day: detail.credit_terms_day,
                 shipping_cost: detail.shipping_cost,
                 payment_invoice_no: detail.payment_method !== "credit_terms" ? body.payment_2c2p.invoiceNo : null,
               },
@@ -1362,8 +1361,7 @@ export const ecommerceCustomerRoute = new Elysia({
               order_created_by: t.Nullable(t.String()),
               contact_id: t.Nullable(t.Number()),
               company_id: t.Nullable(t.Number()),
-              credit_term_days: t.Nullable(t.Number()),
-              credit_payment_duedate: t.Nullable(t.String()),
+              credit_terms_day: t.Nullable(t.Number()),
               shipping_cost: t.Nullable(t.Number()),
               order_items: t.Array(
                 t.Object({
@@ -1444,8 +1442,7 @@ export const ecommerceCustomerRoute = new Elysia({
             order_created_by: true,
             contact_id: true,
             company_id: true,
-            credit_term_days: true,
-            credit_payment_duedate: true,
+            credit_terms_day: true,
             shipping_cost: true,
           }
         });
