@@ -90,7 +90,7 @@ export const ecommerceRoute = new Elysia({
     "/brands",
     async ({ headers, set }) => {
       try {
-        const response = await prisma.brands.findMany();
+        const response = await prisma.nconnect_brands.findMany();
 
         if (!response) {
           set.status = 404;
@@ -124,7 +124,7 @@ export const ecommerceRoute = new Elysia({
     "/brands/active",
     async ({ headers, set }) => {
       try {
-        const response = await prisma.brands.findMany({
+        const response = await prisma.nconnect_brands.findMany({
           where: {
             is_active: true,
           },
@@ -170,7 +170,7 @@ export const ecommerceRoute = new Elysia({
     async ({ headers, body, set }) => {
       try {
         const { brand_image, url_image, brand_name, country_id } = body;
-        const response = await prisma.brands.create({
+        const response = await prisma.nconnect_brands.create({
           data: {
             brand_image: brand_image,
             url_image: url_image,
@@ -223,7 +223,7 @@ export const ecommerceRoute = new Elysia({
         const { brand_id } = params;
         const { brand_image, url_image, brand_name, country_id, is_active } =
           body;
-        const response = await prisma.brands.update({
+        const response = await prisma.nconnect_brands.update({
           where: {
             id: Number(brand_id),
           },
@@ -281,7 +281,7 @@ export const ecommerceRoute = new Elysia({
     async ({ headers, params, set }) => {
       try {
         const { brand_id } = params;
-        const response = await prisma.brands.delete({
+        const response = await prisma.nconnect_brands.delete({
           where: {
             id: brand_id,
           },
@@ -323,7 +323,7 @@ export const ecommerceRoute = new Elysia({
     "/product-categories",
     async ({ headers, set }) => {
       try {
-        const response = await prisma.product_categories.findMany({
+        const response = await prisma.nconnect_product_categories.findMany({
           where: {
             level: 0,
           },
@@ -389,7 +389,7 @@ export const ecommerceRoute = new Elysia({
     "/product-categories/active",
     async ({ headers, set }) => {
       try {
-        const response = await prisma.product_categories.findMany({
+        const response = await prisma.nconnect_product_categories.findMany({
           where: {
             is_active: true,
             level: 0,
@@ -462,13 +462,13 @@ export const ecommerceRoute = new Elysia({
 
         if (!parent_id) {
           // Added new category with level 0
-          const countLevel = await prisma.product_categories.count({
+          const countLevel = await prisma.nconnect_product_categories.count({
             where: {
               level: 0,
             },
           });
 
-          await prisma.product_categories.create({
+          await prisma.nconnect_product_categories.create({
             data: {
               id: `cat_00${countLevel + 1}`,
               name: name,
@@ -480,7 +480,7 @@ export const ecommerceRoute = new Elysia({
           });
         } else {
           // Added new category with level 1 or level 2
-          const parentCategory = await prisma.product_categories.findUnique({
+          const parentCategory = await prisma.nconnect_product_categories.findUnique({
             where: {
               id: parent_id,
             },
@@ -492,13 +492,13 @@ export const ecommerceRoute = new Elysia({
           }
 
           const level = parentCategory.level + 1;
-          const countLevel = await prisma.product_categories.count({
+          const countLevel = await prisma.nconnect_product_categories.count({
             where: {
               level: level,
             },
           });
 
-          await prisma.product_categories.create({
+          await prisma.nconnect_product_categories.create({
             data: {
               id: `cat_${level}1${countLevel + 1}`,
               name: name,
@@ -550,7 +550,7 @@ export const ecommerceRoute = new Elysia({
         const { category_id } = params;
         const { name, slug, parent_id, is_active } = body;
 
-        const category = await prisma.product_categories.findUnique({
+        const category = await prisma.nconnect_product_categories.findUnique({
           where: {
             id: category_id,
           },
@@ -561,7 +561,7 @@ export const ecommerceRoute = new Elysia({
           return { message: "Product category not found" };
         }
 
-        await prisma.product_categories.update({
+        await prisma.nconnect_product_categories.update({
           where: {
             id: category_id,
           },
@@ -613,7 +613,7 @@ export const ecommerceRoute = new Elysia({
       try {
         const { category_id } = params;
 
-        const category = await prisma.product_categories.findUnique({
+        const category = await prisma.nconnect_product_categories.findUnique({
           where: {
             id: category_id,
           },
@@ -624,7 +624,7 @@ export const ecommerceRoute = new Elysia({
           return { message: "Product category not found" };
         }
 
-        await prisma.product_categories.delete({
+        await prisma.nconnect_product_categories.delete({
           where: {
             id: category_id,
           },
@@ -661,7 +661,7 @@ export const ecommerceRoute = new Elysia({
     "/companies",
     async ({ headers, set }) => {
       try {
-        const response = await prisma.companies.findMany({
+        const response = await prisma.nconnect_companies.findMany({
           orderBy: {
             company_name: "asc",
           },
@@ -699,7 +699,7 @@ export const ecommerceRoute = new Elysia({
     "/companies/active",
     async ({ headers, set }) => {
       try {
-        const response = await prisma.companies.findMany({
+        const response = await prisma.nconnect_companies.findMany({
           where: {
             is_active: true,
           },
@@ -745,7 +745,7 @@ export const ecommerceRoute = new Elysia({
     async ({ headers, body, set }) => {
       try {
         const { company_image, url_image, company_name, is_active } = body;
-        const response = await prisma.companies.create({
+        const response = await prisma.nconnect_companies.create({
           data: {
             company_image: company_image,
             url_image: url_image,
@@ -796,7 +796,7 @@ export const ecommerceRoute = new Elysia({
       try {
         const { company_id } = params;
         const { company_image, url_image, company_name, is_active } = body;
-        const response = await prisma.companies.update({
+        const response = await prisma.nconnect_companies.update({
           where: {
             id: Number(company_id),
           },
@@ -852,7 +852,7 @@ export const ecommerceRoute = new Elysia({
     async ({ headers, params, set }) => {
       try {
         const { company_id } = params;
-        const response = await prisma.companies.delete({
+        const response = await prisma.nconnect_companies.delete({
           where: {
             id: company_id,
           },
@@ -895,7 +895,7 @@ export const ecommerceRoute = new Elysia({
     "/countries",
     async ({ headers, set }) => {
       try {
-        const response = await prisma.countries.findMany({
+        const response = await prisma.nconnect_countries.findMany({
           orderBy: {
             country_name: "asc",
           },
@@ -933,7 +933,7 @@ export const ecommerceRoute = new Elysia({
     "/countries/active",
     async ({ headers, set }) => {
       try {
-        const response = await prisma.countries.findMany({
+        const response = await prisma.nconnect_countries.findMany({
           where: {
             is_active: true,
           },
@@ -980,7 +980,7 @@ export const ecommerceRoute = new Elysia({
     async ({ headers, body, set }) => {
       try {
         const { country_name, short_name } = body;
-        const response = await prisma.countries.create({
+        const response = await prisma.nconnect_countries.create({
           data: {
             country_name: country_name,
             short_name: short_name || null,
@@ -1028,7 +1028,7 @@ export const ecommerceRoute = new Elysia({
       try {
         const { country_id } = params;
         const { country_name, short_name, is_active } = body;
-        const response = await prisma.countries.update({
+        const response = await prisma.nconnect_countries.update({
           where: {
             id: Number(country_id),
           },
@@ -1082,7 +1082,7 @@ export const ecommerceRoute = new Elysia({
     async ({ headers, params, set }) => {
       try {
         const { country_id } = params;
-        const response = await prisma.countries.delete({
+        const response = await prisma.nconnect_countries.delete({
           where: {
             id: Number(country_id),
           },
@@ -1124,7 +1124,7 @@ export const ecommerceRoute = new Elysia({
     "/products",
     async ({ headers, set }) => {
       try {
-        const response = await prisma.products.findMany({
+        const response = await prisma.nconnect_products.findMany({
           select: {
             id: true,
             product_name: true,
@@ -1374,7 +1374,7 @@ export const ecommerceRoute = new Elysia({
       try {
         const { mat_unit_identity } = params;
         
-        const response = await prisma.product_options.updateMany({
+        const response = await prisma.nconnect_product_options.updateMany({
           where: {
             mat_identity: mat_unit_identity,
           },
@@ -1419,7 +1419,7 @@ export const ecommerceRoute = new Elysia({
     "/products/active",
     async ({ headers, set }) => {
       try {
-        const response = await prisma.products.findMany({
+        const response = await prisma.nconnect_products.findMany({
           where: {
             is_active: true,
             is_online_active: true,
@@ -1513,7 +1513,7 @@ export const ecommerceRoute = new Elysia({
     "/products/:product_id",
     async ({ headers, params, set }) => {
       try {
-        const response = await prisma.products.findFirst({
+        const response = await prisma.nconnect_products.findFirst({
           where: {
             id: params.product_id,
           },
@@ -1620,7 +1620,7 @@ export const ecommerceRoute = new Elysia({
         } = body;
 
         // TODO : check options.mat_id do not repeat in company
-        const count = await prisma.products.count({
+        const count = await prisma.nconnect_products.count({
           where: {
             company_id: company_id,
             product_options: {
@@ -1638,7 +1638,7 @@ export const ecommerceRoute = new Elysia({
           return { message: "Product with same mat_id already exists" };
         }
 
-        const get_category = await prisma.product_categories.findUnique({
+        const get_category = await prisma.nconnect_product_categories.findUnique({
           where: {
             id: category_id,
           },
@@ -1657,7 +1657,7 @@ export const ecommerceRoute = new Elysia({
           ? [...get_category.ancestors, get_category.id]
           : [get_category.id];
 
-        const response = await prisma.products.create({
+        const response = await prisma.nconnect_products.create({
           data: {
             brand_id: brand_id,
             category_id: category_id,
@@ -1689,7 +1689,7 @@ export const ecommerceRoute = new Elysia({
         if (images && images.length > 0) {
           await Promise.all(
             images.map((image: { image_url: string; is_main: boolean }) => {
-              return prisma.product_images.create({
+              return prisma.nconnect_product_images.create({
                 data: {
                   product_id: response.id,
                   url_image: image.image_url,
@@ -1704,7 +1704,7 @@ export const ecommerceRoute = new Elysia({
         if (options && options.length > 0) {
           await Promise.all(
             options.map((option: any) => {
-              return prisma.product_options.create({
+              return prisma.nconnect_product_options.create({
                 data: {
                   product_id: response.id,
                   row_no: option.row_no,
@@ -1720,7 +1720,7 @@ export const ecommerceRoute = new Elysia({
         }
 
         if (payment_methods) {
-          await prisma.product_payment_method.create({
+          await prisma.nconnect_product_payment_method.create({
             data: {
               product_id: response.id,
               qr_code_promptpay: payment_methods.qr_promptpay,
@@ -1814,7 +1814,7 @@ export const ecommerceRoute = new Elysia({
         } = body;
 
         // TODO : check options.mat_id do not repeat in company not self
-        const count = await prisma.products.count({
+        const count = await prisma.nconnect_products.count({
           where: {
             company_id: company_id,
             id: {
@@ -1835,7 +1835,7 @@ export const ecommerceRoute = new Elysia({
           return { message: "Product with same mat_id already exists" };
         }
 
-        const get_category = await prisma.product_categories.findUnique({
+        const get_category = await prisma.nconnect_product_categories.findUnique({
           where: {
             id: category_id,
           },
@@ -1854,7 +1854,7 @@ export const ecommerceRoute = new Elysia({
           ? [...get_category.ancestors, get_category.id]
           : [get_category.id];
 
-        const response = await prisma.products.update({
+        const response = await prisma.nconnect_products.update({
           where: {
             id: product_id,
           },
@@ -1884,7 +1884,7 @@ export const ecommerceRoute = new Elysia({
         }
 
         if (images && images.length > 0) {
-          const existingImages = await prisma.product_images.findMany({
+          const existingImages = await prisma.nconnect_product_images.findMany({
             where: { product_id: product_id },
             select: { id: true, url_image: true, is_show: true },
           });
@@ -1898,7 +1898,7 @@ export const ecommerceRoute = new Elysia({
           if (imagesToAdd.length > 0) {
             await Promise.all(
               imagesToAdd.map((image: { image_url: string; is_main: boolean }) =>
-                prisma.product_images.create({
+                prisma.nconnect_product_images.create({
                   data: {
                     product_id: product_id,
                     url_image: image.image_url,
@@ -1913,7 +1913,7 @@ export const ecommerceRoute = new Elysia({
           if (imagesToUpdate.length > 0) {
             await Promise.all(
               imagesToUpdate.map((image: { id: number; image_url: string; is_main: boolean }) =>
-                prisma.product_images.update({
+                prisma.nconnect_product_images.update({
                   where: { id: image.id },
                   data: {
                     url_image: image.image_url,
@@ -1926,7 +1926,7 @@ export const ecommerceRoute = new Elysia({
           }
 
           if (imagesToDelete.length > 0) {
-            await prisma.product_images.deleteMany({
+            await prisma.nconnect_product_images.deleteMany({
               where: {
                 id: { in: imagesToDelete.map(img => img.id) },
               },
@@ -1937,7 +1937,7 @@ export const ecommerceRoute = new Elysia({
 
         // TODO : compare with existing product options and update/delete/add
         if (options && options.length > 0) {
-          const existingOptions = await prisma.product_options.findMany({
+          const existingOptions = await prisma.nconnect_product_options.findMany({
             where: { product_id: product_id },
             select: { id: true, row_no: true, mat_identity: true, option_name: true, online_price: true, min_price: true },
           });
@@ -1951,7 +1951,7 @@ export const ecommerceRoute = new Elysia({
           if (optionsToAdd.length > 0) {
             await Promise.all(
               optionsToAdd.map((option: any) =>
-                prisma.product_options.create({
+                prisma.nconnect_product_options.create({
                   data: {
                     product_id: product_id,
                     row_no: option.row_no,
@@ -1969,7 +1969,7 @@ export const ecommerceRoute = new Elysia({
           if (optionsToUpdate.length > 0) {
             await Promise.all(
               optionsToUpdate.map((option: any) =>
-                prisma.product_options.update({
+                prisma.nconnect_product_options.update({
                   where: { id: option.id },
                   data: {
                     row_no: option.row_no,
@@ -1985,7 +1985,7 @@ export const ecommerceRoute = new Elysia({
           }
 
           if (optionsToDelete.length > 0) {
-            await prisma.product_options.deleteMany({
+            await prisma.nconnect_product_options.deleteMany({
               where: {
                 id: { in: optionsToDelete.map(opt => opt.id) },
               },
@@ -1993,7 +1993,7 @@ export const ecommerceRoute = new Elysia({
           }
         }
 
-        await prisma.product_payment_method.updateMany({
+        await prisma.nconnect_product_payment_method.updateMany({
           where: {
             product_id: product_id,
           },
@@ -2073,7 +2073,7 @@ export const ecommerceRoute = new Elysia({
         const { product_id, product_options_id } = params;
         const { online_price } = body;
         
-        const response = await prisma.product_options.update({
+        const response = await prisma.nconnect_product_options.update({
           where: {
             id: product_options_id,
           },
@@ -2130,7 +2130,7 @@ export const ecommerceRoute = new Elysia({
           is_online_active,
           payment_methods
         } = body;
-        const get_category = await prisma.product_categories.findUnique({
+        const get_category = await prisma.nconnect_product_categories.findUnique({
           where: {
             id: category_id,
           },
@@ -2149,7 +2149,7 @@ export const ecommerceRoute = new Elysia({
           ? [...get_category.ancestors, get_category.id]
           : [get_category.id];
 
-        const response = await prisma.products.update({
+        const response = await prisma.nconnect_products.update({
           where: {
             id: product_id,
           },
@@ -2171,7 +2171,7 @@ export const ecommerceRoute = new Elysia({
           return { message: "Failed to update product" };
         }
 
-        await prisma.product_payment_method.updateMany({
+        await prisma.nconnect_product_payment_method.updateMany({
           where : {
             product_id: response.id
           },
@@ -2227,7 +2227,7 @@ export const ecommerceRoute = new Elysia({
     async ({ headers, params, set }) => {
       try {
         const { product_id } = params;
-        const response = await prisma.products.delete({
+        const response = await prisma.nconnect_products.delete({
           where: {
             id: Number(product_id),
           },
@@ -2238,7 +2238,7 @@ export const ecommerceRoute = new Elysia({
           return { message: "Product not found" };
         }
 
-        await prisma.product_images.deleteMany({
+        await prisma.nconnect_product_images.deleteMany({
           where: {
             product_id: Number(product_id),
           },
@@ -2404,7 +2404,7 @@ export const ecommerceRoute = new Elysia({
     "/events",
     async ({ headers, set }) => {
       try {
-        const response = await prisma.events.findMany({
+        const response = await prisma.nconnect_events.findMany({
           select: {
             id: true,
             event_image: true,
@@ -2477,7 +2477,7 @@ export const ecommerceRoute = new Elysia({
           tier_preregister,
           tier_register,
         } = body;
-        const response = await prisma.events.create({
+        const response = await prisma.nconnect_events.create({
           data: {
             event_name: event_name,
             event_category_id: event_category_id,
@@ -2560,7 +2560,7 @@ export const ecommerceRoute = new Elysia({
           tier_register,
           is_active,
         } = body;
-        const response = await prisma.events.update({
+        const response = await prisma.nconnect_events.update({
           where: {
             id: Number(event_id),
           },
@@ -2721,7 +2721,7 @@ export const ecommerceRoute = new Elysia({
     "/attribute-groups",
     async ({ headers, set }) => {
       try {
-        const response = await prisma.attribute_groups.findMany({
+        const response = await prisma.nconnect_attribute_groups.findMany({
           select : {
             id: true,
             attr_group_name: true,
@@ -2775,7 +2775,7 @@ export const ecommerceRoute = new Elysia({
       try {
         const { attr_group_name, attr_group_description } = body;
 
-        const response = await prisma.attribute_groups.create({
+        const response = await prisma.nconnect_attribute_groups.create({
           data: {
             attr_group_name: attr_group_name,
             attr_group_description: attr_group_description,
@@ -2822,7 +2822,7 @@ export const ecommerceRoute = new Elysia({
     async ({ headers, set }) => {
       try {
         
-        const response = await prisma.attribute_groups.findMany({
+        const response = await prisma.nconnect_attribute_groups.findMany({
           where: {
             is_active: true,
           },
@@ -2880,7 +2880,7 @@ export const ecommerceRoute = new Elysia({
         const { attr_group_name, attr_group_description, is_active } = body;
         const { attr_group_id } = params;
 
-        const response = await prisma.attribute_groups.update({
+        const response = await prisma.nconnect_attribute_groups.update({
           where: {
             id: attr_group_id
           },
@@ -2934,7 +2934,7 @@ export const ecommerceRoute = new Elysia({
       try {
         const { attr_group_id } = params;
 
-        const response = await prisma.attribute_groups.delete({
+        const response = await prisma.nconnect_attribute_groups.delete({
           where: {
             id: attr_group_id
           }
@@ -2978,7 +2978,7 @@ export const ecommerceRoute = new Elysia({
       try {
         const { attr_name, attr_description, attr_group_id } = body;
 
-        const response = await prisma.attributes.create({
+        const response = await prisma.nconnect_attributes.create({
           data: {
             attr_name: attr_name,
             attr_description: attr_description,
@@ -3029,7 +3029,7 @@ export const ecommerceRoute = new Elysia({
         const { attr_name, attr_description, is_active } = body;
         const { attr_id } = params;
 
-        const response = await prisma.attributes.update({
+        const response = await prisma.nconnect_attributes.update({
           where: {
             id: attr_id
           },
@@ -3083,7 +3083,7 @@ export const ecommerceRoute = new Elysia({
       try {
         const { attr_id } = params;
 
-        const response = await prisma.attributes.delete({
+        const response = await prisma.nconnect_attributes.delete({
           where: {
             id: attr_id
           }
@@ -3269,7 +3269,7 @@ export const ecommerceRoute = new Elysia({
         }
         const promotionId = response.id;
         
-        await prisma.promotion_flashsale_products.createMany({
+        await prisma.nconnect_promotion_flashsale_products.createMany({
           data: items.map((item: any) => ({
             promotion_id: promotionId,
             product_option_id: item.product_option_id,
@@ -3358,13 +3358,13 @@ export const ecommerceRoute = new Elysia({
           return { message: "Failed to update flash sale promotion" };
         }
 
-        await prisma.promotion_flashsale_products.deleteMany({
+        await prisma.nconnect_promotion_flashsale_products.deleteMany({
           where: {
             promotion_id: promotion_id,
           },
         });
 
-        await prisma.promotion_flashsale_products.createMany({
+        await prisma.nconnect_promotion_flashsale_products.createMany({
           data: items.map((item: any) => ({
             promotion_id: promotion_id,
             product_option_id: item.product_option_id,
@@ -3559,7 +3559,7 @@ export const ecommerceRoute = new Elysia({
         }
         const promotionId = response.id;
         
-        await prisma.promotion_discount_products.createMany({
+        await prisma.nconnect_promotion_discount_products.createMany({
           data: items.map((item: any) => ({
             promotion_id: promotionId,
             product_option_id: item.product_option_id,
@@ -3648,13 +3648,13 @@ export const ecommerceRoute = new Elysia({
           return { message: "Failed to update discount promotion" };
         }
 
-        await prisma.promotion_discount_products.deleteMany({
+        await prisma.nconnect_promotion_discount_products.deleteMany({
           where: {
             promotion_id: promotion_id,
           },
         });
 
-        await prisma.promotion_discount_products.createMany({
+        await prisma.nconnect_promotion_discount_products.createMany({
           data: items.map((item: any) => ({
             promotion_id: promotion_id,
             product_option_id: item.product_option_id,
@@ -3838,7 +3838,7 @@ export const ecommerceRoute = new Elysia({
         const promotionId = response.id;
         
         for (const item of get_products) {
-          const getProducts = await prisma.promotion_bundle_deal_get_products.create({
+          const getProducts = await prisma.nconnect_promotion_bundle_deal_get_products.create({
             data: {
               promotion_id: promotionId,
               product_option_id: item.product_option_id,
@@ -3850,7 +3850,7 @@ export const ecommerceRoute = new Elysia({
           })
 
           const bundle_deal_get_id = getProducts.id;
-          await prisma.promotion_bundle_deal_free_products.createMany({
+          await prisma.nconnect_promotion_bundle_deal_free_products.createMany({
             data: item.free_products.map((freeProduct: any) => ({
               bundle_deal_get_id: bundle_deal_get_id,
               product_option_id: freeProduct.product_option_id,
@@ -3947,7 +3947,7 @@ export const ecommerceRoute = new Elysia({
           return { message: "Failed to update get x free y promotion" };
         }
 
-        const existingGetProducts = await prisma.promotion_bundle_deal_get_products.findMany({
+        const existingGetProducts = await prisma.nconnect_promotion_bundle_deal_get_products.findMany({
           where: {
             promotion_id: promotion_id,
           },
@@ -3958,7 +3958,7 @@ export const ecommerceRoute = new Elysia({
 
         const arrayOfGetProductIds = existingGetProducts.map((item) => item.id);
 
-        await prisma.promotion_bundle_deal_free_products.deleteMany({
+        await prisma.nconnect_promotion_bundle_deal_free_products.deleteMany({
           where: {
             bundle_deal_get_id: {
               in: arrayOfGetProductIds,
@@ -3966,14 +3966,14 @@ export const ecommerceRoute = new Elysia({
           },
         });
 
-        await prisma.promotion_bundle_deal_get_products.deleteMany({
+        await prisma.nconnect_promotion_bundle_deal_get_products.deleteMany({
           where: {
             promotion_id: promotion_id,
           },
         });
 
         for (const item of get_products) {
-          const getProducts = await prisma.promotion_bundle_deal_get_products.create({
+          const getProducts = await prisma.nconnect_promotion_bundle_deal_get_products.create({
             data: {
               promotion_id: promotion_id,
               product_option_id: item.product_option_id,
@@ -3985,7 +3985,7 @@ export const ecommerceRoute = new Elysia({
           })
 
           const bundle_deal_get_id = getProducts.id;
-          await prisma.promotion_bundle_deal_free_products.createMany({
+          await prisma.nconnect_promotion_bundle_deal_free_products.createMany({
             data: item.free_products.map((freeProduct: any) => ({
               bundle_deal_get_id: bundle_deal_get_id,
               product_option_id: freeProduct.product_option_id,
@@ -4196,7 +4196,7 @@ export const ecommerceRoute = new Elysia({
         const promotionId = response.id;
 
         for (const tier of tiers) {
-          const resTier = await prisma.promotion_bundle_deal_grand_total_tiers.create({
+          const resTier = await prisma.nconnect_promotion_bundle_deal_grand_total_tiers.create({
             data: {
               promotion_id: promotionId,
               level_no: tier.level_no,
@@ -4209,7 +4209,7 @@ export const ecommerceRoute = new Elysia({
 
           const tier_id = resTier.id;
           for (const free_product of tier.free_products){
-            await prisma.promotion_bundle_deal_grand_total_free_products.create({
+            await prisma.nconnect_promotion_bundle_deal_grand_total_free_products.create({
               data: {
                 bundle_deal_grand_total_tiers_id: tier_id,
                 product_option_id: free_product.product_option_id,
@@ -4304,7 +4304,7 @@ export const ecommerceRoute = new Elysia({
         });
 
         // Delete existing tiers
-        await prisma.promotion_bundle_deal_grand_total_tiers.deleteMany({
+        await prisma.nconnect_promotion_bundle_deal_grand_total_tiers.deleteMany({
           where: {
             promotion_id: promotion_id,
           },
@@ -4312,7 +4312,7 @@ export const ecommerceRoute = new Elysia({
 
         // Create new tiers
         for (const tier of tiers) {
-          const resTier = await prisma.promotion_bundle_deal_grand_total_tiers.create({
+          const resTier = await prisma.nconnect_promotion_bundle_deal_grand_total_tiers.create({
             data: {
               promotion_id: promotion_id,
               level_no: tier.level_no,
@@ -4326,7 +4326,7 @@ export const ecommerceRoute = new Elysia({
           const tier_id = resTier.id;
           
           for (const freeProduct of tier.free_products) {
-            await prisma.promotion_bundle_deal_grand_total_free_products.create({
+            await prisma.nconnect_promotion_bundle_deal_grand_total_free_products.create({
               data: {
                 bundle_deal_grand_total_tiers_id: tier_id,
                 product_option_id: freeProduct.product_option_id,
@@ -4500,7 +4500,7 @@ export const ecommerceRoute = new Elysia({
         }
 
         const promotionId = response.id;
-        await prisma.promotion_extra_points_tier_rules.createMany({
+        await prisma.nconnect_promotion_extra_points_tier_rules.createMany({
           data: tier_rules.map((rule: any) => ({
             ...rule,
             promotion_id: promotionId,
@@ -4589,7 +4589,7 @@ export const ecommerceRoute = new Elysia({
         }
 
         const promotionId = response.id;
-        await prisma.promotion_extra_points_products.createMany({
+        await prisma.nconnect_promotion_extra_points_products.createMany({
           data: items.map((item: any) => ({
             ...item,
             promotion_id: promotionId,
@@ -4801,13 +4801,13 @@ export const ecommerceRoute = new Elysia({
           return { "message" : "Failed updating extra points." }
         }
 
-        await prisma.promotion_extra_points_tier_rules.deleteMany({
+        await prisma.nconnect_promotion_extra_points_tier_rules.deleteMany({
           where: {
             promotion_id: promotion_id,
           }
         });
 
-        await prisma.promotion_extra_points_tier_rules.createMany({
+        await prisma.nconnect_promotion_extra_points_tier_rules.createMany({
           data: tier_rules.map((rule: any) => ({
             ...rule,
             promotion_id: promotion_id,
@@ -4899,13 +4899,13 @@ export const ecommerceRoute = new Elysia({
           return { "message" : "Failed updating extra points." }
         }
 
-        await prisma.promotion_extra_points_products.deleteMany({
+        await prisma.nconnect_promotion_extra_points_products.deleteMany({
           where: {
             promotion_id: promotion_id,
           }
         });
 
-        await prisma.promotion_extra_points_products.createMany({
+        await prisma.nconnect_promotion_extra_points_products.createMany({
           data: items.map((item: any) => ({
             ...item,
             promotion_id: promotion_id,
@@ -6264,7 +6264,7 @@ export const ecommerceRoute = new Elysia({
           }
         });
 
-        const resCompany = await prisma.companies.findFirst({
+        const resCompany = await prisma.nconnect_companies.findFirst({
           where: {
             id: company_id,
           },
@@ -6330,7 +6330,7 @@ export const ecommerceRoute = new Elysia({
     "/products-online/active",
     async ({ headers, set }) => {
       try {
-        const response = await prisma.products.findMany({
+        const response = await prisma.nconnect_products.findMany({
           where: {
             is_active: true,
             is_online_active: true,
@@ -6413,7 +6413,7 @@ export const ecommerceRoute = new Elysia({
     async ({ headers, set, body }) => {
       try {
         const company_id = body.company_id;
-        const response = await prisma.products.findMany({
+        const response = await prisma.nconnect_products.findMany({
           where: {
             is_active: true,
             is_online_active: true,

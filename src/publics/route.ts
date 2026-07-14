@@ -320,7 +320,7 @@ export const publicRoute = new Elysia({
     "/product-categories/active",
     async ({ set }) => {
       try {
-        const response = await prisma.product_categories.findMany({
+        const response = await prisma.nconnect_product_categories.findMany({
           where: {
             is_active: true,
             level: 0,
@@ -387,7 +387,7 @@ export const publicRoute = new Elysia({
     async ({ params, set }) => {
       try {
         const product_option_id = params.product_option_id;
-        const responseProductOption = await prisma.product_options.findFirst({
+        const responseProductOption = await prisma.nconnect_product_options.findFirst({
           where: {
             id: product_option_id
           },
@@ -403,7 +403,7 @@ export const publicRoute = new Elysia({
 
         const productId = responseProductOption.product_id!;
 
-        const response = await prisma.products.findFirst({
+        const response = await prisma.nconnect_products.findFirst({
           where: {
             id: productId,
           },
