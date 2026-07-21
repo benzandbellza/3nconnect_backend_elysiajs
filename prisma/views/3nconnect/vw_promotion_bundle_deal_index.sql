@@ -1,6 +1,6 @@
 SELECT
   pro.id AS promotion_id,
-  pro.promotion_name,
+  pro.proname AS promotion_name,
   pro.customer_tiers,
   pro.is_accept_overlapse_promotion,
   get_products_table.url_product_image,
@@ -18,7 +18,7 @@ SELECT
 FROM
   (
     (
-      "3nconnect".promotions pro
+      promotion pro
       JOIN (
         SELECT
           pbdgp.id AS bundle_deal_get_id,
@@ -36,15 +36,15 @@ FROM
           (
             (
               (
-                "3nconnect".products p
-                LEFT JOIN "3nconnect".product_images t ON (
+                products p
+                LEFT JOIN product_images t ON (
                   (
                     (p.id = t.product_id)
                     AND (t.is_show = TRUE)
                   )
                 )
               )
-              JOIN "3nconnect".product_options po ON (
+              JOIN product_options po ON (
                 (
                   (p.id = po.product_id)
                   AND (p.is_pre_order = false)
@@ -53,7 +53,7 @@ FROM
                 )
               )
             )
-            JOIN "3nconnect".promotion_bundle_deal_get_products pbdgp ON ((po.id = pbdgp.product_option_id))
+            JOIN promotion_bundle_deal_get_products pbdgp ON ((po.id = pbdgp.product_option_id))
           )
       ) get_products_table ON ((pro.id = get_products_table.promotion_id))
     )
@@ -73,8 +73,8 @@ FROM
         (
           (
             (
-              "3nconnect".products p
-              JOIN "3nconnect".product_options po ON (
+              products p
+              JOIN product_options po ON (
                 (
                   (p.id = po.product_id)
                   AND (p.is_pre_order = false)
@@ -83,9 +83,9 @@ FROM
                 )
               )
             )
-            JOIN "3nconnect".promotion_bundle_deal_free_products pbdfp ON ((po.id = pbdfp.product_option_id))
+            JOIN promotion_bundle_deal_free_products pbdfp ON ((po.id = pbdfp.product_option_id))
           )
-          JOIN "3nconnect".product_images t ON (
+          JOIN product_images t ON (
             (
               (p.id = t.product_id)
               AND (t.is_show = TRUE)
@@ -100,7 +100,7 @@ FROM
   )
 WHERE
   (
-    (pro.promotion_start <= NOW())
-    AND (pro.promotion_end >= NOW())
-    AND (pro.is_active = TRUE)
+    (pro.startdate <= NOW())
+    AND (pro.enddate >= NOW())
+    AND (pro.status = TRUE)
   );

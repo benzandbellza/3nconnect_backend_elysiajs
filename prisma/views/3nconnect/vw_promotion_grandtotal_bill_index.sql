@@ -1,10 +1,10 @@
 SELECT
   p.url_image AS url_promotion_image,
   p.id AS promotion_id,
-  p.promotion_name,
-  p.promotion_description,
-  p.promotion_start,
-  p.promotion_end,
+  p.proname AS promotion_name,
+  p.description AS promotion_description,
+  p.startdate AS promotion_start,
+  p.enddate AS promotion_end,
   pbdgtfp.bundle_deal_grand_total_tiers_id,
   pbdgtt.level_no,
   pbdgtt.minimum_grand_total,
@@ -23,18 +23,18 @@ FROM
       (
         (
           (
-            "3nconnect".promotions p
-            JOIN "3nconnect".promotion_bundle_deal_grand_total_tiers pbdgtt ON ((p.id = pbdgtt.promotion_id))
+            promotion p
+            JOIN promotion_bundle_deal_grand_total_tiers pbdgtt ON ((p.id = pbdgtt.promotion_id))
           )
-          JOIN "3nconnect".promotion_bundle_deal_grand_total_free_products pbdgtfp ON (
+          JOIN promotion_bundle_deal_grand_total_free_products pbdgtfp ON (
             (
               pbdgtfp.bundle_deal_grand_total_tiers_id = pbdgtt.id
             )
           )
         )
-        JOIN "3nconnect".product_options po ON ((pbdgtfp.product_option_id = po.id))
+        JOIN product_options po ON ((pbdgtfp.product_option_id = po.id))
       )
-      JOIN "3nconnect".products p2 ON (
+      JOIN products p2 ON (
         (
           (po.product_id = p2.id)
           AND (p2.is_active = TRUE)
@@ -43,7 +43,7 @@ FROM
         )
       )
     )
-    LEFT JOIN "3nconnect".product_images pi ON (
+    LEFT JOIN product_images pi ON (
       (
         (p2.id = pi.product_id)
         AND (pi.is_show = TRUE)
@@ -52,7 +52,7 @@ FROM
   )
 WHERE
   (
-    (p.promotion_start <= NOW())
-    AND (p.promotion_end >= NOW())
-    AND (p.is_active = TRUE)
+    (p.startdate <= NOW())
+    AND (p.enddate >= NOW())
+    AND (p.status = TRUE)
   );

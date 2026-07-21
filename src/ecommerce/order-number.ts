@@ -74,11 +74,11 @@ export const allocateNextOrderNumber = async (
 
   const rows = await tx.$queryRaw<{ last_number: number | bigint }[]>`
     SELECT COALESCE(
-      MAX(CAST(SUBSTRING("order_no" FROM 8 FOR 4) AS INTEGER)),
+      MAX(CAST(SUBSTRING("docid" FROM 8 FOR 4) AS INTEGER)),
       0
     ) AS "last_number"
-    FROM "3nconnect"."order_billing"
-    WHERE "order_no" ~ ${pattern}
+    FROM "public"."IM"
+    WHERE "docid" ~ ${pattern}
   `;
 
   const lastNumber = rows[0]?.last_number;

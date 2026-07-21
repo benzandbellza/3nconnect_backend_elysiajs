@@ -1112,39 +1112,53 @@ model ConversationMemory {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model IM {
-  id                  Int                @id @default(autoincrement())
-  created_at          DateTime           @default(now()) @db.Timestamptz(6)
-  docid               String             @unique(map: "IM_io_id_key")
-  customer            String?
-  note                String?
-  create_by           String?            @db.Uuid
-  status              String?
-  im                  String?
-  customer_name       String?
-  tel                 String?
-  updated_at          DateTime?          @default(now()) @db.Timestamptz(6)
-  update_by           String?
-  history             Json?
-  type                String?
-  delivery_address_id String?            @db.Uuid
-  invoice_id          Int?
-  shipping_address    String?
-  has_fifo_violation  Boolean?           @default(false)
-  price_valid_days    String?
-  delivery_days       String?
-  payment_days        String?
-  customeruser_id     String?            @db.Uuid
-  contact_id          Int?
-  prefix              String?
-  need_smapprove      Boolean?           @default(false)
-  sopt_id             Int?
-  contact             contact?           @relation(fields: [contact_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users               public_users?      @relation(fields: [create_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  customeruser        customeruser?      @relation(fields: [customeruser_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  customer_delivery   customer_delivery? @relation(fields: [delivery_address_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  invoicehead         invoicehead?       @relation(fields: [invoice_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  sopt_head           sopt_head?         @relation(fields: [sopt_id], references: [id], onDelete: Cascade)
-  im_goods            im_goods[]
+  id                     Int                @id @default(autoincrement())
+  created_at             DateTime           @default(now()) @db.Timestamptz(6)
+  docid                  String             @unique(map: "IM_io_id_key")
+  customer               String?
+  note                   String?
+  create_by              String?            @db.Uuid
+  status                 String?
+  im                     String?
+  customer_name          String?
+  tel                    String?
+  updated_at             DateTime?          @default(now()) @db.Timestamptz(6)
+  update_by              String?
+  history                Json?
+  type                   String?
+  delivery_address_id    String?            @db.Uuid
+  invoice_id             Int?
+  shipping_address       String?
+  has_fifo_violation     Boolean?           @default(false)
+  price_valid_days       String?
+  delivery_days          String?
+  payment_days           String?
+  customeruser_id        String?            @db.Uuid
+  contact_id             Int?
+  prefix                 String?
+  need_smapprove         Boolean?           @default(false)
+  sopt_id                Int?
+  buyer_customeruser_id  String?
+  payment_status         String?
+  log_payment            DateTime?          @db.Timestamptz(6)
+  order_uuid             String?            @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company_id             Int?
+  shipping_cost          Float?
+  admin_verify_status    String?
+  payment_invoice_no     String?
+  credit_terms_day       Int?
+  is_admin_order_created Boolean?
+  admin_updated_at       DateTime?          @db.Timestamptz(6)
+  shipping_address_id    Int?
+  order_created_by       String?            @db.Uuid
+  payment_method_type    String?
+  contact                contact?           @relation(fields: [contact_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users                  public_users?      @relation(fields: [create_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  customeruser           customeruser?      @relation(fields: [customeruser_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  customer_delivery      customer_delivery? @relation(fields: [delivery_address_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  invoicehead            invoicehead?       @relation(fields: [invoice_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  sopt_head              sopt_head?         @relation(fields: [sopt_id], references: [id], onDelete: Cascade)
+  im_goods               im_goods[]
 
   @@schema("public")
 }
@@ -1460,7 +1474,7 @@ model public_attribute_groups {
   attr_group_description String?
   is_active              Boolean?
   created_at             DateTime?           @db.Timestamptz(6)
-  updated_at             String?
+  updated_at             DateTime?           @db.Timestamptz(6)
   companies_id           Int?
   division_id            Int?
   companies              public_companies?   @relation(fields: [companies_id], references: [id], onDelete: Cascade)
@@ -1479,8 +1493,8 @@ model public_attributes {
   attr_description String?
   is_active        Boolean?
   created_at       DateTime?               @db.Timestamptz(6)
-  updated_at       String?
-  attribute_groups public_attribute_groups @relation(fields: [attr_group_id], references: [id], onDelete: Cascade)
+  updated_at       DateTime?               @db.Timestamptz(6)
+  attribute_groups public_attribute_groups @relation(fields: [attr_group_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   sale_target_attr sale_target_attr[]
 
   @@map("attributes")
@@ -1527,9 +1541,57 @@ model bill_tracking {
   // สร้างเมื่อ DateTime? @default(now()) @map("สร้างเมื่อ") @db.Timestamptz(6)
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   note               String?
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // สิ่งที่แนบมา String? @map("สิ่งที่แนบมา")
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   shipby             String?
@@ -1542,6 +1604,30 @@ model bill_tracking {
   enroll_date        String? @map("enroll date")
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // พนักงานขาย String? @map("พนักงานขาย")
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   REFDOC             String?
@@ -1630,14 +1716,14 @@ model brand {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model public_brands {
-  id          Int               @id
+  id          Int               @id @default(autoincrement())
   brand_image String?
   url_image   String?
   brand_name  String?
   country_id  Int?
   is_active   Boolean?
   created_at  DateTime?         @db.Timestamptz(6)
-  updated_at  String?
+  updated_at  DateTime?         @db.Timestamptz(6)
   countries   public_countries? @relation(fields: [country_id], references: [id], onDelete: Cascade)
   products    public_products[]
 
@@ -1734,6 +1820,8 @@ model public_companies {
   active           Boolean?                  @default(true)
   companypic       String?
   short            String?
+  company_image    String?
+  url_image        String?
   Productdata      Productdata[]
   assett           assett[]
   attribute_groups public_attribute_groups[]
@@ -1794,7 +1882,7 @@ model public_countries {
   id           Int             @id @default(autoincrement())
   country_name String?
   created_at   DateTime?       @db.Timestamptz(6)
-  updated_at   String?
+  updated_at   DateTime?       @db.Timestamptz(6)
   is_active    Boolean?
   short_name   String?
   brands       public_brands[]
@@ -1851,6 +1939,8 @@ model customer_group {
   created_by            String?                 @db.Uuid
   group_type            String                  @default("permanent")
   filter_criteria       Json?
+  condition_logic       String                  @default("and")
+  conditions            Json?
   users                 auth_users?             @relation(fields: [created_by], references: [id], onUpdate: NoAction)
   customer_group_member customer_group_member[]
   customernoti          customernoti[]
@@ -1866,6 +1956,7 @@ model customer_group_member {
   id              Int            @id @default(autoincrement())
   customer_group  customer_group @relation(fields: [group_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
+  @@unique([group_id, customeruser_id], map: "customer_group_member_group_customeruser_unique")
   @@index([customeruser_id], map: "cgm_customer_idx")
   @@schema("public")
 }
@@ -2010,38 +2101,48 @@ model customerevent {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model customernoti {
-  id                       Int                 @id @default(autoincrement())
-  created_at               DateTime            @default(now()) @db.Timestamptz(6)
-  title                    String
-  message                  String?
-  senddate                 DateTime            @db.Timestamptz(6)
-  tier                     String?
-  status                   String?             @default("draft")
-  sent_at                  DateTime?           @db.Timestamptz(6)
-  navigation               String?
-  age_range                String?
-  province                 String?
-  specific_name            String?
-  send_on_birthday         Boolean?
-  weblink                  String?
-  image                    String?
-  voucher_id               Int?
-  target_type              String?             @default("tier")
-  target_auth_ids          String[]
-  sent_count               Int?                @default(0)
-  target_promotion_id      Int?
-  target_event_id          String?
-  target_seminar_dwid      String?
-  target_seminar_company   String?
-  send_channels            String[]            @default(["app"])
-  segment_id               String?             @db.Uuid
-  target_customer_group_id String?             @db.Uuid
-  targeting_logic          String              @default("and")
-  customer_segment         customer_segment?   @relation(fields: [segment_id], references: [id], onUpdate: NoAction)
-  customer_group           customer_group?     @relation(fields: [target_customer_group_id], references: [id], onUpdate: NoAction)
-  voucher                  voucher?            @relation(fields: [voucher_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  noti_channel_stats       noti_channel_stats?
-  noti_read_log            noti_read_log[]
+  id                                    Int                  @id @default(autoincrement())
+  created_at                            DateTime             @default(now()) @db.Timestamptz(6)
+  title                                 String
+  message                               String?
+  senddate                              DateTime             @db.Timestamptz(6)
+  tier                                  String?
+  status                                String?              @default("draft")
+  sent_at                               DateTime?            @db.Timestamptz(6)
+  navigation                            String?
+  age_range                             String?
+  province                              String?
+  specific_name                         String?
+  send_on_birthday                      Boolean?
+  weblink                               String?
+  image                                 String?
+  voucher_id                            Int?
+  target_type                           String?              @default("tier")
+  target_auth_ids                       String[]
+  sent_count                            Int?                 @default(0)
+  target_promotion_id                   Int?
+  target_event_id                       String?
+  target_seminar_dwid                   String?
+  target_seminar_company                String?
+  send_channels                         String[]             @default(["app"])
+  segment_id                            String?              @db.Uuid
+  target_customer_group_id              String?              @db.Uuid
+  targeting_logic                       String               @default("and")
+  click_tag_id                          String?              @db.Uuid
+  target_tag_id                         String?              @db.Uuid
+  target_tag_mode                       String?              @default("current")
+  target_tag_date_from                  DateTime?            @db.Date
+  target_tag_date_to                    DateTime?            @db.Date
+  click_tag_ids                         Json?                @default("[]")
+  send_mode                             String               @default("immediate")
+  tags_customernoti_click_tag_idTotags  tags?                @relation("customernoti_click_tag_idTotags", fields: [click_tag_id], references: [id], onUpdate: NoAction)
+  customer_segment                      customer_segment?    @relation(fields: [segment_id], references: [id], onUpdate: NoAction)
+  customer_group                        customer_group?      @relation(fields: [target_customer_group_id], references: [id], onUpdate: NoAction)
+  tags_customernoti_target_tag_idTotags tags?                @relation("customernoti_target_tag_idTotags", fields: [target_tag_id], references: [id], onUpdate: NoAction)
+  voucher                               voucher?             @relation(fields: [voucher_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  noti_auto_send_log                    noti_auto_send_log[]
+  noti_channel_stats                    noti_channel_stats?
+  noti_read_log                         noti_read_log[]
 
   @@schema("public")
 }
@@ -2115,6 +2216,7 @@ model customeruser {
   facebook_psid             String?
   source                    String?
   tel2                      String?
+  referral_campaign_id      Int?
   IM                        IM[]
   assett                    assett[]
   claim_requests            claim_requests[]
@@ -2122,14 +2224,17 @@ model customeruser {
   customer_invoice          customer_invoice[]
   customer_requests         customer_requests[]
   customer_saved_cards      customer_saved_cards[]
+  customer_tags             customer_tags[]
   customer_tax_invoices     customer_tax_invoices[]
   customer_tier             customer_tier?
   customerevent             customerevent[]
   customerseminar           customerseminar[]
   users                     auth_users?               @relation(fields: [authid], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  referral_settings         referral_settings?        @relation(fields: [referral_campaign_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   customeruser_users        customeruser_users[]
   customervoucher           customervoucher[]
   email_logs                email_logs[]
+  noti_auto_send_log        noti_auto_send_log[]
   notification_logs         notification_logs[]
   order                     order[]
   promotion_claim_history   promotion_claim_history[]
@@ -2344,6 +2449,8 @@ model public_events {
   attendee           Decimal?      @db.Decimal
   eventEndDate       String?
   link               String?
+  event_category_id  Int?
+  is_active          Boolean?
   popup_image        popup_image[]
 
   @@map("events")
@@ -2459,26 +2566,33 @@ model im_goods {
   qty                                  Int
   brand                                String?
   reason                               String?
-  im_qty                               Decimal?      @db.Decimal
+  im_qty                               Int?
   itemstatus                           String?       @default("waiting")
   MR                                   String?
   location                             String?
   Owner                                String?
-  exp                                  String?
+  exp                                  DateTime?     @db.Date
   lot                                  String?
   needs_pm_approval                    Boolean?      @default(false)
   approved_by_pm                       String?       @db.Uuid
   pm_approved_at                       DateTime?     @db.Timestamptz(6)
   pm_note                              String?
-  price                                Decimal?      @db.Decimal
+  price                                Float?
   category                             String?
   po_ref                               String?
   rsv_ref                              String?
   name_edit                            String?
-  io_qty                               Decimal?      @db.Decimal
+  io_qty                               Int?
   need_smapprove                       Boolean?
   users_id                             String?       @db.Uuid
   sn                                   String?
+  product_option_id                    Int?
+  sale_price                           Float?
+  order_price                          Float?
+  admin_updated_at                     DateTime?     @db.Timestamptz(6)
+  is_free                              Boolean?
+  promotion_from_product_option_id     Int?
+  admin_updated_by                     String?       @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   users_im_goods_approved_by_pmTousers public_users? @relation("im_goods_approved_by_pmTousers", fields: [approved_by_pm], references: [id], onDelete: NoAction, onUpdate: NoAction)
   IM                                   IM            @relation(fields: [docid], references: [id], onDelete: Cascade)
   users_im_goods_users_idTousers       public_users? @relation("im_goods_users_idTousers", fields: [users_id], references: [id], onDelete: Cascade)
@@ -2759,6 +2873,7 @@ model payment_methods {
   created_at             DateTime                        @default(now()) @db.Timestamptz(6)
   image_url              String?
   category               String?
+  short_code             String?
   order                  order[]
   product_payment_method public_product_payment_method[]
 
@@ -2818,7 +2933,7 @@ model popup_image {
   navigation                 String?
   target_reading_campaign_id String?
   segment_id                 String?            @db.Uuid
-  promotion                  promotion?         @relation(fields: [promotion_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  promotion                  public_promotion?  @relation(fields: [promotion_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   customer_segment           customer_segment?  @relation(fields: [segment_id], references: [id], onUpdate: NoAction)
   events                     public_events?     @relation(fields: [target_event_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   reading_campaigns          reading_campaigns? @relation(fields: [target_reading_campaign_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -2844,7 +2959,7 @@ model public_product_categories {
   name       String?
   slug       String?
   parent_id  String?
-  ancestors  Json?
+  ancestors  String[]
   level      Int?
   sort_order Int?
   image_url  String?
@@ -2863,7 +2978,7 @@ model public_product_images {
   url_image  String?
   is_show    Boolean?
   created_at DateTime? @db.Timestamptz(6)
-  updated_at String?
+  updated_at DateTime? @db.Timestamptz(6)
 
   @@map("product_images")
   @@schema("public")
@@ -2892,21 +3007,20 @@ model product_manager {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model public_product_options {
-  id                           Int                                   @id @default(autoincrement())
-  product_id                   Int?
-  mat_identity                 String?
-  option_name                  String?
-  online_price                 Decimal?                              @db.Decimal
-  min_price                    Decimal?                              @db.Decimal
-  created_at                   DateTime?                             @db.Timestamptz(6)
-  row_no                       Int?
-  updated_at                   DateTime?                             @db.Timestamptz(6)
-  attributes_hierarchy         Json?
-  productdata_id               Int?
-  is_stock                     Boolean?
-  products                     public_products?                      @relation(fields: [product_id], references: [id])
-  Productdata                  Productdata?                          @relation(fields: [productdata_id], references: [id], onDelete: Cascade)
-  promotion_flashsale_products public_promotion_flashsale_products[]
+  id                   Int              @id @default(autoincrement())
+  product_id           Int?
+  mat_identity         String?
+  option_name          String?
+  online_price         Float?
+  min_price            Float?
+  created_at           DateTime?        @db.Timestamptz(6)
+  row_no               Int?
+  updated_at           DateTime?        @db.Timestamptz(6)
+  productdata_id       Int?
+  is_stock             Boolean?
+  attributes_hierarchy Int[]
+  products             public_products? @relation(fields: [product_id], references: [id])
+  Productdata          Productdata?     @relation(fields: [productdata_id], references: [id], onDelete: Cascade)
 
   @@map("product_options")
   @@schema("public")
@@ -2991,7 +3105,7 @@ model public_products {
   created_at             DateTime?                       @db.Timestamptz(6)
   updated_at             DateTime?                       @db.Timestamptz(6)
   is_active              Boolean?
-  category_hierarchy     Json?
+  category_hierarchy     String[]
   unit                   String?
   is_online_active       Boolean?
   category_id            String?
@@ -3050,56 +3164,62 @@ model producttype_level3 {
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model promotion {
-  id                                      Int                                              @id @default(autoincrement())
-  created_at                              DateTime                                         @default(now()) @db.Timestamptz(6)
-  proname                                 String?
-  startdate                               DateTime?                                        @db.Timestamptz(6)
-  enddate                                 DateTime?                                        @db.Timestamptz(6)
+model public_promotion {
+  id                                      Int                                         @id @default(autoincrement())
+  created_at                              DateTime                                    @default(now()) @db.Timestamptz(6)
+  promotion_name                          String?                                     @map("proname")
+  promotion_start                         DateTime?                                   @map("startdate") @db.Timestamptz(6)
+  promotion_end                           DateTime?                                   @map("enddate") @db.Timestamptz(6)
   filelink                                String?
   banner                                  String?
-  description                             String?
-  type                                    String?
-  points_reward                           Decimal?                                         @default(0) @db.Decimal(10, 2)
+  promotion_description                   String?                                     @map("description")
+  promotion_type                          String?                                     @map("type")
+  points_reward                           Float?                                      @default(0)
   max_claims                              Int?
-  current_claims                          Int?                                             @default(0)
+  current_claims                          Int?                                        @default(0)
   voucher_id                              Int?
   location_lat                            Float?
   location_lng                            Float?
-  location_radius_m                       Int?                                             @default(200)
+  location_radius_m                       Int?                                        @default(200)
   location_name                           String?
   conditions                              String?
-  per_person_limit                        Int?                                             @db.SmallInt
+  per_person_limit                        Int?
   subtype                                 String?
-  status                                  Boolean?
-  sort_order                              Int?                                             @db.SmallInt
+  is_active                               Boolean?                                    @map("status")
+  sort_order                              Int?
+  url_image                               String?
+  promotion_image                         String?
+  updated_at                              DateTime?                                   @db.Timestamptz(6)
+  is_accept_overlapse_promotion           Boolean?
+  customer_tiers                          String[]
   popup_image                             popup_image[]
-  voucher                                 voucher?                                         @relation(fields: [voucher_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  voucher                                 voucher?                                    @relation(fields: [voucher_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   promotion_analytics                     promotion_analytics[]
   promotion_bundle_deal_get_products      public_promotion_bundle_deal_get_products[]
-  promotion_bundle_deal_grand_total_tiers public_promotion_bundle_deal_grand_total_tiers[]
+  promotion_bundle_deal_grand_total_tiers promotion_bundle_deal_grand_total_tiers[]
   promotion_claim_history                 promotion_claim_history[]
   promotion_discount_products             public_promotion_discount_products[]
   promotion_extra_points_products         public_promotion_extra_points_products[]
-  promotion_extra_points_tier_rules       public_promotion_extra_points_tier_rules[]
+  promotion_extra_points_tier_rules       promotion_extra_points_tier_rules[]
   promotion_flashsale_products            public_promotion_flashsale_products[]
   promotion_gift                          promotion_gift[]
   promotion_product                       promotion_product[]
   promotion_redeem                        promotion_redeem[]
   promotion_voucher                       promotion_voucher[]
 
+  @@map("promotion")
   @@schema("public")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model promotion_analytics {
-  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id           String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   promotion_id Int
   member_id    String?
   event        String
-  created_at   DateTime? @default(now()) @db.Timestamptz(6)
-  promotion    promotion @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  created_at   DateTime?        @default(now()) @db.Timestamptz(6)
+  promotion    public_promotion @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([member_id])
   @@index([promotion_id])
@@ -3111,57 +3231,45 @@ model public_promotion_bundle_deal_free_products {
   bundle_deal_get_id                 Int?
   product_option_id                  Int?
   free_quantity                      Int?
-  promotion_bundle_deal_get_products public_promotion_bundle_deal_get_products? @relation(fields: [bundle_deal_get_id], references: [id], onDelete: Cascade)
+  promotion_bundle_deal_get_products public_promotion_bundle_deal_get_products? @relation(fields: [bundle_deal_get_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "promotion_bundle_deal_free_products_bundle_get_id_fkey")
 
   @@map("promotion_bundle_deal_free_products")
   @@schema("public")
 }
 
 model public_promotion_bundle_deal_get_products {
-  id                                  Int                                          @id @default(autoincrement())
+  id                                  Int                                          @id(map: "promotion_bundle_deal_products_pkey") @default(autoincrement())
   promotion_id                        Int?
   product_option_id                   Int?
   get_quantity                        Int?
   promotion_bundle_deal_free_products public_promotion_bundle_deal_free_products[]
-  promotion                           promotion?                                   @relation(fields: [promotion_id], references: [id], onDelete: Cascade)
+  promotion                           public_promotion?                            @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "promotion_bundle_deal_products_promotion_id_fkey")
 
   @@map("promotion_bundle_deal_get_products")
   @@schema("public")
 }
 
 model public_promotion_bundle_deal_grand_total_free_products {
-  id                                      Int                                             @id @default(autoincrement())
+  id                                      Int                                      @id(map: "promotion_bundle_deal_grand_total_free_pkey") @default(autoincrement())
   bundle_deal_grand_total_tiers_id        Int?
   product_option_id                       Int?
   free_quantity                           Int?
-  promotion_bundle_deal_grand_total_tiers public_promotion_bundle_deal_grand_total_tiers? @relation(fields: [bundle_deal_grand_total_tiers_id], references: [id], onDelete: Cascade, map: "promotion_bundle_deal_grand_t_bundle_deal_grand_total_tier_fkey")
+  promotion_bundle_deal_grand_total_tiers promotion_bundle_deal_grand_total_tiers? @relation(fields: [bundle_deal_grand_total_tiers_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "promotion_bundle_deal_grand_t_bundle_deal_grand_total_tier_fkey")
 
   @@map("promotion_bundle_deal_grand_total_free_products")
   @@schema("public")
 }
 
-model public_promotion_bundle_deal_grand_total_tiers {
-  id                                              Int                                                      @id @default(autoincrement())
-  promotion_id                                    Int?
-  level_no                                        Int?
-  minimum_grand_total                             Int?
-  promotion_bundle_deal_grand_total_free_products public_promotion_bundle_deal_grand_total_free_products[]
-  promotion                                       promotion?                                               @relation(fields: [promotion_id], references: [id], onDelete: Cascade)
-
-  @@map("promotion_bundle_deal_grand_total_tiers")
-  @@schema("public")
-}
-
 model promotion_claim_history {
-  id             Int          @id @default(autoincrement())
+  id             Int              @id @default(autoincrement())
   promotion_id   Int
-  user_id        String       @db.Uuid
-  claimed_at     DateTime?    @default(now()) @db.Timestamp(6)
+  user_id        String           @db.Uuid
+  claimed_at     DateTime?        @default(now()) @db.Timestamp(6)
   points_awarded Int
   voucher_id     Int?
-  promotion      promotion    @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  customeruser   customeruser @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  voucher        voucher?     @relation(fields: [voucher_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  promotion      public_promotion @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  customeruser   customeruser     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  voucher        voucher?         @relation(fields: [voucher_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([promotion_id, user_id])
   @@index([promotion_id], map: "idx_promotion_claim_promo")
@@ -3170,104 +3278,91 @@ model promotion_claim_history {
 }
 
 model public_promotion_discount_products {
-  id                Int        @id @default(autoincrement())
+  id                Int               @id(map: "discount_products_pkey") @default(autoincrement())
   promotion_id      Int?
   product_option_id Int?
-  sale_price        Int?
+  sale_price        Float?
   sale_percent      Float?
-  promotion         promotion? @relation(fields: [promotion_id], references: [id], onDelete: Cascade)
+  promotion         public_promotion? @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@map("promotion_discount_products")
   @@schema("public")
 }
 
 model public_promotion_extra_points_products {
-  id                Int        @id @default(autoincrement())
+  id                Int               @id(map: "promotion_extra_points_product_point_pkey") @default(autoincrement())
   promotion_id      Int?
   product_option_id Int?
-  points_multiplier Int?
-  promotion         promotion? @relation(fields: [promotion_id], references: [id], onDelete: Cascade)
+  points_multiplier Float?
+  promotion         public_promotion? @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "promotion_extra_points_product_point_promotion_id_fkey")
 
   @@map("promotion_extra_points_products")
   @@schema("public")
 }
 
-model public_promotion_extra_points_tier_rules {
-  id                Int        @id @default(autoincrement())
-  promotion_id      Int?
-  level_no          Int?
-  min_amount        Int?
-  points_multiplier Float?
-  promotion         promotion? @relation(fields: [promotion_id], references: [id], onDelete: Cascade)
-
-  @@map("promotion_extra_points_tier_rules")
-  @@schema("public")
-}
-
 model public_promotion_flashsale_products {
-  id                Int                     @id @default(autoincrement())
+  id                Int               @id(map: "flashsale_products_pkey") @default(autoincrement())
   promotion_id      Int?
   product_option_id Int?
-  sale_price        Int?
+  sale_price        Float?
   sale_percent      Float?
-  product_options   public_product_options? @relation(fields: [product_option_id], references: [id], onDelete: Cascade)
-  promotion         promotion?              @relation(fields: [promotion_id], references: [id], onDelete: Cascade)
+  promotion         public_promotion? @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@map("promotion_flashsale_products")
   @@schema("public")
 }
 
 model promotion_gift {
-  id                                                         Int          @id @default(autoincrement())
-  created_at                                                 DateTime?    @default(now()) @db.Timestamptz(6)
+  id                                                         Int              @id @default(autoincrement())
+  created_at                                                 DateTime?        @default(now()) @db.Timestamptz(6)
   promotion_id                                               Int
   trigger_product_id                                         Int?
-  min_quantity                                               Int          @default(1)
-  min_amount                                                 Decimal?     @db.Decimal
+  min_quantity                                               Int              @default(1)
+  min_amount                                                 Decimal?         @db.Decimal
   gift_product_id                                            Int
-  gift_quantity                                              Int          @default(1)
-  Productdata_promotion_gift_gift_product_idToProductdata    Productdata  @relation("promotion_gift_gift_product_idToProductdata", fields: [gift_product_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  promotion                                                  promotion    @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  Productdata_promotion_gift_trigger_product_idToProductdata Productdata? @relation("promotion_gift_trigger_product_idToProductdata", fields: [trigger_product_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  gift_quantity                                              Int              @default(1)
+  Productdata_promotion_gift_gift_product_idToProductdata    Productdata      @relation("promotion_gift_gift_product_idToProductdata", fields: [gift_product_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  promotion                                                  public_promotion @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  Productdata_promotion_gift_trigger_product_idToProductdata Productdata?     @relation("promotion_gift_trigger_product_idToProductdata", fields: [trigger_product_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@schema("public")
 }
 
 model promotion_product {
-  id              Int          @id @default(autoincrement())
-  created_at      DateTime     @default(now()) @db.Timestamptz(6)
+  id              Int               @id @default(autoincrement())
+  created_at      DateTime          @default(now()) @db.Timestamptz(6)
   promotion_id    Int?
   product_id      Int?
-  promotion_price Decimal?     @db.Decimal
-  qty             Decimal?     @db.Decimal
-  Productdata     Productdata? @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  promotion       promotion?   @relation(fields: [promotion_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  promotion_price Decimal?          @db.Decimal
+  qty             Decimal?          @db.Decimal
+  Productdata     Productdata?      @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  promotion       public_promotion? @relation(fields: [promotion_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@schema("public")
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model promotion_redeem {
-  id               Int        @id @default(autoincrement())
-  created_at       DateTime   @default(now()) @db.Timestamptz(6)
+  id               Int               @id @default(autoincrement())
+  created_at       DateTime          @default(now()) @db.Timestamptz(6)
   promotion_id     Int?
-  promotion_price  Decimal?   @db.Decimal
-  qty              Decimal?   @db.Decimal
-  rewards_id       String     @db.Uuid
-  per_person_limit Int?       @db.SmallInt
-  promotion        promotion? @relation(fields: [promotion_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  rewards          rewards    @relation(fields: [rewards_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  promotion_price  Decimal?          @db.Decimal
+  qty              Decimal?          @db.Decimal
+  rewards_id       String            @db.Uuid
+  per_person_limit Int?              @db.SmallInt
+  promotion        public_promotion? @relation(fields: [promotion_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  rewards          rewards           @relation(fields: [rewards_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@schema("public")
 }
 
 model promotion_voucher {
-  id           Int        @id @default(autoincrement())
+  id           Int               @id @default(autoincrement())
   promotion_id Int?
   voucher_id   Int?
-  created_at   DateTime?  @default(now()) @db.Timestamptz(6)
-  promotion    promotion? @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  voucher      voucher?   @relation(fields: [voucher_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  created_at   DateTime?         @default(now()) @db.Timestamptz(6)
+  promotion    public_promotion? @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  voucher      voucher?          @relation(fields: [voucher_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("public")
 }
@@ -3343,15 +3438,19 @@ model referral_fingerprints {
 }
 
 model referral_settings {
-  id                    Int       @id @default(autoincrement())
-  points_reward         Int       @default(100)
-  is_active             Boolean   @default(true)
-  name                  String?
-  start_date            DateTime? @db.Date
-  end_date              DateTime? @db.Date
-  banner                String?
-  newuser_points_reward Int?
-  product_milestones    Json?     @default("[]")
+  id                          Int                           @id @default(autoincrement())
+  points_reward               Int                           @default(100)
+  is_active                   Boolean                       @default(true)
+  name                        String?
+  start_date                  DateTime?                     @db.Date
+  end_date                    DateTime?                     @db.Date
+  banner                      String?
+  newuser_points_reward       Int?
+  product_milestones          Json?                         @default("[]")
+  milestone_mode              String                        @default("all")
+  condition                   String?                       @default("")
+  customeruser                customeruser[]
+  referral_milestones_claimed referral_milestones_claimed[]
 
   @@schema("public")
 }
@@ -3962,7 +4061,7 @@ model voucher {
   customernoti            customernoti[]
   customervoucher         customervoucher[]
   order                   order[]
-  promotion               promotion[]
+  promotion               public_promotion[]
   promotion_claim_history promotion_claim_history[]
   promotion_voucher       promotion_voucher[]
 
@@ -3993,16 +4092,112 @@ model webhook_retry_queue {
   @@schema("public")
 }
 
+model customer_tags {
+  id           String       @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  customer_id  String       @db.Uuid
+  tag_id       String       @db.Uuid
+  assigned_at  DateTime     @default(now()) @db.Timestamptz(6)
+  expires_at   DateTime?    @db.Timestamptz(6)
+  source       String       @default("manual")
+  customeruser customeruser @relation(fields: [customer_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  tags         tags         @relation(fields: [tag_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([customer_id, tag_id])
+  @@index([customer_id], map: "idx_customer_tags_customer")
+  @@index([expires_at], map: "idx_customer_tags_expires", where: raw("(expires_at IS NOT NULL)"))
+  @@index([tag_id], map: "idx_customer_tags_tag")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model tags {
+  id                                            String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name                                          String
+  color                                         String          @default("#6366f1")
+  tag_type                                      String          @default("permanent")
+  expire_days                                   Int?
+  is_active                                     Boolean         @default(true)
+  created_at                                    DateTime        @default(now()) @db.Timestamptz(6)
+  customer_tags                                 customer_tags[]
+  customernoti_customernoti_click_tag_idTotags  customernoti[]  @relation("customernoti_click_tag_idTotags")
+  customernoti_customernoti_target_tag_idTotags customernoti[]  @relation("customernoti_target_tag_idTotags")
+
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model promotion_bundle_deal_grand_total_tiers {
+  id                                              Int                                                      @id @default(autoincrement())
+  promotion_id                                    Int?
+  level_no                                        Int?
+  minimum_grand_total                             Float?
+  promotion_bundle_deal_grand_total_free_products public_promotion_bundle_deal_grand_total_free_products[]
+  promotion                                       public_promotion?                                        @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model promotion_extra_points_tier_rules {
+  id                Int               @id @default(autoincrement())
+  promotion_id      Int?
+  level_no          Int?
+  min_amount        Float?
+  points_multiplier Float?
+  promotion         public_promotion? @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+model referral_milestones_claimed {
+  id                 BigInt            @id @default(autoincrement())
+  referrer_member_id String
+  campaign_id        Int
+  threshold          Int
+  reward_id          String?
+  claimed_at         DateTime          @default(now()) @db.Timestamptz(6)
+  referral_settings  referral_settings @relation(fields: [campaign_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([referrer_member_id, campaign_id, threshold])
+  @@index([referrer_member_id, campaign_id], map: "idx_rmc_referrer")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model bill_tracking_history {
+  id                 Int      @id @default(autoincrement())
+  created_at         DateTime @default(now()) @db.Timestamptz(6)
+  doc_no             String?
+  line_id            String?
+  line_office_accont String?
+
+  @@unique([doc_no, line_id], map: "bill_tracking_doc_line_unique")
+  @@schema("public")
+}
+
+model noti_auto_send_log {
+  id           Int          @id @default(autoincrement())
+  noti_id      Int
+  customer_id  String       @db.Uuid
+  sent_at      DateTime     @default(now()) @db.Timestamptz(6)
+  customeruser customeruser @relation(fields: [customer_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  customernoti customernoti @relation(fields: [noti_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([noti_id, customer_id])
+  @@index([noti_id], map: "idx_noti_auto_send_log_noti")
+  @@schema("public")
+}
+
 view vw_all_events {
-  event_id         Int?
+  event_id         String?  @db.Uuid
   event_image      String?
   event_cate_name  String?
   event_name       String?
   event_detail     String?
-  register_date    DateTime? @db.Date
-  preregister_date DateTime? @db.Date
-  event_startdate  DateTime? @db.Date
-  event_enddate    DateTime? @db.Date
+  register_date    String?
+  preregister_date String?
+  event_startdate  String?
+  event_enddate    String?
   location_name    String?
   tier_register    String[]
   tier_preregister String[]
@@ -4330,6 +4525,37 @@ view vw_total_points_customeruser {
   user_id      String?  @db.Uuid
 
   @@schema("3nconnect")
+}
+
+view public_vw_bundle_deal_get_x_free_y {
+  promotion_type        String?
+  promotion_name        String?
+  get_company_name      String?
+  get_brand_name        String?
+  get_product_category  String?
+  get_mat_identity      String?
+  get_product_name      String?
+  get_product_unit      String?
+  get_quantity          Int?
+  free_company_name     String?
+  free_brand_name       String?
+  free_product_category String?
+  free_mat_identity     String?
+  free_product_name     String?
+  free_product_unit     String?
+  free_quantity         Int?
+  promotion_start       DateTime? @db.Timestamptz(6)
+  promotion_end         DateTime? @db.Timestamptz(6)
+
+  @@map("vw_bundle_deal_get_x_free_y")
+  @@schema("public")
+}
+
+view customer_peak_hour {
+  customer_id String? @db.Uuid
+  peak_hour   Int?
+
+  @@schema("public")
 }
 
 enum aal_level {

@@ -35,7 +35,7 @@ SELECT
   ) AS sale_percent,
   p.is_online_active,
   p.is_pre_order,
-  com.company_name,
+  com.name AS company_name,
   com.id AS company_id
 FROM
   (
@@ -43,8 +43,8 @@ FROM
       (
         (
           (
-            "3nconnect".product_options po
-            JOIN "3nconnect".products p ON (
+            product_options po
+            JOIN products p ON (
               (
                 (po.product_id = p.id)
                 AND (p.is_active = TRUE)
@@ -61,15 +61,15 @@ FROM
               p_1.is_accept_overlapse_promotion
             FROM
               (
-                "3nconnect".promotions p_1
-                JOIN "3nconnect".promotion_flashsale_products pfp ON ((p_1.id = pfp.promotion_id))
+                promotion p_1
+                JOIN promotion_flashsale_products pfp ON ((p_1.id = pfp.promotion_id))
               )
             WHERE
               (
-                (p_1.promotion_type = 'flash_sale' :: text)
-                AND (p_1.promotion_start <= NOW())
-                AND (p_1.promotion_end >= NOW())
-                AND (p_1.is_active = TRUE)
+                (p_1.type = 'flash_sale' :: text)
+                AND (p_1.startdate <= NOW())
+                AND (p_1.enddate >= NOW())
+                AND (p_1.status = TRUE)
               )
           ) flash_sale_table ON ((po.id = flash_sale_table.product_option_id))
         )
@@ -83,24 +83,24 @@ FROM
             p_1.is_accept_overlapse_promotion
           FROM
             (
-              "3nconnect".promotions p_1
-              JOIN "3nconnect".promotion_discount_products pdp ON ((p_1.id = pdp.promotion_id))
+              promotion p_1
+              JOIN promotion_discount_products pdp ON ((p_1.id = pdp.promotion_id))
             )
           WHERE
             (
-              (p_1.promotion_type = 'discount' :: text)
-              AND (p_1.promotion_start <= NOW())
-              AND (p_1.promotion_end >= NOW())
-              AND (p_1.is_active = TRUE)
+              (p_1.type = 'discount' :: text)
+              AND (p_1.startdate <= NOW())
+              AND (p_1.enddate >= NOW())
+              AND (p_1.status = TRUE)
             )
         ) discount_table ON ((po.id = discount_table.product_option_id))
       )
-      LEFT JOIN "3nconnect".product_images t ON (
+      LEFT JOIN product_images t ON (
         (
           (p.id = t.product_id)
           AND (t.is_show = TRUE)
         )
       )
     )
-    JOIN "3nconnect".companies com ON ((p.company_id = com.id))
+    JOIN companies com ON ((p.company_id = com.id))
   );

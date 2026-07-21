@@ -9,7 +9,7 @@ SELECT
   p."MM_RPTMAT_Qty-Unit" AS mat_qty_unit,
   p."MM_RPTMAT_AGQty-Unit" AS mat_agqty_unit,
   com.id AS company_id,
-  com.company_name,
+  com.name AS company_name,
   product_ecommerce.min_price,
   product_ecommerce.online_price,
   product_ecommerce.option_name AS sale_option_name,
@@ -34,7 +34,7 @@ FROM
           tpo.attributes_hierarchy
         FROM
           (
-            "3nconnect".products tp
+            products tp
             JOIN "3nconnect".product_options tpo ON ((tp.id = tpo.product_id))
           )
       ) product_ecommerce ON (
@@ -46,5 +46,5 @@ FROM
         )
       )
     )
-    JOIN "3nconnect".companies com ON ((p.company_id = com.id))
+    JOIN companies com ON ((p.company_id = com.id))
   );

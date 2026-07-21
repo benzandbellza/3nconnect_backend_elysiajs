@@ -127,7 +127,7 @@ export const publicRoute = new Elysia({
     "/products/flashsale",
     async ({ set }) => {
       try { 
-        const flashsale_detail = await prisma.promotions.findFirst({
+        const flashsale_detail = await prisma.public_promotion.findFirst({
           where: {
             promotion_type: 'flash_sale',
             is_active: true,
@@ -223,6 +223,7 @@ export const publicRoute = new Elysia({
             }
           },
           select: {
+            product_id: true,
             mat_identity: true,
             product_name: true,
             promotion_type: true,
@@ -240,11 +241,59 @@ export const publicRoute = new Elysia({
           }
         });
 
+        const productIds = [
+          ...new Set(
+            products
+              .map((product) => product.product_id)
+              .filter((productId): productId is number => productId !== null),
+          ),
+        ];
+
+        const paymentMethods = await prisma.public_product_payment_method.findMany({
+          where: {
+            product_id: { in: productIds },
+          },
+          select: {
+            id: true,
+            product_id: true,
+            payment_method_id: true,
+            payment_methods: {
+              select: {
+                id: true,
+                name: true,
+                icon: true,
+                icon_color: true,
+                is_active: true,
+                sort_order: true,
+                image_url: true,
+                category: true,
+              },
+            },
+          },
+        });
+
+        const paymentMethodsByProductId = new Map<number, typeof paymentMethods>();
+        for (const paymentMethod of paymentMethods) {
+          if (paymentMethod.product_id === null) continue;
+          const current = paymentMethodsByProductId.get(paymentMethod.product_id) ?? [];
+          if (paymentMethod.payment_methods?.is_active !== false) {
+            current.push(paymentMethod);
+          }
+          paymentMethodsByProductId.set(paymentMethod.product_id, current);
+        }
+
+        const productsWithPaymentMethods = products.map((product) => ({
+          ...product,
+          product_payment_method: product.product_id === null
+            ? []
+            : paymentMethodsByProductId.get(product.product_id) ?? [],
+        }));
+
         return {
           success: true,
           message: 'Products',
           data: {
-            products: products
+            products: productsWithPaymentMethods,
           }
         }
       } catch (error) {
@@ -320,38 +369,9 @@ export const publicRoute = new Elysia({
     "/product-categories/active",
     async ({ set }) => {
       try {
-        const response = await prisma.nconnect_product_categories.findMany({
-          where: {
-            is_active: true,
-            level: 0,
-          },
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-            other_product_categories: {
-              where: {
-                is_active: true,
-                level: 1,
-              },
-              select: {
-                id: true,
-                name: true,
-                slug: true,
-                other_product_categories: {
-                  where: {
-                    is_active: true,
-                    level: 2,
-                  },
-                  select: {
-                    id: true,
-                    name: true,
-                    slug: true,
-                  },
-                },
-              },
-            },
-          },
+        const response = await prisma.public_product_categories.findMany({
+          where: { is_active: true, level: { not: null } },
+          select: { id: true, name: true, slug: true, parent_id: true, level: true },
           orderBy: {
             id: "asc",
           },
@@ -387,7 +407,7 @@ export const publicRoute = new Elysia({
     async ({ params, set }) => {
       try {
         const product_option_id = params.product_option_id;
-        const responseProductOption = await prisma.nconnect_product_options.findFirst({
+        const responseProductOption = await prisma.public_product_options.findFirst({
           where: {
             id: product_option_id
           },
@@ -403,7 +423,7 @@ export const publicRoute = new Elysia({
 
         const productId = responseProductOption.product_id!;
 
-        const response = await prisma.nconnect_products.findFirst({
+        const response = await prisma.public_products.findFirst({
           where: {
             id: productId,
           },
@@ -421,14 +441,25 @@ export const publicRoute = new Elysia({
                 name: true
               }
             },
-            product_images: {
+            product_payment_method: {
               select: {
-                url_image: true
+                id: true,
+                product_id: true,
+                payment_method_id: true,
+                payment_methods: {
+                  select: {
+                    id: true,
+                    name: true,
+                    icon: true,
+                    icon_color: true,
+                    is_active: true,
+                    sort_order: true,
+                    image_url: true,
+                    category: true,
+                  },
+                },
               },
-              orderBy: {
-                is_show: "desc"
-              }
-            }
+            },
           },
         });
 
@@ -969,7 +1000,7 @@ export const publicRoute = new Elysia({
     "/promotions",
     async ({ set }) => {
       try { 
-        const promotions = await prisma.promotions.findMany({
+        const promotions = await prisma.public_promotion.findMany({
           where: {
             is_active: true,
             promotion_start: {
@@ -1025,7 +1056,7 @@ export const publicRoute = new Elysia({
       try {
         const promotion_id = params.promotion_id;
 
-        const promotionDetail = await prisma.promotions.findFirst({
+        const promotionDetail = await prisma.public_promotion.findFirst({
           where: {
             id: promotion_id,
             is_active: true,
@@ -1102,7 +1133,7 @@ export const publicRoute = new Elysia({
     async ({ params, set }) => {
       try {
         const promotion_id = params.promotion_id;
-        const promotionDetail = await prisma.promotions.findFirst({
+        const promotionDetail = await prisma.public_promotion.findFirst({
           where: {
             id: promotion_id,
             is_active: true,
@@ -1180,7 +1211,7 @@ export const publicRoute = new Elysia({
       try {
         const promotion_id = params.promotion_id;
 
-        const promotionDetail = await prisma.promotions.findFirst({
+        const promotionDetail = await prisma.public_promotion.findFirst({
           where: {
             id: promotion_id,
             is_active: true,
@@ -1256,7 +1287,7 @@ export const publicRoute = new Elysia({
       try {
         const promotion_id = params.promotion_id;
 
-        const promotionDetail = await prisma.promotions.findFirst({
+        const promotionDetail = await prisma.public_promotion.findFirst({
           where: {
             id: promotion_id,
             is_active: true,
@@ -1333,7 +1364,7 @@ export const publicRoute = new Elysia({
       try {
         const promotion_id = params.promotion_id;
 
-        const promotionDetail = await prisma.promotions.findFirst({
+        const promotionDetail = await prisma.public_promotion.findFirst({
           where: {
             id: promotion_id,
             is_active: true,

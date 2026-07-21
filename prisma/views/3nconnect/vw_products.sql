@@ -1,5 +1,5 @@
 SELECT
-  c.company_name,
+  c.name AS company_name,
   b.brand_name,
   pc.name AS category_name,
   po.mat_identity,
@@ -18,16 +18,16 @@ FROM
       (
         (
           (
-            "3nconnect".products p2
-            JOIN "3nconnect".product_options po ON ((p2.id = po.product_id))
+            products p2
+            JOIN product_options po ON ((p2.id = po.product_id))
           )
-          JOIN "3nconnect".companies c ON ((p2.company_id = c.id))
+          JOIN companies c ON ((p2.company_id = c.id))
         )
-        JOIN "3nconnect".brands b ON ((p2.brand_id = b.id))
+        JOIN brands b ON ((p2.brand_id = b.id))
       )
-      JOIN "3nconnect".product_categories pc ON ((p2.category_id = pc.id))
+      JOIN product_categories pc ON ((p2.category_id = pc.id))
     )
-    LEFT JOIN "3nconnect".product_images pi ON (
+    LEFT JOIN product_images pi ON (
       (
         (pi.product_id = p2.id)
         AND (pi.is_show = TRUE)
