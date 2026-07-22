@@ -1150,6 +1150,14 @@ export const ecommerceRoute = new Elysia({
                 },
               },
             },
+            product_images: {
+              where: {
+                is_show: true
+              },
+              select: {
+                url_image: true,
+              }
+            }
           },
           orderBy : {
             product_name: "asc"

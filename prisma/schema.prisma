@@ -1565,9 +1565,13 @@ model bill_tracking {
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   note               String?
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // สิ่งที่แนบมา String? @map("สิ่งที่แนบมา")
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
@@ -1604,6 +1608,8 @@ model bill_tracking {
   enroll_date        String? @map("enroll date")
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // พนักงานขาย String? @map("พนักงานขาย")
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
@@ -2776,6 +2782,7 @@ model noti_channel_stats {
   updated_at   DateTime     @default(now()) @db.Timestamptz(6)
   customernoti customernoti @relation(fields: [noti_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
+  @@unique([noti_id, platform])
   @@index([noti_id], map: "noti_channel_stats_noti_idx")
   @@schema("public")
 }
@@ -2973,12 +2980,13 @@ model public_product_categories {
 }
 
 model public_product_images {
-  id         Int       @id @default(autoincrement())
+  id         Int              @id @default(autoincrement())
   product_id Int?
   url_image  String?
   is_show    Boolean?
-  created_at DateTime? @db.Timestamptz(6)
-  updated_at DateTime? @db.Timestamptz(6)
+  created_at DateTime?        @db.Timestamptz(6)
+  updated_at DateTime?        @db.Timestamptz(6)
+  products   public_products? @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@map("product_images")
   @@schema("public")
@@ -3115,6 +3123,7 @@ model public_products {
   youtube_url            String?
   is_pre_order           Boolean?
   is_custom_options      Boolean?
+  product_images         public_product_images[]
   product_options        public_product_options[]
   product_payment_method public_product_payment_method[]
   brands                 public_brands?                  @relation(fields: [brand_id], references: [id], onDelete: Cascade)
