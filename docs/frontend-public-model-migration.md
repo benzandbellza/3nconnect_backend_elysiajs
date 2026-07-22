@@ -347,7 +347,7 @@ Create/update ยังคงรับ form field เดิมจาก route �
 
 - `event_id` ต้องส่งเป็น UUID string ห้ามใช้ `Number(event_id)`
 - `event_category_id` และ relation `event_categories` ไม่ได้ถูกใช้ใน `public_events` route ปัจจุบัน
-- `tierregister`/`tierpreregister` ถูกเก็บเป็น string JSON หาก UI ต้องแสดงเป็น array ให้ `JSON.parse` แบบมี try/catch
+- `tierregister`/`tierpreregister` ถูกเก็บและส่งออกเป็น plain text; UI ไม่ควร `JSON.parse` ค่าเหล่านี้เป็น array
 
 ## 7. Brands, attributes และ promotions
 

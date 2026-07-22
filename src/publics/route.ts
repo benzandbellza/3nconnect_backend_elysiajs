@@ -2,7 +2,6 @@ import { Elysia, t } from "elysia";
 import { prisma } from "./prisma_connection";
 import "dotenv/config";
 import { createClient } from '@supabase/supabase-js'
-import { responsePathAsArray } from "graphql";
 
 const now: Date = new Date();
 
@@ -1483,11 +1482,11 @@ export const publicRoute = new Elysia({
     async ({headers, set}) => {
       try {
         const response = await prisma.vw_all_events.findMany({
-          where: {
+          where : {
             is_active: true
-          },
+          }
         })
-
+        
         if(!response){
           set.status = 404;
           return {message : "Not have any events are active"}

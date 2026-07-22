@@ -6,6 +6,7 @@ import {
   mapOrderItemToImGoods,
   normalizeBuyerCustomerUserId,
 } from "./order-mapping";
+import { mapEventTierFields } from "./event-tier-mapping";
 import { auth } from "../plugins/auth";
 import "dotenv/config";
 
@@ -2509,8 +2510,7 @@ export const ecommerceRoute = new Elysia({
             event_preregister: preregister_date ? String(preregister_date) : null,
             link: ref_url ? String(ref_url) : null,
             event_registerdate: register_date ? String(register_date) : null,
-            tierpreregister: JSON.stringify(tier_preregister),
-            tierregister: JSON.stringify(tier_register),
+            ...mapEventTierFields({ tier_preregister, tier_register }),
             created_at: now,
             event_category_id: event_category_id
           },
@@ -2545,8 +2545,8 @@ export const ecommerceRoute = new Elysia({
         preregister_date: t.Any(),
         ref_url: t.Any(),
         register_date: t.Any(),
-        tier_preregister: t.Array(t.Any()),
-        tier_register: t.Array(t.Any()),
+        tier_preregister: t.String(),
+        tier_register: t.String(),
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
@@ -2594,8 +2594,7 @@ export const ecommerceRoute = new Elysia({
             event_preregister: preregister_date ? String(preregister_date) : null,
             link: ref_url ? String(ref_url) : null,
             event_registerdate: register_date ? String(register_date) : null,
-            tierpreregister: JSON.stringify(tier_preregister),
-            tierregister: JSON.stringify(tier_register),
+            ...mapEventTierFields({ tier_preregister, tier_register }),
           },
         });
 
@@ -2631,8 +2630,8 @@ export const ecommerceRoute = new Elysia({
         preregister_date: t.Any(),
         ref_url: t.Any(),
         register_date: t.Any(),
-        tier_preregister: t.Array(t.Any()),
-        tier_register: t.Array(t.Any()),
+        tier_preregister: t.String(),
+        tier_register: t.String(),
         is_active: t.Boolean(),
       }),
       detail: {
