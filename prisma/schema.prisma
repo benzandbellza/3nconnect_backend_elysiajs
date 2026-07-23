@@ -324,7 +324,7 @@ model order_billing_payment {
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model order_billing_payment_response {
   id                   Int       @id @default(autoincrement())
-  invoice_no           String
+  invoice_no           String?
   amount               Float?
   currency_code        String?   @default("THB")
   tran_ref             String?
@@ -1112,53 +1112,54 @@ model ConversationMemory {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model IM {
-  id                     Int                @id @default(autoincrement())
-  created_at             DateTime           @default(now()) @db.Timestamptz(6)
-  docid                  String             @unique(map: "IM_io_id_key")
-  customer               String?
-  note                   String?
-  create_by              String?            @db.Uuid
-  status                 String?
-  im                     String?
-  customer_name          String?
-  tel                    String?
-  updated_at             DateTime?          @default(now()) @db.Timestamptz(6)
-  update_by              String?
-  history                Json?
-  type                   String?
-  delivery_address_id    String?            @db.Uuid
-  invoice_id             Int?
-  shipping_address       String?
-  has_fifo_violation     Boolean?           @default(false)
-  price_valid_days       String?
-  delivery_days          String?
-  payment_days           String?
-  customeruser_id        String?            @db.Uuid
-  contact_id             Int?
-  prefix                 String?
-  need_smapprove         Boolean?           @default(false)
-  sopt_id                Int?
-  buyer_customeruser_id  String?
-  payment_status         String?
-  log_payment            DateTime?          @db.Timestamptz(6)
-  order_uuid             String?            @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  company_id             Int?
-  shipping_cost          Float?
-  admin_verify_status    String?
-  payment_invoice_no     String?
-  credit_terms_day       Int?
-  is_admin_order_created Boolean?
-  admin_updated_at       DateTime?          @db.Timestamptz(6)
-  shipping_address_id    Int?
-  order_created_by       String?            @db.Uuid
-  payment_method_type    String?
-  contact                contact?           @relation(fields: [contact_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users                  public_users?      @relation(fields: [create_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  customeruser           customeruser?      @relation(fields: [customeruser_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  customer_delivery      customer_delivery? @relation(fields: [delivery_address_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  invoicehead            invoicehead?       @relation(fields: [invoice_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  sopt_head              sopt_head?         @relation(fields: [sopt_id], references: [id], onDelete: Cascade)
-  im_goods               im_goods[]
+  id                          Int                @id @default(autoincrement())
+  created_at                  DateTime           @default(now()) @db.Timestamptz(6)
+  docid                       String             @unique(map: "IM_io_id_key")
+  customer                    String?
+  note                        String?
+  create_by                   String?            @db.Uuid
+  status                      String?
+  im                          String?
+  customer_name               String?
+  tel                         String?
+  updated_at                  DateTime?          @default(now()) @db.Timestamptz(6)
+  update_by                   String?
+  history                     Json?
+  type                        String?
+  delivery_address_id         String?            @db.Uuid
+  invoice_id                  Int?
+  shipping_address            String?
+  has_fifo_violation          Boolean?           @default(false)
+  price_valid_days            String?
+  delivery_days               String?
+  payment_days                String?
+  customeruser_id             String?            @db.Uuid
+  contact_id                  Int?
+  prefix                      String?
+  need_smapprove              Boolean?           @default(false)
+  sopt_id                     Int?
+  buyer_customeruser_id       String?
+  payment_status              String?
+  log_payment                 DateTime?          @db.Timestamptz(6)
+  order_uuid                  String?            @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company_id                  Int?
+  shipping_cost               Float?
+  admin_verify_status         String?
+  payment_invoice_no          String?
+  credit_terms_day            Int?
+  is_admin_order_created      Boolean?
+  admin_updated_at            DateTime?          @db.Timestamptz(6)
+  shipping_address_id         Int?
+  order_created_by            String?            @db.Uuid
+  payment_method_type         String?
+  customer_invoice_address_id Int?
+  contact                     contact?           @relation(fields: [contact_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users                       public_users?      @relation(fields: [create_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  customeruser                customeruser?      @relation(fields: [customeruser_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  customer_delivery           customer_delivery? @relation(fields: [delivery_address_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  invoicehead                 invoicehead?       @relation(fields: [invoice_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  sopt_head                   sopt_head?         @relation(fields: [sopt_id], references: [id], onDelete: Cascade)
+  im_goods                    im_goods[]
 
   @@schema("public")
 }
@@ -1399,51 +1400,50 @@ model asset_check {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model assett {
-  id                                 Int               @id(map: "assett_instrument_pkey") @default(autoincrement())
-  created_at                         DateTime          @default(now()) @db.Timestamptz(6)
-  customeruser_id                    String?           @db.Uuid
+  id                                 Int                 @id(map: "assett_instrument_pkey") @default(autoincrement())
+  created_at                         DateTime            @default(now()) @db.Timestamptz(6)
+  customeruser_id                    String?             @db.Uuid
   contact_id                         Int?
   install                            String?
   install_place                      String?
-  installer                          String?           @db.Uuid
-  recorded_by                        String?           @db.Uuid
-  sale_person_id                     String?           @db.Uuid
+  installer                          String?             @db.Uuid
+  recorded_by                        String?             @db.Uuid
+  sale_person_id                     String?             @db.Uuid
   ref_doc                            String?
   note                               String?
   doc_id                             String?
   companies_id                       Int?
   status                             String?
   log                                String?
-  action_date                        DateTime?         @db.Timestamptz(6)
+  action_date                        DateTime?           @db.Timestamptz(6)
   type                               String?
-  users_assett_installerTousers      public_users?     @relation("assett_installerTousers", fields: [installer], references: [id], onDelete: Cascade)
-  companies                          public_companies? @relation(fields: [companies_id], references: [id], onDelete: Cascade, map: "assett_instrument_companies_id_fkey")
-  contact                            contact?          @relation(fields: [contact_id], references: [id], onDelete: Cascade, map: "assett_instrument_contact_id_fkey")
-  customeruser                       customeruser?     @relation(fields: [customeruser_id], references: [id], onDelete: Cascade, map: "assett_instrument_customeruser_id_fkey")
-  users_assett_recorded_byTousers    public_users?     @relation("assett_recorded_byTousers", fields: [recorded_by], references: [id], onDelete: Cascade, map: "assett_instrument_recorded_by_fkey")
-  users_assett_sale_person_idTousers public_users?     @relation("assett_sale_person_idTousers", fields: [sale_person_id], references: [id], onDelete: Cascade, map: "assett_instrument_sale_person_id_fkey")
-  assett_goods                       assett_goods[]
+  users_assett_installerTousers      public_users?       @relation("assett_installerTousers", fields: [installer], references: [id], onDelete: Cascade)
+  companies                          public_companies?   @relation(fields: [companies_id], references: [id], onDelete: Cascade, map: "assett_instrument_companies_id_fkey")
+  contact                            contact?            @relation(fields: [contact_id], references: [id], onDelete: Cascade, map: "assett_instrument_contact_id_fkey")
+  customeruser                       customeruser?       @relation(fields: [customeruser_id], references: [id], onDelete: Cascade, map: "assett_instrument_customeruser_id_fkey")
+  users_assett_recorded_byTousers    public_users?       @relation("assett_recorded_byTousers", fields: [recorded_by], references: [id], onDelete: Cascade, map: "assett_instrument_recorded_by_fkey")
+  users_assett_sale_person_idTousers public_users?       @relation("assett_sale_person_idTousers", fields: [sale_person_id], references: [id], onDelete: Cascade, map: "assett_instrument_sale_person_id_fkey")
+  assett_goods_docs                  assett_goods_docs[]
 
   @@schema("public")
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model assett_goods {
-  id             Int              @id @default(autoincrement())
-  created_at     DateTime         @default(now()) @db.Timestamptz(6)
-  sn_no          String?
-  catalog_no     String?
-  name           String?
-  type           String?
-  cost           Decimal?         @db.Decimal
-  product_gr     String?
-  brand          String?
-  depreciation   Int?
-  size           String?
-  aseet_id       Int?
-  asset_check    asset_check[]
-  assett         assett?          @relation(fields: [aseet_id], references: [id], onDelete: Cascade)
-  assett_waranty assett_waranty[]
+  id                Int                 @id @default(autoincrement())
+  created_at        DateTime            @default(now()) @db.Timestamptz(6)
+  sn_no             String?
+  catalog_no        String?
+  name              String?
+  type              String?
+  cost              Decimal?            @db.Decimal
+  product_gr        String?
+  brand             String?
+  depreciation      Int?
+  size              String?
+  asset_check       asset_check[]
+  assett_goods_docs assett_goods_docs[]
+  assett_waranty    assett_waranty[]
 
   @@schema("public")
 }
@@ -1540,73 +1540,9 @@ model bill_tracking {
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // สร้างเมื่อ DateTime? @default(now()) @map("สร้างเมื่อ") @db.Timestamptz(6)
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   note               String?
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // สิ่งที่แนบมา String? @map("สิ่งที่แนบมา")
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   shipby             String?
   outsource_no       String?
@@ -1618,38 +1554,6 @@ model bill_tracking {
   enroll_date        String? @map("enroll date")
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // พนักงานขาย String? @map("พนักงานขาย")
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   REFDOC             String?
   TEL                String?
@@ -4209,6 +4113,87 @@ model noti_auto_send_log {
 
   @@unique([noti_id, customer_id])
   @@index([noti_id], map: "idx_noti_auto_send_log_noti")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model customer_invoice_address {
+  id              Int      @id @default(autoincrement())
+  customeruser_id String?  @db.Uuid
+  company_name    String?
+  tax_no          String?
+  entity_id       String?
+  entity_name     String?
+  branch_name     String?
+  branch_code     String?
+  address_line1   String?
+  address_line2   String?
+  sub_district    String?
+  district        String?
+  province        String?
+  post_code       String?
+  set_default     Boolean?
+
+  @@schema("3nconnect")
+}
+
+model aecsales {
+  ID          Int     @id @default(autoincrement())
+  DATE        String?
+  DOC_ID      String? @map("DOC ID")
+  C__REF      String? @map("C. REF")
+  CUSTOMER    String?
+  C__BUYER    String? @map("C. BUYER")
+  C__PAYMENT  String? @map("C. PAYMENT")
+  SO_TYPE     String? @map("SO TYPE")
+  MAT_CAT     String? @map("MAT CAT")
+  MAT_ID      String? @map("MAT ID")
+  MAT         String?
+  UNIT        String?
+  PERSONNEL   String?
+  UNIT_PRICE  Float?  @map("UNIT PRICE")
+  R_QTY       Int?    @map("R-QTY")
+  AG_QTY      Int?    @map("AG-QTY")
+  AMOUNT      Float?
+  COST        Float?
+  PROFIT_LOSS Float?  @map("PROFIT/LOSS")
+  P_L         Float?  @map("% P/L")
+
+  @@schema("public")
+}
+
+model assett_goods_docs {
+  id              Int          @id @default(autoincrement())
+  created_at      DateTime     @default(now()) @db.Timestamptz(6)
+  assett_goods_id Int
+  assett_id       Int
+  assett          assett       @relation(fields: [assett_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "assett_goods_docs_assett_fkey")
+  assett_goods    assett_goods @relation(fields: [assett_goods_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "assett_goods_docs_goods_fkey")
+
+  @@unique([assett_goods_id, assett_id], map: "assett_goods_docs_unique")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model report_inventory_snapshot {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company_short String
+  period        DateTime @db.Date
+  cost_bln      Decimal  @db.Decimal
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([company_short, period])
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model report_recipients {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email      String   @unique
+  name       String?
+  active     Boolean  @default(true)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+
   @@schema("public")
 }
 

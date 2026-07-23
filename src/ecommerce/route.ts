@@ -6285,7 +6285,7 @@ export const ecommerceRoute = new Elysia({
             status: true,
             im: true,
             type: true,
-            invoice_id: true,
+            customer_invoice_address_id: true,
             shipping_address_id: true,
             payment_status: true,
             log_payment: true,
@@ -6311,6 +6311,7 @@ export const ecommerceRoute = new Elysia({
         const company_id = response.company_id;
         const buyer_customeruser_id = response.buyer_customeruser_id;
         const shipping_address_id = response.shipping_address_id;
+        const customer_invoice_address_id = response.customer_invoice_address_id;
 
         const resShippingAddress = shipping_address_id === null
           ? null
@@ -6331,6 +6332,28 @@ export const ecommerceRoute = new Elysia({
               }
             });
 
+        const resInvoiceAddress = customer_invoice_address_id === null ? null :
+            await prisma.customer_invoice_address.findFirst({
+              where : {
+                id : customer_invoice_address_id
+              },
+              select : {
+                tax_no: true,
+                company_name: true,
+                entity_id: true,
+                entity_name: true,
+                branch_code: true,
+                branch_name: true,
+                address_line1: true,
+                address_line2: true,
+                sub_district: true,
+                district: true,
+                province: true,
+                post_code: true,
+              }
+            })
+
+            
         const resCustomer = buyer_customeruser_id === null
           ? null
           : await prisma.vw_customer_information.findFirst({
@@ -6411,7 +6434,7 @@ export const ecommerceRoute = new Elysia({
           order_status: response.status,
           im_no: response.im,
           order_type: response.type,
-          invoice_id: response.invoice_id,
+          invoice_id: response.customer_invoice_address_id,
           shipping_address_id: response.shipping_address_id,
           payment_status: response.payment_status,
           log_payment: response.log_payment,
@@ -6429,6 +6452,7 @@ export const ecommerceRoute = new Elysia({
           company_name: resCompany?.name || null,
           buyer_customer_info: resCustomer,
           shipping_address_info: resShippingAddress,
+          invoice_address_info: resInvoiceAddress,
           order_items_info: await Promise.all(orderItemsInfo),
         }
 

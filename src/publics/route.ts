@@ -2,6 +2,8 @@ import { Elysia, t } from "elysia";
 import { prisma } from "./prisma_connection";
 import "dotenv/config";
 import { createClient } from '@supabase/supabase-js'
+import { mapPreOrderProducts, mapPublicEvents } from './public-model-mappers'
+import { buildProductCategoryTree } from './product-category-tree'
 
 const now: Date = new Date();
 
@@ -319,18 +321,33 @@ export const publicRoute = new Elysia({
     "/products/pre-order",
     async ({ set }) => {
       try { 
-        const products = await prisma.vw_products.findMany({
+        const products = await prisma.public_products.findMany({
           where: {
             is_pre_order: true,
           },
           select: {
-            mat_identity: true,
             product_name: true,
             unit: true,
-            online_price: true,
-            product_option_id: true,
-            url_image: true,
-            option_name: true,
+            product_options: {
+              select: {
+                id: true,
+                mat_identity: true,
+                option_name: true,
+                online_price: true,
+              },
+              orderBy: {
+                row_no: 'asc',
+              },
+            },
+            product_images: {
+              where: {
+                is_show: true,
+              },
+              select: {
+                url_image: true,
+                is_show: true,
+              },
+            },
           },
           orderBy: {
             product_name: 'desc'
@@ -341,7 +358,7 @@ export const publicRoute = new Elysia({
           success: true,
           message: 'Products Pre-Order',
           data: {
-            products: products
+            products: mapPreOrderProducts(products)
           }
         }
       } catch (error) {
@@ -380,7 +397,7 @@ export const publicRoute = new Elysia({
           set.status = 404;
           return { message: "No valid product categories found" };
         }
-        return response;
+        return buildProductCategoryTree(response);
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
@@ -438,6 +455,16 @@ export const publicRoute = new Elysia({
             product_categories: {
               select : {
                 name: true
+              }
+            },
+            product_images: {
+              select : {
+                id: true,
+                url_image: true,
+                is_show: true,
+              },
+              orderBy: {
+                is_show: "asc"
               }
             },
             product_payment_method: {
@@ -1008,6 +1035,9 @@ export const publicRoute = new Elysia({
             promotion_end: {
               gte: now
             },
+            promotion_type: {
+              notIn : ['product', 'redeem']
+            }
           },
           select: {
             id: true,
@@ -1481,10 +1511,28 @@ export const publicRoute = new Elysia({
     "/events",
     async ({headers, set}) => {
       try {
-        const response = await prisma.vw_all_events.findMany({
+        const response = await prisma.public_events.findMany({
           where : {
             is_active: true
-          }
+          },
+          select: {
+            id: true,
+            event_pic: true,
+            eventname: true,
+            event_detail: true,
+            event_registerdate: true,
+            event_preregister: true,
+            eventStartDate: true,
+            eventEndDate: true,
+            location: true,
+            tierregister: true,
+            tierpreregister: true,
+            link: true,
+            is_active: true,
+          },
+          orderBy: {
+            eventname: "asc",
+          },
         })
         
         if(!response){
@@ -1492,7 +1540,7 @@ export const publicRoute = new Elysia({
           return {message : "Not have any events are active"}
         }
 
-        return response;
+        return mapPublicEvents(response);
       } catch (error) {
         set.status = 500;
         return {message: error};

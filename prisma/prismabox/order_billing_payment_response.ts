@@ -7,7 +7,7 @@ import { __nullable__ } from "./__nullable__";
 export const order_billing_payment_responsePlain = t.Object(
   {
     id: t.Integer(),
-    invoice_no: t.String(),
+    invoice_no: __nullable__(t.String()),
     amount: __nullable__(t.Number()),
     currency_code: __nullable__(t.String()),
     tran_ref: __nullable__(t.String()),
@@ -36,7 +36,7 @@ export const order_billing_payment_responseRelations = t.Object(
 
 export const order_billing_payment_responsePlainInputCreate = t.Object(
   {
-    invoice_no: t.String(),
+    invoice_no: t.Optional(__nullable__(t.String())),
     amount: t.Optional(__nullable__(t.Number())),
     currency_code: t.Optional(__nullable__(t.String())),
     tran_ref: t.Optional(__nullable__(t.String())),
@@ -57,7 +57,7 @@ export const order_billing_payment_responsePlainInputCreate = t.Object(
 
 export const order_billing_payment_responsePlainInputUpdate = t.Object(
   {
-    invoice_no: t.Optional(t.String()),
+    invoice_no: t.Optional(__nullable__(t.String())),
     amount: t.Optional(__nullable__(t.Number())),
     currency_code: t.Optional(__nullable__(t.String())),
     tran_ref: t.Optional(__nullable__(t.String())),

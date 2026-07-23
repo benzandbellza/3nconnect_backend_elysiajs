@@ -1,5 +1,6 @@
 import { Elysia, replaceUrlPath, t } from "elysia";
 import { prisma } from "./prisma_connection";
+import { mapCustomerOrderItemToImGoods } from "./order-submit-mapping";
 import { auth } from "../plugins/auth";
 import "dotenv/config";
 
@@ -9,6 +10,216 @@ export const ecommerceCustomerRoute = new Elysia({
   prefix: "/api/ecommerce-customer",
 })
   .use(auth())
+  .get(
+    "/myaccount/tax-invoice-address/:customeruser_id",
+    async({ headers, set, params }) => {
+      const customeruser_id = params.customeruser_id;
+      try {
+        const response = await prisma.customer_invoice_address.findMany({
+          where: {
+            customeruser_id: customeruser_id
+          },
+          orderBy: {
+            id: "asc"
+          }
+        })
+
+        if(!response){
+          set.status = 400;
+          return {message: "Cannot get Invoice Address by customeruser_id"}
+        }
+
+        return response;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error getting customers:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      params: t.Object({
+        customeruser_id: t.String()
+      }),
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "eCommerce Customer - Find Invoice Address by CustomerUserID",
+        description: `
+          This endpoint gets all customer invoice address by customeruser_id in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    }
+  )
+  .post(
+    "/myaccount/tax-invoice-address",
+    async({ headers, set, body }) => {
+      try {
+        const response = await prisma.customer_invoice_address.create({
+          data: body,
+        })
+
+        if (body.set_default) {
+          await prisma.customer_invoice_address.updateMany({
+            where: {
+              customeruser_id: body.customeruser_id,
+              id: {
+                not: response.id,
+              },
+            },
+            data: {
+              set_default: false,
+            },
+          })
+        }
+
+        return response;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error creating invoice address:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      body: t.Object({
+        customeruser_id: t.String(),
+        company_name: t.String(),
+        tax_no: t.String(),
+        entity_id: t.String(),
+        entity_name: t.String(),
+        branch_name: t.String(),
+        branch_code: t.String(),
+        address_line1: t.String(),
+        address_line2: t.String(),
+        sub_district: t.String(),
+        district: t.String(),
+        province: t.String(),
+        post_code: t.String(),
+        set_default: t.Boolean(),
+      }),
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "eCommerce Customer - Create Invoice Address",
+        description: `
+          This endpoint use to create new customer invoice address in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    }
+  )
+  .put(
+    "/myaccount/tax-invoice-address/:customer_invoice_address_id",
+    async({ headers, set, body, params }) => {
+      try {
+        const customer_invoice_address_id = params.customer_invoice_address_id;
+        const response = await prisma.customer_invoice_address.update({
+          where: {
+            id: customer_invoice_address_id,
+          },
+          data: body,
+        })
+
+        if (body.set_default) {
+          await prisma.customer_invoice_address.updateMany({
+            where: {
+              customeruser_id: body.customeruser_id,
+              id: {
+                not: customer_invoice_address_id,
+              },
+            },
+            data: {
+              set_default: false,
+            },
+          })
+        }
+
+        return response;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error updating invoice address:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      body: t.Object({
+        customeruser_id: t.String(),
+        company_name: t.String(),
+        tax_no: t.String(),
+        entity_id: t.String(),
+        entity_name: t.String(),
+        branch_name: t.String(),
+        branch_code: t.String(),
+        address_line1: t.String(),
+        address_line2: t.String(),
+        sub_district: t.String(),
+        district: t.String(),
+        province: t.String(),
+        post_code: t.String(),
+        set_default: t.Boolean(),
+      }),
+      params: t.Object({
+        customer_invoice_address_id: t.Number(),
+      }),
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "eCommerce Customer - Update Invoice Address",
+        description: `
+          This endpoint use to update customer invoice address in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    }
+  )
+  .delete(
+    "/myaccount/tax-invoice-address/:customer_invoice_address_id",
+    async({ headers, set, params }) => {
+      try {
+        const response = await prisma.customer_invoice_address.delete({
+          where: {
+            id: params.customer_invoice_address_id,
+          },
+        })
+
+        return response;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error deleting invoice address:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      params: t.Object({
+        customer_invoice_address_id: t.Number(),
+      }),
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "eCommerce Customer - Delete Invoice Address",
+        description: `
+          This endpoint use to delete customer invoice address in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    }
+  )
   .get(
     "/myaccount/address/:customeruser_id",
     async({ headers, set, params }) => {
@@ -1192,10 +1403,9 @@ export const ecommerceCustomerRoute = new Elysia({
     async ({ headers, body, set }) => {
       try {
         const toDateTime = (value?: string | null) => (value ? new Date(value) : null);
-        const toDate = (value?: string | null) => (value ? new Date(value) : null);
         const result = await prisma.$transaction(async (tx) => {
           const createdOrders: Array<{
-            order_billing_id: number;
+            im_id: number;
             order_no: string;
             invoice_no: string | null;
           }> = [];
@@ -1203,74 +1413,59 @@ export const ecommerceCustomerRoute = new Elysia({
           for (const entry of body.order_billing) {
             const detail = entry.billing_detail;
 
-            const createdBilling = await tx.order_billing.create({
+            const createdOrder = await tx.iM.create({
               data: {
-                order_no: detail.order_no,
+                docid: detail.order_no,
                 buyer_customeruser_id: detail.buyer_customeruser_id,
                 payment_method_type: detail.payment_method,
-                order_status: detail.order_status,
-                im_no: detail.im_no,
-                order_type: detail.order_type,
-                invoice_id: detail.invoice_id,
+                status: detail.order_status,
+                im: detail.im_no,
+                type: detail.order_type,
+                customer_invoice_address_id: detail.invoice_id,
                 shipping_address_id: detail.shipping_address_id,
-                payment_status: detail.payment_status,
+                payment_status: detail.payment_status, 
                 log_payment: toDateTime(detail.log_payment),
                 order_uuid: detail.order_uuid,
                 created_at: new Date(detail.created_at),
-                updated_at: toDateTime(detail.updated_at),
-                admin_updated_by: detail.admin_updated_by,
-                admin_updated_at: toDateTime(detail.admin_updated_at),
-                admin_verify_status: "Pending",
+                update_by: detail.admin_updated_by,
+                admin_verify_status: detail.admin_verify_status ?? "Pending",
                 order_created_by: detail.order_created_by,
                 contact_id: detail.contact_id,
                 company_id: detail.company_id,
                 credit_terms_day: detail.credit_terms_day,
                 shipping_cost: detail.shipping_cost,
+                is_admin_order_created: false,
                 payment_invoice_no: detail.payment_method !== "credit_terms" ? body.payment_2c2p.invoiceNo : null,
               },
               select: {
                 id: true,
+                docid: true,
+                order_uuid: true,
               },
             });
 
             if (detail.order_items.length > 0) {
-              await tx.order_billing_items.createMany({
-                data: detail.order_items.map((item) => ({
-                  order_billing_id: createdBilling.id,
-                  product_option_id: item.product_option_id,
-                  order_product_quantity: item.order_product_quantity,
-                  item_status: item.item_status,
-                  mr_code: item.mr_code,
-                  localtion_code: item.location_code,
-                  product_owner: item.product_owner,
-                  expire_date: toDate(item.expire_date),
-                  lot_code: item.lot_number,
-                  order_price: item.order_price,
-                  sale_price: item.sale_price,
-                  waiting_out_quantity: item.waiting_out_quantity,
-                  admin_updated_by: item.admin_updated_by,
-                  admin_updated_at: toDateTime(item.admin_updated_at),
-                  is_free: item.is_free,
-                  promotion_from_product_option_id: item.promotion_from_product_option_id,
-                })),
+              await tx.im_goods.createMany({
+                data: detail.order_items.map((item) =>
+                  mapCustomerOrderItemToImGoods(createdOrder.id, item),
+                ),
               });
             }
 
             if (detail.voucher_usage.length > 0) {
               await tx.order_billing_voucher_usage.createMany({
                 data: detail.voucher_usage.map((voucher) => ({
-                  order_billing_id: createdBilling.id,
+                  order_billing_id: createdOrder.id,
                   gift_voucher_code: voucher.gift_voucher_code,
                   promotion_id: voucher.promotion_id,
                   usaged_at: toDateTime(voucher.usaged_at),
-                })),
-              });
+                }))
+              })
             }
 
-
             createdOrders.push({
-              order_billing_id: createdBilling.id,
-              order_no: detail.order_no,
+              im_id: createdOrder.id,
+              order_no: createdOrder.docid,
               invoice_no: body.payment_2c2p.invoiceNo,
             });
           }
@@ -1308,7 +1503,7 @@ export const ecommerceCustomerRoute = new Elysia({
             });
 
             if(body.payment_2c2p.respCode === "0000"){
-              await tx.order_billing.updateMany({
+              await tx.iM.updateMany({
                 where: {
                   payment_invoice_no: body.payment_2c2p.invoiceNo,
                 },
@@ -1329,7 +1524,10 @@ export const ecommerceCustomerRoute = new Elysia({
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Unknown error";
-        set.status = 500;
+        set.status = errorMessage === "Voucher usage migration is not supported for IM orders."
+          || errorMessage.endsWith("is required.")
+          ? 422
+          : 500;
         return { message: errorMessage };
       }
     },
@@ -1361,7 +1559,7 @@ export const ecommerceCustomerRoute = new Elysia({
               order_created_by: t.Nullable(t.String()),
               contact_id: t.Nullable(t.Number()),
               company_id: t.Nullable(t.Number()),
-              credit_terms_day: t.Nullable(t.Number()),
+              credit_terms_day: t.Any(),
               shipping_cost: t.Nullable(t.Number()),
               order_items: t.Array(
                 t.Object({
@@ -1411,7 +1609,7 @@ export const ecommerceCustomerRoute = new Elysia({
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
         summary: "Order Submit",
-        description: `Create order_billing, items, voucher usage, payment request, and payment response from one payload.`,
+        description: `Create IM order, im_goods items, payment request, and payment response from one payload.`,
         security: [{ bearerAuth: [] }],
         tags: ["3NConnect"],
       },
@@ -1421,15 +1619,15 @@ export const ecommerceCustomerRoute = new Elysia({
     "/order-billing",
     async({headers, set}) => {
       try{
-        const response = await prisma.order_billing.findMany({
+        const response = await prisma.iM.findMany({
           select: {
             id: true,
-            order_no: true,
+            docid: true,
             buyer_customeruser_id: true,
             payment_method_type: true,
-            order_status: true,
-            im_no: true,
-            order_type: true,
+            status: true,
+            im: true,
+            type: true,
             invoice_id: true,
             shipping_address_id: true,
             payment_status: true,
@@ -1437,7 +1635,7 @@ export const ecommerceCustomerRoute = new Elysia({
             order_uuid: true,
             created_at: true,
             updated_at: true,
-            admin_updated_by: true,
+            update_by: true,
             admin_updated_at: true,
             order_created_by: true,
             contact_id: true,
@@ -1452,7 +1650,14 @@ export const ecommerceCustomerRoute = new Elysia({
           return { message: "Not found order billings."}
         }
 
-        return response
+        return response.map(({ docid, im, status, type, update_by, ...order }) => ({
+          ...order,
+          order_no: docid,
+          order_status: status,
+          im_no: im,
+          order_type: type,
+          admin_updated_by: update_by,
+        }));
       }catch(error){
         set.status = 500;
         return { message : error };
@@ -1475,11 +1680,11 @@ export const ecommerceCustomerRoute = new Elysia({
     "/orders/:customeruser_id",
     async ({ headers, set, params }) => {
       const customeruser_id = params.customeruser_id;
-      const response = await prisma.order_billing.findMany({
+      const response = await prisma.iM.findMany({
         where: {
           OR:[
             { 
-              admin_updated_by: null,
+              update_by: null,
             },
             {
               buyer_customeruser_id: customeruser_id,
@@ -1487,20 +1692,17 @@ export const ecommerceCustomerRoute = new Elysia({
           ]
         },
         select: {
-          order_no : true,
+          docid: true,
           payment_method_type: true,
-          order_status: true,
-          im_no: true,
-          order_type: true,
+          status: true,
+          im: true,
+          type: true,
           payment_status: true,
           payment_invoice_no: true,
           created_at: true,
           order_uuid: true,
-          companies: {
-            select: {
-              company_name: true,
-            }
-          }
+          update_by: true,
+          company_id: true,
         }
       })
 
@@ -1509,7 +1711,38 @@ export const ecommerceCustomerRoute = new Elysia({
         return { "message" : "No orders found." }
       }
 
-      return response;
+      const companyIds = response
+        .map((order) => order.company_id)
+        .filter((companyId): companyId is number => companyId !== null);
+      const companies = companyIds.length > 0
+        ? await prisma.nconnect_companies.findMany({
+            where: {
+              id: {
+                in: companyIds,
+              },
+            },
+            select: {
+              id: true,
+              company_name: true,
+            },
+          })
+        : [];
+      const companyMap = new Map(
+        companies.map((company) => [company.id, company.company_name]),
+      );
+
+      return response.map(({ docid, im, status, type, update_by, company_id, ...order }) => ({
+        ...order,
+        order_no: docid,
+        order_status: status,
+        im_no: im,
+        order_type: type,
+        companies: company_id === null
+          ? null
+          : {
+              company_name: companyMap.get(company_id) ?? null,
+            },
+      }));
     },
     {
       headers: t.Object({

@@ -3,17 +3,74 @@ SELECT
   po.id AS product_option_id,
   p.product_name,
   po.option_name,
-  ppm.credit_terms,
-  ppm.mobile_banking,
-  ppm.qr_code_promptpay,
-  ppm.visa_card
+  CASE
+    WHEN (
+      EXISTS (
+        SELECT
+          ppm.id
+        FROM
+          product_payment_method ppm
+        WHERE
+          (
+            (ppm.payment_method_id = 7)
+            AND (ppm.product_id = p.id)
+          )
+      )
+    ) THEN TRUE
+    ELSE false
+  END AS credit_terms,
+  CASE
+    WHEN (
+      EXISTS (
+        SELECT
+          ppm.id
+        FROM
+          product_payment_method ppm
+        WHERE
+          (
+            (ppm.payment_method_id = 4)
+            AND (ppm.product_id = p.id)
+          )
+      )
+    ) THEN TRUE
+    ELSE false
+  END AS mobile_banking,
+  CASE
+    WHEN (
+      EXISTS (
+        SELECT
+          ppm.id
+        FROM
+          product_payment_method ppm
+        WHERE
+          (
+            (ppm.payment_method_id = 3)
+            AND (ppm.product_id = p.id)
+          )
+      )
+    ) THEN TRUE
+    ELSE false
+  END AS qr_code_promptpay,
+  CASE
+    WHEN (
+      EXISTS (
+        SELECT
+          ppm.id
+        FROM
+          product_payment_method ppm
+        WHERE
+          (
+            (ppm.payment_method_id = 1)
+            AND (ppm.product_id = p.id)
+          )
+      )
+    ) THEN TRUE
+    ELSE false
+  END AS visa_card
 FROM
   (
-    (
-      "3nconnect".products p
-      JOIN "3nconnect".product_options po ON ((p.id = po.product_id))
-    )
-    JOIN "3nconnect".product_payment_method ppm ON ((p.id = ppm.product_id))
+    products p
+    JOIN product_options po ON ((p.id = po.product_id))
   )
 WHERE
   (p.is_active = TRUE);
