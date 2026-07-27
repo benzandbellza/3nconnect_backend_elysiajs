@@ -9,6 +9,7 @@ import {
 import { mapEventTierFields } from "./event-tier-mapping";
 import { auth } from "../plugins/auth";
 import "dotenv/config";
+import { GoTrueAdminApi, GoTrueClient } from "@supabase/supabase-js";
 
 const now: Date = new Date();
 // const utc7: Date = new Date(now.getTime() + 7 * 60 * 60 * 1000);
@@ -6804,7 +6805,7 @@ export const ecommerceRoute = new Elysia({
               status: mapAdminVerifyStatusToOrderStatus(body.admin_verify_status),
               im: body.im_no,
               type: 'inv',
-              invoice_id: body.invoice_id,
+              customer_invoice_address_id: body.invoice_address_id,
               shipping_address_id: body.shipping_address_id,
               payment_status: body.payment_status,
               log_payment: loggedAt,
@@ -6912,7 +6913,7 @@ export const ecommerceRoute = new Elysia({
         shipping_cost: t.Optional(t.Nullable(t.Number())),
         payment_method_type: t.Optional(t.Nullable(t.String())),
         order_type: t.Optional(t.Nullable(t.String())),
-        invoice_id: t.Optional(t.Nullable(t.Number())),
+        invoice_address_id: t.Optional(t.Nullable(t.Number())),
         payment_status: t.Optional(t.Nullable(t.String())),
         payment_invoice_no: t.Optional(t.Nullable(t.String())),
         order_created_by: t.Optional(t.Nullable(t.String())),
@@ -6985,6 +6986,7 @@ export const ecommerceRoute = new Elysia({
               im: body.im_no,
               shipping_cost: body.shipping_cost,
               shipping_address_id: body.shipping_address_id,
+              customer_invoice_address_id: body.invoice_address_id,
               payment_invoice_no: body.payment_invoice_no,
               log_payment: loggedAt,
               updated_at: loggedAt,
@@ -6999,6 +7001,7 @@ export const ecommerceRoute = new Elysia({
               admin_verify_status: true,
               im: true,
               shipping_cost: true,
+              buyer_customeruser_id: true,
             },
           });
 
@@ -7078,6 +7081,7 @@ export const ecommerceRoute = new Elysia({
         im_no: t.Optional(t.Nullable(t.String())),
         shipping_cost: t.Optional(t.Nullable(t.Number())),
         shipping_address_id: t.Number(),
+        invoice_address_id: t.Number(),
         payment_invoice_no: t.Optional(t.Nullable(t.String())),
         billing_items: t.Array(
           t.Object({
@@ -7217,6 +7221,152 @@ export const ecommerceRoute = new Elysia({
         summary: "Payment Information - Find By Invoice No.",
         description: `
           This endpoint use to get payment information with invoice no.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
+  .post(
+    "/invoice-head/planetone/search",
+    async({ headers, set, body})=>{
+      try{
+        const search = body.search;
+        
+        const response = await prisma.invoicehead.findMany({
+          where: {
+            OR: [
+              {
+                Entity_ID: {
+                  contains: search
+                }
+              },
+              {
+                Entity_Name: {
+                  contains: search
+                }
+              },
+              {
+                Province: {
+                  contains: search
+                }
+              },
+              {
+                PostCode: {
+                  contains: search
+                }
+              },
+              {
+                Branch_Tax_ID: {
+                  contains: search
+                }
+              },
+              {
+                Branch_Tax_Name: {
+                  contains: search
+                }
+              }
+            ]
+            
+          },
+          select: {
+            id: true,
+            Entity_ID: true,
+            Entity_Name: true,
+            Address1: true,
+            Address2: true,
+            Province: true,
+            Country: true,
+            PostCode: true,
+            Tax_Number: true,
+            Branch_Tax_ID: true,
+            Branch_Tax_Name: true,
+          },
+        });
+        if(!response){
+          set.status = 404;
+          return { message: "Failed to get invoice head." }
+        }
+        return response;
+      } catch (error) {
+        set.status = 500;
+        return { message : error }
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        search: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Invoice Head - PlanetOne",
+        description: `
+          This endpoint use to get invoice head from planetone system.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
+  .post(
+    "/invoice-address/:customeruser_id",
+    async({ headers, set, params}) => {
+      try{
+        const response = await prisma.customer_invoice_address.findMany({
+          where: {
+            invoicehead_id: {
+              not: null
+            },
+            customeruser_id: params.customeruser_id,
+          },
+          select: {
+            id: true,
+            invoicehead: {
+              select: {
+                company_name: true,
+                Entity_ID: true,
+                Entity_Name: true,
+                Address1: true,
+                Address2: true,
+                Province: true,
+                Country: true,
+                PostCode: true,
+                Tax_Number: true,
+                Branch_Tax_Name: true,
+                Branch_Tax_ID: true,
+              }
+            }
+          }
+        });
+
+        if(!response){
+          set.status = 404;
+          return { message: "Failed to get invoice address from planetone." }
+        }
+
+        return response;
+      } catch (error) {
+        set.status = 500;
+        return { message: error }
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      params: t.Object({
+        customeruser_id: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Invoice Address - PlanetOne",
+        description: `
+          This endpoint use to get invoice head from planetone system.
         `.trim(),
         security: [{ bearerAuth: [] }],
         tags: ["3NConnect"],

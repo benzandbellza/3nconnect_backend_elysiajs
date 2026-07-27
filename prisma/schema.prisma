@@ -1540,9 +1540,15 @@ model bill_tracking {
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // สร้างเมื่อ DateTime? @default(now()) @map("สร้างเมื่อ") @db.Timestamptz(6)
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   note               String?
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // สิ่งที่แนบมา String? @map("สิ่งที่แนบมา")
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   shipby             String?
   outsource_no       String?
@@ -1554,6 +1560,9 @@ model bill_tracking {
   enroll_date        String? @map("enroll date")
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // พนักงานขาย String? @map("พนักงานขาย")
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   REFDOC             String?
   TEL                String?
@@ -2147,6 +2156,7 @@ model customeruser {
   claim_requests            claim_requests[]
   customer_delivery         customer_delivery[]
   customer_invoice          customer_invoice[]
+  customer_line_accounts    customer_line_accounts[]
   customer_requests         customer_requests[]
   customer_saved_cards      customer_saved_cards[]
   customer_tags             customer_tags[]
@@ -2526,22 +2536,23 @@ model im_goods {
 }
 
 model invoicehead {
-  id               Int                @id @default(autoincrement())
-  created_at       DateTime           @default(now()) @db.Timestamptz(6)
-  company_name     String?            @unique
-  Entity_ID        String             @unique @map("Entity ID")
-  Entity_Name      String?            @map("Entity Name")
-  Address1         String?
-  Address2         String?
-  Province         String?
-  Country          String?
-  PostCode         String?
-  Tax_Number       String?            @map("Tax Number")
-  Branch_Tax_Name  String?            @map("Branch Tax Name")
-  Branch_Tax_ID    String?            @map("Branch Tax ID")
-  IM               IM[]
-  PO               PO[]
-  customer_invoice customer_invoice[]
+  id                       Int                        @id @default(autoincrement())
+  created_at               DateTime                   @default(now()) @db.Timestamptz(6)
+  company_name             String?                    @unique
+  Entity_ID                String                     @unique @map("Entity ID")
+  Entity_Name              String?                    @map("Entity Name")
+  Address1                 String?
+  Address2                 String?
+  Province                 String?
+  Country                  String?
+  PostCode                 String?
+  Tax_Number               String?                    @map("Tax Number")
+  Branch_Tax_Name          String?                    @map("Branch Tax Name")
+  Branch_Tax_ID            String?                    @map("Branch Tax ID")
+  customer_invoice_address customer_invoice_address[]
+  IM                       IM[]
+  PO                       PO[]
+  customer_invoice         customer_invoice[]
 
   @@schema("public")
 }
@@ -3462,16 +3473,19 @@ model rewards {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model rich_menu_config {
-  id           Int       @id @default(autoincrement())
-  created_at   DateTime  @default(now()) @db.Timestamptz(6)
-  role         String?
-  rich_menu_id String?
-  is_active    Boolean?
-  description  String?
-  start_date   DateTime? @db.Timestamptz(6)
-  end_date     DateTime? @db.Timestamptz(6)
-  priority     Int?
+  id                     Int                    @id @default(autoincrement())
+  created_at             DateTime               @default(now()) @db.Timestamptz(6)
+  role                   String?
+  rich_menu_id           String?
+  is_active              Boolean?
+  description            String?
+  start_date             DateTime?              @db.Timestamptz(6)
+  end_date               DateTime?              @db.Timestamptz(6)
+  priority               Int?
+  channel_config_id      String                 @db.Uuid
+  social_channel_configs social_channel_configs @relation(fields: [channel_config_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
+  @@index([channel_config_id], map: "rich_menu_config_channel_idx")
   @@schema("public")
 }
 
@@ -3579,22 +3593,25 @@ model shipping_api_settings {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model social_channel_configs {
-  id                   String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  platform             String
-  name                 String
-  access_token         String?
-  channel_secret       String?
-  page_id              String?
-  verify_token         String?
-  webhook_verified     Boolean?               @default(false)
-  active               Boolean?               @default(true)
-  created_at           DateTime?              @default(now()) @db.Timestamptz(6)
-  updated_at           DateTime?              @default(now()) @db.Timestamptz(6)
-  app_id               String?
-  refresh_token        String?
-  token_expires_at     DateTime?              @db.Timestamptz(6)
-  oauth_type           String?
-  social_conversations social_conversations[]
+  id                     String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  platform               String
+  name                   String
+  access_token           String?
+  channel_secret         String?
+  page_id                String?
+  verify_token           String?
+  webhook_verified       Boolean?                 @default(false)
+  active                 Boolean?                 @default(true)
+  created_at             DateTime?                @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime?                @default(now()) @db.Timestamptz(6)
+  app_id                 String?
+  refresh_token          String?
+  token_expires_at       DateTime?                @db.Timestamptz(6)
+  oauth_type             String?
+  customer_line_accounts customer_line_accounts[]
+  rich_menu_config       rich_menu_config[]
+  social_conversations   social_conversations[]
+  staff_line_accounts    staff_line_accounts[]
 
   @@schema("public")
 }
@@ -3893,10 +3910,10 @@ model user_reading_progress {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model public_users {
-  id                                      String               @id @unique @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  name                                    String               @unique
+  id                                      String                @id @unique @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name                                    String                @unique
   avatar_url                              String?
-  is_online                               Boolean?             @default(false)
+  is_online                               Boolean?              @default(false)
   sharepoint_id                           Int?
   person_id                               String?
   email                                   String?
@@ -3904,33 +3921,33 @@ model public_users {
   planetone_id                            String?
   tel                                     String?
   position                                String?
-  manager                                 String?              @db.Uuid
-  manager2                                String?              @db.Uuid
+  manager                                 String?               @db.Uuid
+  manager2                                String?               @db.Uuid
   address                                 String?
-  authid                                  String?              @unique @db.Uuid
+  authid                                  String?               @unique @db.Uuid
   last_online                             String?
   fcm_token                               String?
-  salesupport                             String?              @db.Uuid
-  role                                    String?              @default("user")
+  salesupport                             String?               @db.Uuid
+  role                                    String?               @default("user")
   pdpa_accepted                           Boolean?
-  pdpa_accepted_at                        DateTime?            @db.Timestamptz(6)
+  pdpa_accepted_at                        DateTime?             @db.Timestamptz(6)
   pdpa_version                            String?
   department                              Int?
   company                                 Int?
   team                                    Int?
   is_active                               Boolean?
-  extra_pages                             String[]             @default([])
+  extra_pages                             String[]              @default([])
   lineid_3nholdingapp                     String?
   IM                                      IM[]
   IO                                      IO[]
-  PO_PO_create_byTousers                  PO[]                 @relation("PO_create_byTousers")
-  PO_PO_update_byTousers                  PO[]                 @relation("PO_update_byTousers")
+  PO_PO_create_byTousers                  PO[]                  @relation("PO_create_byTousers")
+  PO_PO_update_byTousers                  PO[]                  @relation("PO_update_byTousers")
   Productdata                             Productdata[]
   addgoods                                addgoods[]
   asset_check                             asset_check[]
-  assett_assett_installerTousers          assett[]             @relation("assett_installerTousers")
-  assett_assett_recorded_byTousers        assett[]             @relation("assett_recorded_byTousers")
-  assett_assett_sale_person_idTousers     assett[]             @relation("assett_sale_person_idTousers")
+  assett_assett_installerTousers          assett[]              @relation("assett_installerTousers")
+  assett_assett_recorded_byTousers        assett[]              @relation("assett_recorded_byTousers")
+  assett_assett_sale_person_idTousers     assett[]              @relation("assett_sale_person_idTousers")
   assett_waranty                          assett_waranty[]
   ces_status                              ces_status[]
   chat_participants                       chat_participants[]
@@ -3938,8 +3955,8 @@ model public_users {
   customer_requests                       customer_requests[]
   customeruser_users                      customeruser_users[]
   hidden_chats                            hidden_chats[]
-  im_goods_im_goods_approved_by_pmTousers im_goods[]           @relation("im_goods_approved_by_pmTousers")
-  im_goods_im_goods_users_idTousers       im_goods[]           @relation("im_goods_users_idTousers")
+  im_goods_im_goods_approved_by_pmTousers im_goods[]            @relation("im_goods_approved_by_pmTousers")
+  im_goods_im_goods_users_idTousers       im_goods[]            @relation("im_goods_users_idTousers")
   io_goods                                io_goods[]
   messages                                messages[]
   product_manager                         product_manager[]
@@ -3948,16 +3965,17 @@ model public_users {
   sale_target_attr                        sale_target_attr[]
   sopt_head                               sopt_head[]
   sopt_status                             sopt_status[]
-  users                                   auth_users?          @relation(fields: [authid], references: [id])
-  companies                               public_companies?    @relation(fields: [company], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  departments                             departments?         @relation(fields: [department], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  users_users_manager2Tousers             public_users?        @relation("users_manager2Tousers", fields: [manager2], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  other_users_users_manager2Tousers       public_users[]       @relation("users_manager2Tousers")
-  users_users_managerTousers              public_users?        @relation("users_managerTousers", fields: [manager], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  other_users_users_managerTousers        public_users[]       @relation("users_managerTousers")
-  users_users_salesupportTousers          public_users?        @relation("users_salesupportTousers", fields: [salesupport], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  other_users_users_salesupportTousers    public_users[]       @relation("users_salesupportTousers")
-  teams                                   teams?               @relation(fields: [team], references: [id], onUpdate: NoAction)
+  staff_line_accounts                     staff_line_accounts[]
+  users                                   auth_users?           @relation(fields: [authid], references: [id])
+  companies                               public_companies?     @relation(fields: [company], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  departments                             departments?          @relation(fields: [department], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_users_manager2Tousers             public_users?         @relation("users_manager2Tousers", fields: [manager2], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  other_users_users_manager2Tousers       public_users[]        @relation("users_manager2Tousers")
+  users_users_managerTousers              public_users?         @relation("users_managerTousers", fields: [manager], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  other_users_users_managerTousers        public_users[]        @relation("users_managerTousers")
+  users_users_salesupportTousers          public_users?         @relation("users_salesupportTousers", fields: [salesupport], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  other_users_users_salesupportTousers    public_users[]        @relation("users_salesupportTousers")
+  teams                                   teams?                @relation(fields: [team], references: [id], onUpdate: NoAction)
 
   @@index([is_active], map: "idx_users_is_active")
   @@index([team], map: "idx_users_team")
@@ -4118,8 +4136,8 @@ model noti_auto_send_log {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model customer_invoice_address {
-  id              Int      @id @default(autoincrement())
-  customeruser_id String?  @db.Uuid
+  id              Int          @id @default(autoincrement())
+  customeruser_id String?      @db.Uuid
   company_name    String?
   tax_no          String?
   entity_id       String?
@@ -4133,6 +4151,8 @@ model customer_invoice_address {
   province        String?
   post_code       String?
   set_default     Boolean?
+  invoicehead_id  Int?
+  invoicehead     invoicehead? @relation(fields: [invoicehead_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@schema("3nconnect")
 }
@@ -4194,6 +4214,40 @@ model report_recipients {
   active     Boolean  @default(true)
   created_at DateTime @default(now()) @db.Timestamptz(6)
 
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model customer_line_accounts {
+  id                     String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  customeruser_id        String                 @db.Uuid
+  channel_config_id      String                 @db.Uuid
+  line_user_id           String
+  created_at             DateTime               @default(now()) @db.Timestamptz(6)
+  social_channel_configs social_channel_configs @relation(fields: [channel_config_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  customeruser           customeruser           @relation(fields: [customeruser_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([channel_config_id, line_user_id])
+  @@unique([customeruser_id, channel_config_id])
+  @@index([customeruser_id])
+  @@index([line_user_id])
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model staff_line_accounts {
+  id                     String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id                String                 @db.Uuid
+  channel_config_id      String                 @db.Uuid
+  line_user_id           String
+  created_at             DateTime               @default(now()) @db.Timestamptz(6)
+  social_channel_configs social_channel_configs @relation(fields: [channel_config_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users                  public_users           @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([channel_config_id, line_user_id])
+  @@unique([user_id, channel_config_id])
+  @@index([line_user_id])
+  @@index([user_id])
   @@schema("public")
 }
 

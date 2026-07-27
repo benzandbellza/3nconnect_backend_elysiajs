@@ -101,6 +101,66 @@ export const ecommerceCustomerRoute = new Elysia({
         province: t.String(),
         post_code: t.String(),
         set_default: t.Boolean(),
+        invoicehead_id: t.Any(),
+      }),
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "eCommerce Customer - Create Invoice Address",
+        description: `
+          This endpoint use to create new customer invoice address in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    }
+  )
+  .put(
+    "/myaccount/tax-invoice-address/update/:address_id",
+    async({ headers, set, body, params }) => {
+      try{
+        const customer_invoice_address_id = params.address_id
+        
+        const response = await prisma.customer_invoice_address.update({
+          where: {
+            id: customer_invoice_address_id
+          },
+          data: body
+        })
+
+        if(!response){
+          set.status = 404;
+          return { message: "Failed to update invoice address."}
+        }
+
+        return { message : "Update customer invoice successfully." }
+      }catch (error) {
+        set.status = 500;
+        return { message: error }
+      }
+    },
+    {
+      body: t.Object({
+        customeruser_id: t.String(),
+        company_name: t.String(),
+        tax_no: t.String(),
+        entity_id: t.String(),
+        entity_name: t.String(),
+        branch_name: t.String(),
+        branch_code: t.String(),
+        address_line1: t.String(),
+        address_line2: t.String(),
+        sub_district: t.String(),
+        district: t.String(),
+        province: t.String(),
+        post_code: t.String(),
+        set_default: t.Boolean(),
+        invoicehead_id: t.Any(),
+      }),
+      params: t.Object({
+        address_id: t.Number()
       }),
       headers: t.Object({
         authorization: t.String(),

@@ -231,6 +231,8 @@ export * from "./aecsales";
 export * from "./assett_goods_docs";
 export * from "./report_inventory_snapshot";
 export * from "./report_recipients";
+export * from "./customer_line_accounts";
+export * from "./staff_line_accounts";
 export * from "./vw_all_events";
 export * from "./vw_bundle_deal_get_x_free_y";
 export * from "./vw_customer_information";
