@@ -1563,6 +1563,16 @@ export const ecommerceRoute = new Elysia({
             is_online_active: true,
             is_pre_order: true,
             is_custom_options: true,
+            product_images: {
+              select: {
+                id: true,
+                url_image: true,
+                is_show: true,
+              },
+              orderBy: {
+                is_show: "desc",
+              },
+            },
             product_options: {
               select: {
                 id: true,
