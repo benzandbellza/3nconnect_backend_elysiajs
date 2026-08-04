@@ -2608,6 +2608,7 @@ export const ecommerceRoute = new Elysia({
             event_registerdate: register_date ? String(register_date) : null,
             ...mapEventTierFields({ tier_preregister, tier_register }),
             is_active: is_active !== undefined ? is_active : true,
+            event_category_id: event_category_id,
           },
         });
 
