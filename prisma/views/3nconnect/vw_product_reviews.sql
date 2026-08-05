@@ -22,7 +22,10 @@ SELECT
   ig.sale_price,
   po.id AS product_option_id,
   pr.rating,
-  pr.id AS product_review_id
+  pr.id AS product_review_id,
+  p.id AS product_id,
+  pr.created_at,
+  pr.admin_reply AS admin_quote
 FROM
   (
     (

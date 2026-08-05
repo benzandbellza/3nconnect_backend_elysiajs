@@ -530,9 +530,21 @@ export const publicRoute = new Elysia({
           (item as any).qty_total = stock?.qty_total || 0;
         }
 
+        const productReviews = await prisma.vw_product_reviews.findMany({
+          where: {
+            product_id: productId
+          },
+          select: {
+            review_comment: true,
+            admin_quote: true,
+            created_at: true,
+          }
+        });
+
         const result = {
           ...response,
-          product_options: promoteProductIndex ?? []
+          product_options: promoteProductIndex ?? [],
+          product_reviews: productReviews ?? []
         }
         return result;
       } catch (error) {
@@ -1691,32 +1703,3 @@ export const publicRoute = new Elysia({
       },
     },
   )
-  // .get(
-  //   "/gibstock",
-  //   async({ headers, set}) => {
-  //     try{
-  //       const response = await prisma.gibstock.findMany();
-
-  //       if(!response){
-  //         set.status = 404;
-  //         return { message : "Failed to get Gib stocks." }
-  //       }
-
-  //       return response;
-  //     } catch (error) {
-  //       set.status = 500;
-  //       return { message: error }
-  //     }
-  //   },
-  //   {
-  //     detail: {
-  //       servers: [{ url: process.env.APP_API_PREFIX || "" }],
-  //       summary: "Campaign Voucher - View detail campaign by gift_voucher_id",
-  //       description: `
-  //         This endpoint retrieves detail of campaign voucher.
-  //       `.trim(),
-  //       security: [{ bearerAuth: [] }],
-  //       tags: ["Publics"],
-  //     },
-  //   },
-  // )
