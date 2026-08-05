@@ -1548,9 +1548,19 @@ model bill_tracking {
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   note               String?
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // สิ่งที่แนบมา String? @map("สิ่งที่แนบมา")
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
@@ -1571,6 +1581,11 @@ model bill_tracking {
   enroll_date        String? @map("enroll date")
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // พนักงานขาย String? @map("พนักงานขาย")
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
@@ -2966,20 +2981,21 @@ model product_manager {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model public_product_options {
-  id                   Int              @id @default(autoincrement())
-  product_id           Int?
-  mat_identity         String?
-  option_name          String?
-  online_price         Float?
-  min_price            Float?
-  created_at           DateTime?        @db.Timestamptz(6)
-  row_no               Int?
-  updated_at           DateTime?        @db.Timestamptz(6)
-  productdata_id       Int?
-  is_stock             Boolean?
-  attributes_hierarchy Int[]
-  products             public_products? @relation(fields: [product_id], references: [id])
-  Productdata          Productdata?     @relation(fields: [productdata_id], references: [id], onDelete: Cascade)
+  id                           Int                            @id @default(autoincrement())
+  product_id                   Int?
+  mat_identity                 String?
+  option_name                  String?
+  online_price                 Float?
+  min_price                    Float?
+  created_at                   DateTime?                      @db.Timestamptz(6)
+  row_no                       Int?
+  updated_at                   DateTime?                      @db.Timestamptz(6)
+  productdata_id               Int?
+  is_stock                     Boolean?
+  attributes_hierarchy         Int[]
+  products                     public_products?               @relation(fields: [product_id], references: [id])
+  Productdata                  Productdata?                   @relation(fields: [productdata_id], references: [id], onDelete: Cascade)
+  promotion_clearance_products promotion_clearance_products[]
 
   @@map("product_options")
   @@schema("public")
@@ -3002,11 +3018,11 @@ model public_product_payment_method {
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model product_review {
   id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  order_uuid        String    @db.Uuid
-  product_option_id Int
-  customeruser_id   String    @db.Uuid
-  rating            Int
-  comment           String    @default("")
+  order_uuid        String?   @db.Uuid
+  product_option_id Int?
+  customeruser_id   String?   @db.Uuid
+  rating            Int?
+  comment           String?   @default("")
   created_at        DateTime  @default(now()) @db.Timestamptz(6)
   status            String    @default("pending")
   admin_reply       String?
@@ -3264,6 +3280,8 @@ model public_promotion_flashsale_products {
   product_option_id Int?
   sale_price        Float?
   sale_percent      Float?
+  quantity_limit    Int?
+  quantity_sold     Int               @default(0)
   promotion         public_promotion? @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@map("promotion_flashsale_products")
@@ -4449,6 +4467,24 @@ model social_channel_visibility {
   @@schema("public")
 }
 
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model promotion_clearance_products {
+  id                BigInt                 @id @default(autoincrement())
+  promotion_id      BigInt
+  product_option_id Int
+  stock_source      String
+  stock_row_id      BigInt
+  mr_code           String
+  sale_price        Decimal?               @db.Decimal
+  sale_percent      Decimal?               @db.Decimal
+  created_at        DateTime               @default(now()) @db.Timestamptz(6)
+  product_options   public_product_options @relation(fields: [product_option_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([promotion_id, stock_source, stock_row_id])
+  @@schema("public")
+}
+
 view vw_all_events {
   event_id         String?  @db.Uuid
   event_image      String?
@@ -4833,6 +4869,7 @@ view vw_product_reviews {
   sale_price          Float?
   product_option_id   Int?
   rating              Int?
+  product_review_id   String?   @db.Uuid
 
   @@schema("3nconnect")
 }

@@ -7395,3 +7395,90 @@ export const ecommerceRoute = new Elysia({
       },
     },
   )
+  .get(
+    "/orders-review/pending",
+    async({ headers, set, params}) => {
+      try{
+        const response = await prisma.vw_product_reviews.findMany({
+          where: {
+            admin_review_status: "pending"
+          },
+        });
+
+        if(!response){
+          set.status = 404;
+          return { message: "Failed to get pending orders review." }
+        }
+
+        return response;
+      } catch (error) {
+        set.status = 500;
+        return { message: error }
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Orders Review - Pending",
+        description: `
+          This endpoint use to get pending orders review.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
+  .post(
+    "/orders-review/submit",
+    async({ headers, set, body}) => {
+      try{
+        
+        const response = await prisma.product_review.updateMany({
+          where: {
+            id: body.product_review_id
+          },
+          data: {
+            status: body.status,
+            admin_reply: body.quote_comment,
+            replied_by: body.user_id,
+            replied_at: now,
+          }
+        });
+
+        if(!response){
+          set.status = 404;
+          return { message: "Failed to review & approve order." }
+        }
+
+        return response;
+      } catch (error) {
+        set.status = 500;
+        return { message: error }
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        product_review_id: t.String(),
+        quote_comment: t.String(),
+        status: t.String(),
+        user_id: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Orders Review & Approve - Submit",
+        description: `
+          This endpoint use to submit orders review and approve.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    }
+  )

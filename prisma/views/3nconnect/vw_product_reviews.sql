@@ -21,7 +21,8 @@ SELECT
   pr.status AS admin_review_status,
   ig.sale_price,
   po.id AS product_option_id,
-  pr.rating
+  pr.rating,
+  pr.id AS product_review_id
 FROM
   (
     (

@@ -243,6 +243,7 @@ export * from "./quiz_event_prizes";
 export * from "./quiz_events";
 export * from "./quiz_questions";
 export * from "./social_channel_visibility";
+export * from "./promotion_clearance_products";
 export * from "./vw_all_events";
 export * from "./vw_bundle_deal_get_x_free_y";
 export * from "./vw_customer_information";
