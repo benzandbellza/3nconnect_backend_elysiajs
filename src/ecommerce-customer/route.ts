@@ -1763,6 +1763,7 @@ export const ecommerceCustomerRoute = new Elysia({
           order_uuid: true,
           update_by: true,
           company_id: true,
+          is_review_completed: true,
         }
       })
 
@@ -2026,5 +2027,147 @@ export const ecommerceCustomerRoute = new Elysia({
         `.trim(),
         security: [{ bearerAuth: [] }],
         tags: ["3NConnect"],
-    }}
+      }
+    }
+  )
+  .post(
+    "/orders/reviews/:order_uuid",
+    async({ headers, set, params }) => {
+      try{
+        const order_uuid = params.order_uuid;
+        const response = await prisma.vw_product_reviews.findMany({
+          where: {
+            order_uuid: order_uuid
+          }
+        });
+
+        if(!response){
+          set.status = 404;
+          return { message: "Not found order reviews."}
+        }
+
+        return response;
+      } catch (error) {
+        set.status = 500;
+        return { message: error };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      params: t.Object({
+        order_uuid: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Order Reviews - Get Reviews",
+        description: `
+          This endpoint gets reviews for a specific order.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      }
+    }
+  )
+  .post(
+    "/orders/reviews/:order_uuid",
+    async({ headers, set, params }) => {
+      try{
+        const order_uuid = params.order_uuid;
+        const response = await prisma.vw_product_reviews.findMany({
+          where: {
+            order_uuid: order_uuid
+          }
+        });
+
+        if(!response){
+          set.status = 404;
+          return { message: "Not found order reviews."}
+        }
+
+        return response;
+      } catch (error) {
+        set.status = 500;
+        return { message: error };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      params: t.Object({
+        order_uuid: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Order Reviews - Get Reviews",
+        description: `
+          This endpoint gets reviews for a specific order.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      }
+    }
+  )
+  .post(
+    "/orders/reviews/submit",
+    async({ headers, set, body }) => {
+      try{
+
+        const order_uuid = body.order_uuid;
+        const customeruser_id = body.customeruser_id;
+        const review_data = body.review_data;
+        
+        await prisma.product_review.createMany({
+          data: review_data.map((review) => ({
+            order_uuid: order_uuid,
+            customeruser_id: customeruser_id,
+            product_option_id: review.product_option_id,
+            rating: review.rating,
+            comment: review.comment,
+            created_at: now
+          }))
+        });
+
+        await prisma.iM.updateMany({
+          where: {
+            order_uuid: order_uuid,
+          },
+          data: {
+            is_review_completed: true,
+          }
+        });
+
+        return { message: "Reviews submitted successfully." };
+      } catch (error) {
+        set.status = 500;
+        return { message: error };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        order_uuid: t.String(),
+        customeruser_id : t.String(),
+        review_data: t.Array(
+          t.Object({
+            rating: t.Number(),
+            comment: t.String(),
+            product_option_id: t.Number(),
+          })
+        )
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Order Review - Customer Submit Review",
+        description: `
+          This endpoint allows customers to submit reviews for a specific order.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      }
+    }
   )

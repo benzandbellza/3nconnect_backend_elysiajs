@@ -6618,6 +6618,14 @@ export const ecommerceRoute = new Elysia({
             },
             is_pre_order: true,
             is_custom_options: true,
+            product_images: {
+              where: {
+                is_show: true,
+              },
+              select: {
+                url_image: true,
+              },
+            },
             product_options: {
               select: {
                 id: true,
