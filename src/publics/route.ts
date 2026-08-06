@@ -538,6 +538,7 @@ export const publicRoute = new Elysia({
             review_comment: true,
             admin_quote: true,
             created_at: true,
+            rating: true,
           }
         });
 

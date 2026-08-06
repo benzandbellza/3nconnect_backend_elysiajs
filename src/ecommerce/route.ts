@@ -7396,14 +7396,10 @@ export const ecommerceRoute = new Elysia({
     },
   )
   .get(
-    "/orders-review/pending",
+    "/orders-review",
     async({ headers, set, params}) => {
       try{
-        const response = await prisma.vw_product_reviews.findMany({
-          where: {
-            admin_review_status: "pending"
-          },
-        });
+        const response = await prisma.vw_product_reviews.findMany();
 
         if(!response){
           set.status = 404;
