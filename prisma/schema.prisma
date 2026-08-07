@@ -1132,11 +1132,9 @@ model IM {
   delivery_days               String?
   payment_days                String?
   customeruser_id             String?            @db.Uuid
-  contact_id                  Int?
   prefix                      String?
   need_smapprove              Boolean?           @default(false)
   sopt_id                     Int?
-  buyer_customeruser_id       String?
   payment_status              String?
   log_payment                 DateTime?          @db.Timestamptz(6)
   order_uuid                  String?            @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -1152,7 +1150,6 @@ model IM {
   payment_method_type         String?
   customer_invoice_address_id Int?
   is_review_completed         Boolean?           @default(false)
-  contact                     contact?           @relation(fields: [contact_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   users                       public_users?      @relation(fields: [create_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   customeruser                customeruser?      @relation(fields: [customeruser_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   customer_delivery           customer_delivery? @relation(fields: [delivery_address_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -1538,9 +1535,13 @@ model bill_tracking {
   Process            String?
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // สร้างเมื่อ DateTime? @default(now()) @map("สร้างเมื่อ") @db.Timestamptz(6)
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   note               String?
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // สิ่งที่แนบมา String? @map("สิ่งที่แนบมา")
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   shipby             String?
   outsource_no       String?
   ID                 Int     @id(map: "bill tracking_pkey") @default(autoincrement())
@@ -1551,6 +1552,8 @@ model bill_tracking {
   enroll_date        String? @map("enroll date")
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // พนักงานขาย String? @map("พนักงานขาย")
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   REFDOC             String?
   TEL                String?
   SR                 String?
@@ -1774,7 +1777,6 @@ model contact {
   prefix             String?
   email              String?
   division           String?
-  IM                 IM[]
   assett             assett[]
   users              public_users?       @relation(fields: [create_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   customer_delivery  customer_delivery[]

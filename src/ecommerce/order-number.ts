@@ -27,6 +27,7 @@ export const getOrderPeriod = (date: Date, timeZone: string): string => {
 export const formatOrderNumber = (
   period: string,
   sequence: number,
+  companyShortCode?: string | null,
 ): string => {
   if (!/^\d{4}$/.test(period)) {
     throw new Error("Order period must be YYMM.");
@@ -45,10 +46,16 @@ export const formatOrderNumber = (
     throw new Error("Monthly order number limit exceeded.");
   }
 
-  return `INV${period}${String(sequence).padStart(4, "0")}`;
+  const shortCode = companyShortCode?.trim();
+  const prefix = shortCode ? `${shortCode}-SSR${period}` : `SSR${period}`;
+
+  return `${prefix}${String(sequence).padStart(4, "0")}`;
 };
 
-export const getOrderNumberPattern = (period: string): string => {
+export const getOrderNumberPattern = (
+  period: string,
+  companyShortCode?: string | null,
+): string => {
   if (!/^\d{4}$/.test(period)) {
     throw new Error("Order period must be YYMM.");
   }
@@ -58,23 +65,44 @@ export const getOrderNumberPattern = (period: string): string => {
     throw new Error("Order period contains an invalid month.");
   }
 
-  return `^INV${period}[0-9]{4}$`;
+  const shortCode = companyShortCode?.trim();
+  const prefix = shortCode ? `${shortCode}-SSR${period}` : `SSR${period}`;
+
+  return `^${prefix}[0-9]{4}$`;
 };
 
 export const allocateNextOrderNumber = async (
   tx: Prisma.TransactionClient,
   orderDate: Date,
+  companyId?: number | null,
 ): Promise<string> => {
   const period = getOrderPeriod(orderDate, ORDER_NUMBER_TIME_ZONE);
-  const pattern = getOrderNumberPattern(period);
+  let companyShortCode: string | null = null;
+
+  if (companyId !== null && companyId !== undefined) {
+    try {
+      const company = await tx.public_companies.findUnique({
+        where: { id: companyId },
+        select: { short: true },
+      });
+      companyShortCode = company?.short?.trim() || null;
+    } catch {
+      companyShortCode = null;
+    }
+  }
+
+  const prefix = companyShortCode
+    ? `${companyShortCode}-SSR${period}`
+    : `SSR${period}`;
+  const pattern = getOrderNumberPattern(period, companyShortCode);
 
   await tx.$executeRaw`
-    SELECT pg_advisory_xact_lock(hashtext(${`order-number:${period}`}))
+    SELECT pg_advisory_xact_lock(hashtext(${`order-number:${prefix}`}))
   `;
 
   const rows = await tx.$queryRaw<{ last_number: number | bigint }[]>`
     SELECT COALESCE(
-      MAX(CAST(SUBSTRING("docid" FROM 8 FOR 4) AS INTEGER)),
+      MAX(CAST(SUBSTRING("docid" FROM ${prefix.length + 1} FOR 4) AS INTEGER)),
       0
     ) AS "last_number"
     FROM "public"."IM"
@@ -86,5 +114,5 @@ export const allocateNextOrderNumber = async (
     throw new Error("Unable to allocate order number.");
   }
 
-  return formatOrderNumber(period, Number(lastNumber) + 1);
+  return formatOrderNumber(period, Number(lastNumber) + 1, companyShortCode);
 };

@@ -1,6 +1,7 @@
 import { Elysia, replaceUrlPath, t } from "elysia";
 import { prisma } from "./prisma_connection";
 import { mapCustomerOrderItemToImGoods } from "./order-submit-mapping";
+import { allocateNextOrderNumber } from "../ecommerce/order-number";
 import { auth } from "../plugins/auth";
 import "dotenv/config";
 
@@ -17,7 +18,10 @@ export const ecommerceCustomerRoute = new Elysia({
       try {
         const response = await prisma.customer_invoice_address.findMany({
           where: {
-            customeruser_id: customeruser_id
+            customeruser_id: customeruser_id,
+            invoicehead_id: {
+              equals: null
+            }
           },
           orderBy: {
             id: "asc"
@@ -1470,17 +1474,20 @@ export const ecommerceCustomerRoute = new Elysia({
             invoice_no: string | null;
           }> = [];
 
+          const companyId = body.order_billing[0]?.billing_detail.company_id;
+          const orderNo = await allocateNextOrderNumber(tx, new Date(), companyId);
+
           for (const entry of body.order_billing) {
             const detail = entry.billing_detail;
 
             const createdOrder = await tx.iM.create({
               data: {
-                docid: detail.order_no,
-                buyer_customeruser_id: detail.buyer_customeruser_id,
+                docid: orderNo,
+                customeruser_id: detail.buyer_customeruser_id,
                 payment_method_type: detail.payment_method,
                 status: detail.order_status,
                 im: detail.im_no,
-                type: detail.order_type,
+                type: 'inv_online',
                 customer_invoice_address_id: detail.invoice_id,
                 shipping_address_id: detail.shipping_address_id,
                 payment_status: detail.payment_status, 
@@ -1490,7 +1497,6 @@ export const ecommerceCustomerRoute = new Elysia({
                 update_by: detail.admin_updated_by,
                 admin_verify_status: detail.admin_verify_status ?? "Pending",
                 order_created_by: detail.order_created_by,
-                contact_id: detail.contact_id,
                 company_id: detail.company_id,
                 credit_terms_day: detail.credit_terms_day,
                 shipping_cost: detail.shipping_cost,
@@ -1599,7 +1605,6 @@ export const ecommerceCustomerRoute = new Elysia({
         order_billing: t.Array(
           t.Object({
             billing_detail: t.Object({
-              order_no: t.String(),
               payment_invoice_no: t.Any(),
               buyer_customeruser_id: t.String(),
               payment_method: t.Nullable(t.String()),
@@ -1617,7 +1622,6 @@ export const ecommerceCustomerRoute = new Elysia({
               admin_updated_by: t.Nullable(t.String()),
               admin_updated_at: t.Nullable(t.String()),
               order_created_by: t.Nullable(t.String()),
-              contact_id: t.Nullable(t.Number()),
               company_id: t.Nullable(t.Number()),
               credit_terms_day: t.Any(),
               shipping_cost: t.Nullable(t.Number()),
@@ -1683,7 +1687,7 @@ export const ecommerceCustomerRoute = new Elysia({
           select: {
             id: true,
             docid: true,
-            buyer_customeruser_id: true,
+            customeruser_id: true,
             payment_method_type: true,
             status: true,
             im: true,
@@ -1698,7 +1702,6 @@ export const ecommerceCustomerRoute = new Elysia({
             update_by: true,
             admin_updated_at: true,
             order_created_by: true,
-            contact_id: true,
             company_id: true,
             credit_terms_day: true,
             shipping_cost: true,
@@ -1742,14 +1745,7 @@ export const ecommerceCustomerRoute = new Elysia({
       const customeruser_id = params.customeruser_id;
       const response = await prisma.iM.findMany({
         where: {
-          OR:[
-            { 
-              update_by: null,
-            },
-            {
-              buyer_customeruser_id: customeruser_id,
-            }
-          ]
+          customeruser_id: customeruser_id,
         },
         select: {
           docid: true,

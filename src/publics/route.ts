@@ -130,7 +130,7 @@ export const publicRoute = new Elysia({
       try { 
         const flashsale_detail = await prisma.public_promotion.findFirst({
           where: {
-            promotion_type: 'flash_sale',
+            subtype: 'flash_sale',
             is_active: true,
             promotion_start: {
               lte: now
@@ -1048,8 +1048,8 @@ export const publicRoute = new Elysia({
             promotion_end: {
               gte: now
             },
-            promotion_type: {
-              notIn : ['product', 'redeem']
+            subtype: {
+              in : ['flash_sale', 'discount', 'bundle_deal_get_x_free_y', 'bundle_deal_grand_total_free_y', 'extra_points_bill_total', 'extra_points_products'              ]
             }
           },
           select: {

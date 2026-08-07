@@ -3198,7 +3198,7 @@ export const ecommerceRoute = new Elysia({
         const { promotion_type } = body;
         const response = await prisma.public_promotion.findMany({
           where: {
-            promotion_type: {
+            subtype: {
               contains: promotion_type,
               mode: "insensitive",
             }
@@ -3254,6 +3254,7 @@ export const ecommerceRoute = new Elysia({
             promotion_name: true,
             promotion_description: true,
             promotion_type: true,
+            subtype: true,
             promotion_start: true,
             promotion_end: true,
             is_active: true,
@@ -3309,6 +3310,7 @@ export const ecommerceRoute = new Elysia({
           promotion_name,
           promotion_description,
           promotion_type,
+          subtype,
           promotion_start,
           promotion_end,
           is_accept_overlapse_promotion,
@@ -3322,6 +3324,7 @@ export const ecommerceRoute = new Elysia({
             promotion_name: promotion_name,
             promotion_description: promotion_description,
             promotion_type: promotion_type,
+            subtype: subtype,
             promotion_start: promotion_start,
             promotion_end: promotion_end,
             is_accept_overlapse_promotion: is_accept_overlapse_promotion,
@@ -3366,6 +3369,7 @@ export const ecommerceRoute = new Elysia({
         promotion_name: t.String(),
         promotion_description: t.String(),
         promotion_type: t.String(),
+        subtype: t.String(),
         promotion_start: t.Date(),
         promotion_end: t.Date(),
         is_accept_overlapse_promotion: t.Boolean(),
@@ -3398,6 +3402,7 @@ export const ecommerceRoute = new Elysia({
           promotion_name,
           promotion_description,
           promotion_type,
+          subtype,
           promotion_start,
           promotion_end,
           is_active,
@@ -3415,6 +3420,7 @@ export const ecommerceRoute = new Elysia({
             promotion_name: promotion_name,
             promotion_description: promotion_description,
             promotion_type: promotion_type,
+            subtype: subtype,
             promotion_start: promotion_start,
             promotion_end: promotion_end,
             is_active: is_active,
@@ -3461,6 +3467,7 @@ export const ecommerceRoute = new Elysia({
         promotion_name: t.String(),
         promotion_description: t.String(),
         promotion_type: t.String(),
+        subtype: t.String(),
         promotion_start: t.Date(),
         promotion_end: t.Date(),
         is_active: t.Boolean(),
@@ -3544,6 +3551,7 @@ export const ecommerceRoute = new Elysia({
             promotion_name: true,
             promotion_description: true,
             promotion_type: true,
+            subtype: true,
             promotion_start: true,
             promotion_end: true,
             is_active: true,
@@ -3599,6 +3607,7 @@ export const ecommerceRoute = new Elysia({
           promotion_name,
           promotion_description,
           promotion_type,
+          subtype,
           promotion_start,
           promotion_end,
           is_accept_overlapse_promotion,
@@ -3612,6 +3621,7 @@ export const ecommerceRoute = new Elysia({
             promotion_name: promotion_name,
             promotion_description: promotion_description,
             promotion_type: promotion_type,
+            subtype: subtype,
             promotion_start: promotion_start,
             promotion_end: promotion_end,
             is_accept_overlapse_promotion: is_accept_overlapse_promotion,
@@ -3656,6 +3666,7 @@ export const ecommerceRoute = new Elysia({
         promotion_name: t.String(),
         promotion_description: t.String(),
         promotion_type: t.String(),
+        subtype: t.String(),
         promotion_start: t.Date(),
         promotion_end: t.Date(),
         is_accept_overlapse_promotion: t.Boolean(),
@@ -3688,6 +3699,7 @@ export const ecommerceRoute = new Elysia({
           promotion_name,
           promotion_description,
           promotion_type,
+          subtype,
           promotion_start,
           promotion_end,
           is_active,
@@ -3705,6 +3717,7 @@ export const ecommerceRoute = new Elysia({
             promotion_name: promotion_name,
             promotion_description: promotion_description,
             promotion_type: promotion_type,
+            subtype: subtype,
             promotion_start: promotion_start,
             promotion_end: promotion_end,
             is_active: is_active,
@@ -3751,6 +3764,7 @@ export const ecommerceRoute = new Elysia({
         promotion_name: t.String(),
         promotion_description: t.String(),
         promotion_type: t.String(),
+        subtype: t.String(),
         promotion_start: t.Date(),
         promotion_end: t.Date(),
         is_active: t.Boolean(),
@@ -3825,7 +3839,7 @@ export const ecommerceRoute = new Elysia({
       try {
         const response = await prisma.public_promotion.findMany({
           where: {
-            promotion_type: {
+            subtype: {
               in: ["bundle_deal_get_x_free_y", "bundle_deal_grand_total_free_y"],
             },
           },
@@ -3835,6 +3849,7 @@ export const ecommerceRoute = new Elysia({
             promotion_name: true,
             promotion_description: true,
             promotion_type: true,
+            subtype: true,
             promotion_start: true,
             promotion_end: true,
             is_active: true,
@@ -3875,6 +3890,7 @@ export const ecommerceRoute = new Elysia({
           promotion_name,
           promotion_description,
           promotion_type,
+          subtype,
           promotion_start,
           promotion_end,
           is_accept_overlapse_promotion,
@@ -3889,6 +3905,7 @@ export const ecommerceRoute = new Elysia({
             promotion_name: promotion_name,
             promotion_description: promotion_description,
             promotion_type: promotion_type,
+            subtype: subtype,
             promotion_start: promotion_start,
             promotion_end: promotion_end,
             is_accept_overlapse_promotion: is_accept_overlapse_promotion,
@@ -3948,6 +3965,7 @@ export const ecommerceRoute = new Elysia({
         promotion_name: t.String(),
         promotion_description: t.String(),
         promotion_type: t.String(),
+        subtype: t.String(),
         promotion_start: t.Date(),
         promotion_end: t.Date(),
         is_accept_overlapse_promotion: t.Boolean(),
@@ -3983,6 +4001,7 @@ export const ecommerceRoute = new Elysia({
           promotion_name,
           promotion_description,
           promotion_type,
+          subtype,
           promotion_start,
           promotion_end,
           is_active,
@@ -4003,6 +4022,7 @@ export const ecommerceRoute = new Elysia({
             promotion_name: promotion_name,
             promotion_description: promotion_description,
             promotion_type: promotion_type,
+            subtype: subtype,
             promotion_start: promotion_start,
             promotion_end: promotion_end,
             is_active: is_active,
@@ -4086,6 +4106,7 @@ export const ecommerceRoute = new Elysia({
         promotion_name: t.String(),
         promotion_description: t.String(),
         promotion_type: t.String(),
+        subtype: t.String(),
         promotion_start: t.Date(),
         promotion_end: t.Date(),
         is_accept_overlapse_promotion: t.Boolean(),
@@ -4129,6 +4150,7 @@ export const ecommerceRoute = new Elysia({
             promotion_name: true,
             promotion_description: true,
             promotion_type: true,
+            subtype: true,
             promotion_start: true,
             promotion_end: true,
             is_active: true,
@@ -4233,6 +4255,7 @@ export const ecommerceRoute = new Elysia({
           promotion_name,
           promotion_description,
           promotion_type,
+          subtype,
           promotion_start,
           promotion_end,
           is_accept_overlapse_promotion,
@@ -4247,6 +4270,7 @@ export const ecommerceRoute = new Elysia({
             promotion_name: promotion_name,
             promotion_description: promotion_description,
             promotion_type: promotion_type,
+            subtype: subtype,
             promotion_start: promotion_start,
             promotion_end: promotion_end,
             is_accept_overlapse_promotion: is_accept_overlapse_promotion,
@@ -4307,6 +4331,7 @@ export const ecommerceRoute = new Elysia({
         promotion_name: t.String(),
         promotion_description: t.String(),
         promotion_type: t.String(),
+        subtype: t.String(),
         promotion_start: t.Date(),
         promotion_end: t.Date(),
         is_accept_overlapse_promotion: t.Boolean(),
@@ -4346,6 +4371,7 @@ export const ecommerceRoute = new Elysia({
           promotion_name,
           promotion_description,
           promotion_type,
+          subtype,
           promotion_start,
           promotion_end,
           is_accept_overlapse_promotion,
@@ -4365,6 +4391,7 @@ export const ecommerceRoute = new Elysia({
             promotion_name: promotion_name,
             promotion_description: promotion_description,
             promotion_type: promotion_type,
+            subtype: subtype,
             promotion_start: promotion_start,
             promotion_end: promotion_end,
             is_accept_overlapse_promotion: is_accept_overlapse_promotion,
@@ -4432,6 +4459,7 @@ export const ecommerceRoute = new Elysia({
         promotion_name: t.String(),
         promotion_description: t.String(),
         promotion_type: t.String(),
+        subtype: t.String(),
         promotion_start: t.Date(),
         promotion_end: t.Date(),
         is_accept_overlapse_promotion: t.Boolean(),
@@ -4478,6 +4506,7 @@ export const ecommerceRoute = new Elysia({
             promotion_name: true,
             promotion_description: true,
             promotion_type: true,
+            subtype: true,
             promotion_start: true,
             promotion_end: true,
             is_active: true,
@@ -4539,6 +4568,7 @@ export const ecommerceRoute = new Elysia({
           promotion_name,
           promotion_description,
           promotion_type,
+          subtype,
           promotion_start,
           promotion_end,
           is_accept_overlapse_promotion,
@@ -4553,6 +4583,7 @@ export const ecommerceRoute = new Elysia({
             promotion_name: promotion_name,
             promotion_description: promotion_description,
             promotion_type: promotion_type,
+            subtype: subtype,
             promotion_start: promotion_start,
             promotion_end: promotion_end,
             is_accept_overlapse_promotion: is_accept_overlapse_promotion,
@@ -4595,6 +4626,7 @@ export const ecommerceRoute = new Elysia({
         promotion_name: t.String(),
         promotion_description: t.Any(),
         promotion_type: t.String(),
+        subtype: t.String(),
         promotion_start: t.Date(),
         promotion_end: t.Date(),
         is_accept_overlapse_promotion: t.Boolean(),
@@ -4628,6 +4660,7 @@ export const ecommerceRoute = new Elysia({
           promotion_name,
           promotion_description,
           promotion_type,
+          subtype,
           promotion_start,
           promotion_end,
           is_accept_overlapse_promotion,
@@ -4642,6 +4675,7 @@ export const ecommerceRoute = new Elysia({
             promotion_name: promotion_name,
             promotion_description: promotion_description,
             promotion_type: promotion_type,
+            subtype: subtype,
             promotion_start: promotion_start,
             promotion_end: promotion_end,
             is_accept_overlapse_promotion: is_accept_overlapse_promotion,
@@ -4684,6 +4718,7 @@ export const ecommerceRoute = new Elysia({
         promotion_name: t.String(),
         promotion_description: t.Any(),
         promotion_type: t.String(),
+        subtype: t.String(),
         promotion_start: t.Date(),
         promotion_end: t.Date(),
         is_accept_overlapse_promotion: t.Boolean(),
@@ -4722,6 +4757,7 @@ export const ecommerceRoute = new Elysia({
             promotion_name: true,
             promotion_description: true,
             promotion_type: true,
+            subtype: true,
             promotion_start: true,
             promotion_end: true,
             is_active: true,
@@ -4786,6 +4822,7 @@ export const ecommerceRoute = new Elysia({
             promotion_name: true,
             promotion_description: true,
             promotion_type: true,
+            subtype: true,
             promotion_start: true,
             promotion_end: true,
             is_active: true,
@@ -4841,6 +4878,7 @@ export const ecommerceRoute = new Elysia({
           promotion_name,
           promotion_description,
           promotion_type,
+          subtype,
           promotion_start,
           promotion_end,
           is_accept_overlapse_promotion,
@@ -4853,15 +4891,16 @@ export const ecommerceRoute = new Elysia({
             id: promotion_id
           },
           data: {
-            url_image,
-            promotion_image,
-            promotion_name,
-            promotion_description,
-            promotion_type,
-            promotion_start,
-            promotion_end,
-            is_accept_overlapse_promotion,
-            is_active,
+            url_image: url_image,
+            promotion_image: promotion_image,
+            promotion_name: promotion_name,
+            promotion_description: promotion_description,
+            promotion_type: promotion_type,
+            subtype: subtype,
+            promotion_start: promotion_start,
+            promotion_end: promotion_end,
+            is_accept_overlapse_promotion: is_accept_overlapse_promotion,
+            is_active: is_active,
             updated_at: now,
           }
         })
@@ -4905,6 +4944,7 @@ export const ecommerceRoute = new Elysia({
         promotion_name: t.String(),
         promotion_description: t.Any(),
         promotion_type: t.String(),
+        subtype: t.String(),
         promotion_start: t.Date(),
         promotion_end: t.Date(),
         is_accept_overlapse_promotion: t.Boolean(),
@@ -4939,6 +4979,7 @@ export const ecommerceRoute = new Elysia({
           promotion_name,
           promotion_description,
           promotion_type,
+          subtype,
           promotion_start,
           promotion_end,
           is_accept_overlapse_promotion,
@@ -4951,15 +4992,16 @@ export const ecommerceRoute = new Elysia({
             id: promotion_id
           },
           data: {
-            url_image,
-            promotion_image,
-            promotion_name,
-            promotion_description,
-            promotion_type,
-            promotion_start,
-            promotion_end,
-            is_accept_overlapse_promotion,
-            is_active,
+            url_image: url_image,
+            promotion_image: promotion_image,
+            promotion_name: promotion_name,
+            promotion_description: promotion_description,
+            promotion_type: promotion_type,
+            subtype: subtype,
+            promotion_start: promotion_start,
+            promotion_end: promotion_end,
+            is_accept_overlapse_promotion: is_accept_overlapse_promotion,
+            is_active: is_active,
             updated_at: now,
           }
         })
@@ -5003,6 +5045,7 @@ export const ecommerceRoute = new Elysia({
         promotion_name: t.String(),
         promotion_description: t.Any(),
         promotion_type: t.String(),
+        subtype: t.String(),
         promotion_start: t.Date(),
         promotion_end: t.Date(),
         is_accept_overlapse_promotion: t.Boolean(),
@@ -6295,7 +6338,7 @@ export const ecommerceRoute = new Elysia({
           select: {
             id: true,
             docid: true,
-            buyer_customeruser_id: true,
+            customeruser_id: true,
             status: true,
             im: true,
             type: true,
@@ -6307,7 +6350,6 @@ export const ecommerceRoute = new Elysia({
             created_at: true,
             updated_at: true,
             create_by: true,
-            contact_id: true,
             company_id: true,
             credit_terms_day: true,
             shipping_cost: true,
@@ -6323,7 +6365,7 @@ export const ecommerceRoute = new Elysia({
         }
 
         const company_id = response.company_id;
-        const buyer_customeruser_id = response.buyer_customeruser_id;
+        const customeruser_id = response.customeruser_id;
         const shipping_address_id = response.shipping_address_id;
         const customer_invoice_address_id = response.customer_invoice_address_id;
 
@@ -6368,13 +6410,13 @@ export const ecommerceRoute = new Elysia({
             })
 
             
-        const resCustomer = buyer_customeruser_id === null
+        const resCustomer = customeruser_id === null
           ? null
           : await prisma.vw_customer_information.findFirst({
               where: {
                 OR: [
-                  { user_id: String(buyer_customeruser_id) },
-                  { member_no: String(buyer_customeruser_id) },
+                  { user_id: String(customeruser_id) },
+                  { member_no: String(customeruser_id) },
                 ],
               },
               select: {
@@ -6443,7 +6485,7 @@ export const ecommerceRoute = new Elysia({
         const result = {
           id: response.id,
           order_no: response.docid,
-          buyer_customeruser_id: response.buyer_customeruser_id,
+          buyer_customeruser_id: response.customeruser_id,
           payment_method_type: response.payment_method_type,
           order_status: response.status,
           im_no: response.im,
@@ -6456,7 +6498,6 @@ export const ecommerceRoute = new Elysia({
           created_at: response.created_at,
           updated_at: response.updated_at,
           order_created_by: response.create_by,
-          contact_id: response.contact_id,
           company_id: response.company_id,
           credit_terms_day: response.credit_terms_day,
           shipping_cost: response.shipping_cost,
@@ -6817,15 +6858,15 @@ export const ecommerceRoute = new Elysia({
             }
           }
 
-          const orderNo = await allocateNextOrderNumber(tx, orderDate);
+          const orderNo = await allocateNextOrderNumber(tx, orderDate, body.company_id);
 
           const createdOrder = await tx.iM.create({
             data: {
               docid: orderNo,
-              buyer_customeruser_id: body.buyer_customeruser_id,
+              customeruser_id: body.buyer_customeruser_id,
               status: mapAdminVerifyStatusToOrderStatus(body.admin_verify_status),
               im: body.im_no,
-              type: 'inv',
+              type: 'inv_online',
               customer_invoice_address_id: body.invoice_address_id,
               shipping_address_id: body.shipping_address_id,
               payment_status: body.payment_status,
@@ -6836,7 +6877,6 @@ export const ecommerceRoute = new Elysia({
               update_by: body.admin_updated_by,
               admin_updated_at: loggedAt,
               order_created_by: body.order_created_by,
-              contact_id: body.contact_id,
               company_id: body.company_id,
               credit_terms_day: body.credit_terms_day,
               shipping_cost: body.shipping_cost,
@@ -6938,7 +6978,6 @@ export const ecommerceRoute = new Elysia({
         payment_status: t.Optional(t.Nullable(t.String())),
         payment_invoice_no: t.Optional(t.Nullable(t.String())),
         order_created_by: t.Optional(t.Nullable(t.String())),
-        contact_id: t.Optional(t.Nullable(t.Number())),
         company_id: t.Optional(t.Nullable(t.Number())),
         billing_items: t.Array(
           t.Object({
@@ -7022,7 +7061,7 @@ export const ecommerceRoute = new Elysia({
               admin_verify_status: true,
               im: true,
               shipping_cost: true,
-              buyer_customeruser_id: true,
+              customeruser_id: true,
             },
           });
 
@@ -7399,7 +7438,28 @@ export const ecommerceRoute = new Elysia({
     "/orders-review",
     async({ headers, set, params}) => {
       try{
-        const response = await prisma.vw_product_reviews.findMany();
+        const resOrders = await prisma.iM.findMany({
+          where: {
+            status: "Completed",
+            type: "inv_online",
+          },
+          select: {
+            order_uuid: true,
+          }
+        })
+
+        const arrOrderUUID = resOrders.map((order) => order.order_uuid);
+
+        const response = await prisma.vw_product_reviews.findMany({
+          where: {
+            order_uuid: {
+              in: arrOrderUUID as string[]
+            },
+            product_review_id: {
+              not: null
+            }
+          }
+        });
 
         if(!response){
           set.status = 404;
@@ -7461,7 +7521,7 @@ export const ecommerceRoute = new Elysia({
         authorization: t.String(),
       }),
       body: t.Object({
-        product_review_id: t.String(),
+        product_review_id: t.Any(),
         quote_comment: t.String(),
         status: t.String(),
         user_id: t.String(),
@@ -7475,6 +7535,51 @@ export const ecommerceRoute = new Elysia({
         security: [{ bearerAuth: [] }],
         tags: ["3NConnect"],
         // you can also add `deprecated`, `security`, etc.
+      },
+    }
+  )
+  .get(
+    "/tax-invoice-address/:customeruser_id",
+    async({ headers, set, params }) => {
+      const customeruser_id = params.customeruser_id;
+      try {
+        const response = await prisma.customer_invoice_address.findMany({
+          where: {
+            customeruser_id: customeruser_id,
+          },
+          orderBy: {
+            id: "asc"
+          }
+        })
+
+        if(!response){
+          set.status = 400;
+          return {message: "Cannot get Invoice Address by customeruser_id"}
+        }
+
+        return response;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error getting customers:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      params: t.Object({
+        customeruser_id: t.String()
+      }),
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "eCommerce Customer - Find Invoice Address by CustomerUserID",
+        description: `
+          This endpoint gets all customer invoice address by customeruser_id in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
       },
     }
   )
