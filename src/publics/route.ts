@@ -1054,8 +1054,9 @@ export const publicRoute = new Elysia({
           },
           select: {
             id: true,
-            promotion_image: true,
+            url_image: true,
             promotion_type: true,
+            subtype: true,
             promotion_name: true,
             promotion_description: true,
             promotion_start: true,
