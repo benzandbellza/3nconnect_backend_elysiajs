@@ -3249,6 +3249,7 @@ export const ecommerceRoute = new Elysia({
             id: promotion_id,
           },
           select: {
+            banner:true,
             url_image: true,
             promotion_image: true,
             promotion_name: true,
@@ -3319,8 +3320,9 @@ export const ecommerceRoute = new Elysia({
 
         const response = await prisma.public_promotion.create({
           data: {
-            url_image: url_image,
-            promotion_image: promotion_image,
+            url_image: url_image ?? null,
+            banner: url_image ?? null,
+            promotion_image: promotion_image ?? null,
             promotion_name: promotion_name,
             promotion_description: promotion_description,
             promotion_type: promotion_type,
@@ -3364,8 +3366,8 @@ export const ecommerceRoute = new Elysia({
         authorization: t.String(),
       }),
       body: t.Object({
-        url_image: t.String(),
-        promotion_image: t.String(),
+        url_image: t.Any(),
+        promotion_image: t.Any(),
         promotion_name: t.String(),
         promotion_description: t.String(),
         promotion_type: t.String(),
@@ -3415,8 +3417,9 @@ export const ecommerceRoute = new Elysia({
             id: promotion_id,
           },
           data: {
-            url_image: url_image,
-            promotion_image: promotion_image,
+            url_image: url_image ?? null,
+            banner: url_image ?? null,
+            promotion_image: promotion_image ?? null,
             promotion_name: promotion_name,
             promotion_description: promotion_description,
             promotion_type: promotion_type,
@@ -3462,8 +3465,8 @@ export const ecommerceRoute = new Elysia({
         authorization: t.String(),
       }),
       body: t.Object({
-        url_image: t.String(),
-        promotion_image: t.String(),
+        url_image: t.Any(),
+        promotion_image: t.Any(),
         promotion_name: t.String(),
         promotion_description: t.String(),
         promotion_type: t.String(),
@@ -3547,6 +3550,7 @@ export const ecommerceRoute = new Elysia({
           },
           select: {
             url_image: true,
+            banner: true,
             promotion_image: true,
             promotion_name: true,
             promotion_description: true,
@@ -3616,8 +3620,9 @@ export const ecommerceRoute = new Elysia({
 
         const response = await prisma.public_promotion.create({
           data: {
-            url_image: url_image,
-            promotion_image: promotion_image,
+            url_image: url_image ?? null,
+            banner: url_image ?? null,
+            promotion_image: promotion_image ?? null,
             promotion_name: promotion_name,
             promotion_description: promotion_description,
             promotion_type: promotion_type,
@@ -3712,8 +3717,9 @@ export const ecommerceRoute = new Elysia({
             id: promotion_id,
           },
           data: {
-            url_image: url_image,
-            promotion_image: promotion_image,
+            url_image: url_image ?? null,
+            banner: url_image ?? null,
+            promotion_image: promotion_image ?? null,
             promotion_name: promotion_name,
             promotion_description: promotion_description,
             promotion_type: promotion_type,
@@ -3759,8 +3765,8 @@ export const ecommerceRoute = new Elysia({
         authorization: t.String(),
       }),
       body: t.Object({
-        url_image: t.String(),
-        promotion_image: t.String(),
+        url_image: t.Any(),
+        promotion_image: t.Any(),
         promotion_name: t.String(),
         promotion_description: t.String(),
         promotion_type: t.String(),
@@ -3846,6 +3852,7 @@ export const ecommerceRoute = new Elysia({
           select: {
             id: true,
             url_image: true,
+            banner: true,
             promotion_name: true,
             promotion_description: true,
             promotion_type: true,
@@ -3900,8 +3907,9 @@ export const ecommerceRoute = new Elysia({
 
         const response = await prisma.public_promotion.create({
           data: {
-            url_image: url_image,
-            promotion_image: promotion_image,
+            url_image: url_image ?? null,
+            banner: url_image ?? null,
+            promotion_image: promotion_image ?? null,
             promotion_name: promotion_name,
             promotion_description: promotion_description,
             promotion_type: promotion_type,
@@ -3960,8 +3968,8 @@ export const ecommerceRoute = new Elysia({
         authorization: t.String(),
       }),
       body: t.Object({
-        url_image: t.String(),
-        promotion_image: t.String(),
+        url_image: t.Any(),
+        promotion_image: t.Any(),
         promotion_name: t.String(),
         promotion_description: t.String(),
         promotion_type: t.String(),
@@ -4017,8 +4025,9 @@ export const ecommerceRoute = new Elysia({
             id: promotion_id,
           },
           data: {
-            url_image: url_image,
-            promotion_image: promotion_image,
+            url_image: url_image ?? null,
+            banner: url_image ?? null,
+            promotion_image: promotion_image ?? null,
             promotion_name: promotion_name,
             promotion_description: promotion_description,
             promotion_type: promotion_type,
@@ -4101,8 +4110,8 @@ export const ecommerceRoute = new Elysia({
         promotion_id: t.Number(),
       }),
       body: t.Object({
-        url_image: t.String(),
-        promotion_image: t.String(),
+        url_image: t.Any(),
+        promotion_image: t.Any(),
         promotion_name: t.String(),
         promotion_description: t.String(),
         promotion_type: t.String(),
@@ -4146,6 +4155,7 @@ export const ecommerceRoute = new Elysia({
           select: {
             id: true,
             url_image: true,
+            banner: true,
             promotion_image: true,
             promotion_name: true,
             promotion_description: true,
@@ -4265,8 +4275,9 @@ export const ecommerceRoute = new Elysia({
 
         const response = await prisma.public_promotion.create({
           data: {
-            url_image: url_image,
-            promotion_image: promotion_image,
+            url_image: url_image ?? null,
+            banner: url_image ?? null,
+            promotion_image: promotion_image ?? null,
             promotion_name: promotion_name,
             promotion_description: promotion_description,
             promotion_type: promotion_type,
@@ -4386,8 +4397,9 @@ export const ecommerceRoute = new Elysia({
             id: promotion_id,
           },
           data: {
-            url_image: url_image,
-            promotion_image: promotion_image,
+            url_image: url_image ?? null,
+            banner: url_image ?? null,
+            promotion_image: promotion_image ?? null,
             promotion_name: promotion_name,
             promotion_description: promotion_description,
             promotion_type: promotion_type,
@@ -4502,6 +4514,7 @@ export const ecommerceRoute = new Elysia({
           select: {
             id: true,
             url_image: true,
+            banner: true,
             promotion_image: true,
             promotion_name: true,
             promotion_description: true,
@@ -4578,8 +4591,9 @@ export const ecommerceRoute = new Elysia({
 
         const response = await prisma.public_promotion.create({
           data: {
-            url_image : url_image,
-            promotion_image: promotion_image,
+            url_image : url_image ?? null,
+            banner: url_image ?? null,
+            promotion_image: promotion_image ?? null,
             promotion_name: promotion_name,
             promotion_description: promotion_description,
             promotion_type: promotion_type,
@@ -4670,8 +4684,9 @@ export const ecommerceRoute = new Elysia({
 
         const response = await prisma.public_promotion.create({
           data: {
-            url_image : url_image,
-            promotion_image: promotion_image,
+            url_image : url_image ?? null,
+            banner: url_image ?? null,
+            promotion_image: promotion_image ?? null,
             promotion_name: promotion_name,
             promotion_description: promotion_description,
             promotion_type: promotion_type,
@@ -4752,6 +4767,7 @@ export const ecommerceRoute = new Elysia({
             id: promotion_id
           },
           select : {
+            banner: true,
             url_image: true,
             promotion_image: true,
             promotion_name: true,
@@ -4817,6 +4833,7 @@ export const ecommerceRoute = new Elysia({
             id: promotion_id
           },
           select : {
+            banner: true,
             url_image: true,
             promotion_image: true,
             promotion_name: true,
@@ -4891,8 +4908,9 @@ export const ecommerceRoute = new Elysia({
             id: promotion_id
           },
           data: {
-            url_image: url_image,
-            promotion_image: promotion_image,
+            banner: url_image ?? null,
+            url_image: url_image ?? null,
+            promotion_image: promotion_image ?? null,
             promotion_name: promotion_name,
             promotion_description: promotion_description,
             promotion_type: promotion_type,
@@ -4992,8 +5010,9 @@ export const ecommerceRoute = new Elysia({
             id: promotion_id
           },
           data: {
-            url_image: url_image,
-            promotion_image: promotion_image,
+            url_image: url_image ?? null,
+            banner: url_image ?? null,
+            promotion_image: promotion_image ?? null,
             promotion_name: promotion_name,
             promotion_description: promotion_description,
             promotion_type: promotion_type,

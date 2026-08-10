@@ -144,6 +144,7 @@ export const publicRoute = new Elysia({
             promotion_name: true,
             promotion_start: true,
             promotion_end: true,
+            banner: true,
           }
         });
 
@@ -1055,6 +1056,7 @@ export const publicRoute = new Elysia({
           select: {
             id: true,
             url_image: true,
+            banner: true,
             promotion_type: true,
             subtype: true,
             promotion_name: true,
@@ -1106,6 +1108,7 @@ export const publicRoute = new Elysia({
           },
           select: {
             url_image: true,
+            banner: true,
             promotion_name: true,
             promotion_description: true,
             promotion_start: true,
@@ -1183,6 +1186,7 @@ export const publicRoute = new Elysia({
           },
           select: {
             url_image: true,
+            banner: true,
             promotion_name: true,
             promotion_description: true,
             promotion_start: true,
@@ -1260,7 +1264,7 @@ export const publicRoute = new Elysia({
             is_active: true,
           },
           select: {
-            url_image: true,
+            banner: true,
             promotion_name: true,
             promotion_description: true,
             promotion_start: true,
@@ -1336,7 +1340,7 @@ export const publicRoute = new Elysia({
             is_active: true,
           },
           select: {
-            url_image: true,
+            banner: true,
             promotion_name: true,
             promotion_description: true,
             promotion_start: true,
@@ -1413,7 +1417,7 @@ export const publicRoute = new Elysia({
             is_active: true,
           },
           select: {
-            url_image: true,
+            banner: true,
             promotion_name: true,
             promotion_description: true,
             promotion_start: true,
