@@ -87,6 +87,27 @@ export const gift_voucherRelations = t.Object(
       ),
       { additionalProperties: false },
     ),
+    customervoucher: t.Array(
+      t.Object(
+        {
+          id: t.Integer(),
+          created_at: t.Date(),
+          customer_id: __nullable__(t.String()),
+          voucher_id: __nullable__(t.Integer()),
+          used: __nullable__(t.Boolean()),
+          exp: __nullable__(t.Date()),
+          use_detail: __nullable__(t.String()),
+          used_at: __nullable__(t.Date()),
+          voucherid: t.String(),
+          gift_voucher_id: __nullable__(t.Integer()),
+        },
+        {
+          additionalProperties: false,
+          description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,
+        },
+      ),
+      { additionalProperties: false },
+    ),
   },
   {
     additionalProperties: false,
@@ -210,6 +231,22 @@ export const gift_voucherRelationsInputCreate = t.Object(
         { additionalProperties: false },
       ),
     ),
+    customervoucher: t.Optional(
+      t.Object(
+        {
+          connect: t.Array(
+            t.Object(
+              {
+                id: t.Integer({ additionalProperties: false }),
+              },
+              { additionalProperties: false },
+            ),
+            { additionalProperties: false },
+          ),
+        },
+        { additionalProperties: false },
+      ),
+    ),
   },
   {
     additionalProperties: false,
@@ -271,6 +308,31 @@ export const gift_voucherRelationsInputUpdate = t.Partial(
         ),
       ),
       gift_voucher_redeem_code: t.Partial(
+        t.Object(
+          {
+            connect: t.Array(
+              t.Object(
+                {
+                  id: t.Integer({ additionalProperties: false }),
+                },
+                { additionalProperties: false },
+              ),
+              { additionalProperties: false },
+            ),
+            disconnect: t.Array(
+              t.Object(
+                {
+                  id: t.Integer({ additionalProperties: false }),
+                },
+                { additionalProperties: false },
+              ),
+              { additionalProperties: false },
+            ),
+          },
+          { additionalProperties: false },
+        ),
+      ),
+      customervoucher: t.Partial(
         t.Object(
           {
             connect: t.Array(
@@ -449,6 +511,7 @@ export const gift_voucherSelect = t.Partial(
       gift_voucher_campaign_voucher: t.Boolean(),
       gift_voucher_generic: t.Boolean(),
       gift_voucher_redeem_code: t.Boolean(),
+      customervoucher: t.Boolean(),
       _count: t.Boolean(),
     },
     {
@@ -464,6 +527,7 @@ export const gift_voucherInclude = t.Partial(
       gift_voucher_campaign_voucher: t.Boolean(),
       gift_voucher_generic: t.Boolean(),
       gift_voucher_redeem_code: t.Boolean(),
+      customervoucher: t.Boolean(),
       _count: t.Boolean(),
     },
     {

@@ -1,5 +1,5 @@
 SELECT
-  p.type AS promotion_type,
+  p.subtype AS promotion_type,
   p.proname AS promotion_name,
   c.name AS company_name,
   b.brand_name,
@@ -33,4 +33,4 @@ FROM
     JOIN product_categories pc ON ((p2.category_id = pc.id))
   )
 WHERE
-  (p.type = 'discount' :: text);
+  (p.subtype = 'discount' :: text);

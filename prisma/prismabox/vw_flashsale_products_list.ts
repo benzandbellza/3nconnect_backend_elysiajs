@@ -23,6 +23,8 @@ export const vw_flashsale_products_listPlain = t.Object(
     url_image: __nullable__(t.String()),
     promotion_id: __nullable__(t.Integer()),
     is_promotion_active: __nullable__(t.Boolean()),
+    quantity_limit: __nullable__(t.Integer()),
+    quantity_sold: __nullable__(t.Integer()),
   },
   { additionalProperties: false },
 );
@@ -49,6 +51,8 @@ export const vw_flashsale_products_listPlainInputCreate = t.Object(
     promotion_end: t.Optional(__nullable__(t.Date())),
     url_image: t.Optional(__nullable__(t.String())),
     is_promotion_active: t.Optional(__nullable__(t.Boolean())),
+    quantity_limit: t.Optional(__nullable__(t.Integer())),
+    quantity_sold: t.Optional(__nullable__(t.Integer())),
   },
   { additionalProperties: false },
 );
@@ -70,6 +74,8 @@ export const vw_flashsale_products_listPlainInputUpdate = t.Object(
     promotion_end: t.Optional(__nullable__(t.Date())),
     url_image: t.Optional(__nullable__(t.String())),
     is_promotion_active: t.Optional(__nullable__(t.Boolean())),
+    quantity_limit: t.Optional(__nullable__(t.Integer())),
+    quantity_sold: t.Optional(__nullable__(t.Integer())),
   },
   { additionalProperties: false },
 );
@@ -108,6 +114,8 @@ export const vw_flashsale_products_listWhere = t.Partial(
           url_image: t.String(),
           promotion_id: t.Integer(),
           is_promotion_active: t.Boolean(),
+          quantity_limit: t.Integer(),
+          quantity_sold: t.Integer(),
         },
         { additionalProperties: false },
       ),
@@ -157,6 +165,8 @@ export const vw_flashsale_products_listWhereUnique = t.Recursive(
               url_image: t.String(),
               promotion_id: t.Integer(),
               is_promotion_active: t.Boolean(),
+              quantity_limit: t.Integer(),
+              quantity_sold: t.Integer(),
             },
             { additionalProperties: false },
           ),
@@ -187,6 +197,8 @@ export const vw_flashsale_products_listSelect = t.Partial(
       url_image: t.Boolean(),
       promotion_id: t.Boolean(),
       is_promotion_active: t.Boolean(),
+      quantity_limit: t.Boolean(),
+      quantity_sold: t.Boolean(),
       _count: t.Boolean(),
     },
     { additionalProperties: false },
@@ -249,6 +261,12 @@ export const vw_flashsale_products_listOrderBy = t.Partial(
         additionalProperties: false,
       }),
       is_promotion_active: t.Union([t.Literal("asc"), t.Literal("desc")], {
+        additionalProperties: false,
+      }),
+      quantity_limit: t.Union([t.Literal("asc"), t.Literal("desc")], {
+        additionalProperties: false,
+      }),
+      quantity_sold: t.Union([t.Literal("asc"), t.Literal("desc")], {
         additionalProperties: false,
       }),
     },

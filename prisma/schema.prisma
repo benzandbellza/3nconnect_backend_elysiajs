@@ -119,6 +119,7 @@ model customer_address {
   post_code       String?
   set_default     Boolean?
   order_billing   order_billing[]
+  IM              IM[]
 
   @@schema("3nconnect")
 }
@@ -208,6 +209,7 @@ model gift_voucher {
   gift_voucher_campaign_voucher gift_voucher_campaign_voucher[]
   gift_voucher_generic          gift_voucher_generic[]
   gift_voucher_redeem_code      gift_voucher_redeem_code[]
+  customervoucher               customervoucher[]
 
   @@schema("3nconnect")
 }
@@ -1110,51 +1112,53 @@ model ConversationMemory {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model IM {
-  id                          Int                @id @default(autoincrement())
-  created_at                  DateTime           @default(now()) @db.Timestamptz(6)
-  docid                       String             @unique(map: "IM_io_id_key")
+  id                          Int                       @id @default(autoincrement())
+  created_at                  DateTime                  @default(now()) @db.Timestamptz(6)
+  docid                       String                    @unique(map: "IM_io_id_key")
   customer                    String?
   note                        String?
-  create_by                   String?            @db.Uuid
+  create_by                   String?                   @db.Uuid
   status                      String?
   im                          String?
   customer_name               String?
   tel                         String?
-  updated_at                  DateTime?          @default(now()) @db.Timestamptz(6)
+  updated_at                  DateTime?                 @default(now()) @db.Timestamptz(6)
   update_by                   String?
   history                     Json?
   type                        String?
-  delivery_address_id         String?            @db.Uuid
+  delivery_address_id         String?                   @db.Uuid
   invoice_id                  Int?
   shipping_address            String?
-  has_fifo_violation          Boolean?           @default(false)
+  has_fifo_violation          Boolean?                  @default(false)
   price_valid_days            String?
   delivery_days               String?
   payment_days                String?
-  customeruser_id             String?            @db.Uuid
+  customeruser_id             String?                   @db.Uuid
   prefix                      String?
-  need_smapprove              Boolean?           @default(false)
+  need_smapprove              Boolean?                  @default(false)
   sopt_id                     Int?
   payment_status              String?
-  log_payment                 DateTime?          @db.Timestamptz(6)
-  order_uuid                  String?            @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  log_payment                 DateTime?                 @db.Timestamptz(6)
+  order_uuid                  String?                   @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   company_id                  Int?
   shipping_cost               Float?
   admin_verify_status         String?
   payment_invoice_no          String?
   credit_terms_day            Int?
   is_admin_order_created      Boolean?
-  admin_updated_at            DateTime?          @db.Timestamptz(6)
+  admin_updated_at            DateTime?                 @db.Timestamptz(6)
   shipping_address_id         Int?
-  order_created_by            String?            @db.Uuid
+  order_created_by            String?                   @db.Uuid
   payment_method_type         String?
   customer_invoice_address_id Int?
-  is_review_completed         Boolean?           @default(false)
-  users                       public_users?      @relation(fields: [create_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  customeruser                customeruser?      @relation(fields: [customeruser_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  customer_delivery           customer_delivery? @relation(fields: [delivery_address_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  invoicehead                 invoicehead?       @relation(fields: [invoice_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  sopt_head                   sopt_head?         @relation(fields: [sopt_id], references: [id], onDelete: Cascade)
+  is_review_completed         Boolean?                  @default(false)
+  users                       public_users?             @relation(fields: [create_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  customeruser                customeruser?             @relation(fields: [customeruser_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  customer_delivery           customer_delivery?        @relation(fields: [delivery_address_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  invoicehead                 invoicehead?              @relation(fields: [invoice_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  customer_address            customer_address?         @relation(fields: [shipping_address_id], references: [id], onDelete: Cascade)
+  sopt_head                   sopt_head?                @relation(fields: [sopt_id], references: [id], onDelete: Cascade)
+  customer_invoice_address    customer_invoice_address? @relation(fields: [customer_invoice_address_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "im_customer_invoice_address_id_fkey")
   im_goods                    im_goods[]
 
   @@schema("public")
@@ -1262,6 +1266,9 @@ model Productdata {
   promotion_gift_promotion_gift_trigger_product_idToProductdata promotion_gift[]         @relation("promotion_gift_trigger_product_idToProductdata")
   promotion_product                                             promotion_product[]
 
+  @@index([detail(ops: raw("gin_trgm_ops"))], map: "idx_productdata_detail_trgm", type: Gin)
+  @@index([MM_RPTMAT_MAT_Name(ops: raw("gin_trgm_ops"))], map: "idx_productdata_name_trgm", type: Gin)
+  @@index([rich_description(ops: raw("gin_trgm_ops"))], map: "idx_productdata_richdesc_trgm", type: Gin)
   @@schema("public")
 }
 
@@ -1537,9 +1544,25 @@ model bill_tracking {
   // สร้างเมื่อ DateTime? @default(now()) @map("สร้างเมื่อ") @db.Timestamptz(6)
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   note               String?
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // สิ่งที่แนบมา String? @map("สิ่งที่แนบมา")
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   shipby             String?
@@ -1552,6 +1575,14 @@ model bill_tracking {
   enroll_date        String? @map("enroll date")
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // พนักงานขาย String? @map("พนักงานขาย")
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   REFDOC             String?
@@ -2058,6 +2089,7 @@ model customernoti {
   target_tag_date_to                    DateTime?            @db.Date
   click_tag_ids                         Json?                @default("[]")
   send_mode                             String               @default("immediate")
+  target_channel_config_ids             String[]             @db.Uuid
   tags_customernoti_click_tag_idTotags  tags?                @relation("customernoti_click_tag_idTotags", fields: [click_tag_id], references: [id], onUpdate: NoAction)
   customer_segment                      customer_segment?    @relation(fields: [segment_id], references: [id], onUpdate: NoAction)
   customer_group                        customer_group?      @relation(fields: [target_customer_group_id], references: [id], onUpdate: NoAction)
@@ -2071,14 +2103,22 @@ model customernoti {
 }
 
 model customerseminar {
-  id              Int          @id @default(autoincrement())
-  customeruser_id String       @db.Uuid
-  seminar_uuid    String       @db.Uuid
-  seminar_dwid    String
-  registered_at   DateTime?    @default(now()) @db.Timestamp(6)
-  status          String?      @default("registered")
-  company         String?
-  customeruser    customeruser @relation(fields: [customeruser_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id               Int          @id @default(autoincrement())
+  customeruser_id  String       @db.Uuid
+  seminar_uuid     String       @db.Uuid
+  seminar_dwid     String
+  registered_at    DateTime?    @default(now()) @db.Timestamp(6)
+  status           String?      @default("registered")
+  company          String?
+  title            String?
+  image_url        String?
+  event_start_date DateTime?    @db.Timestamptz(6)
+  event_end_date   DateTime?    @db.Timestamptz(6)
+  answers          Json?
+  location         String?
+  description      String?
+  organizer        String?
+  customeruser     customeruser @relation(fields: [customeruser_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([customeruser_id, seminar_dwid])
   @@index([customeruser_id], map: "idx_customerseminar_user")
@@ -2087,19 +2127,19 @@ model customerseminar {
 }
 
 model customeruser {
-  id                        String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  authid                    String?                   @unique @default(dbgenerated("auth.uid()")) @db.Uuid
-  member_id                 String?                   @unique(map: "customeruser_idno_key")
-  created_at                DateTime                  @default(now()) @db.Timestamptz(6)
+  id                        String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  authid                    String?                    @unique @default(dbgenerated("auth.uid()")) @db.Uuid
+  member_id                 String?                    @unique(map: "customeruser_idno_key")
+  created_at                DateTime                   @default(now()) @db.Timestamptz(6)
   prefix                    String?
   namesurname               String?
   email                     String?
   tel                       String?
   pdpa_accepted             Boolean?
-  pdpa_accepted_at          DateTime?                 @db.Timestamptz(6)
+  pdpa_accepted_at          DateTime?                  @db.Timestamptz(6)
   pdpa_version              String?
   gender                    String?
-  birthday                  DateTime?                 @db.Date
+  birthday                  DateTime?                  @db.Date
   home_address_line1        String?
   home_address_line2        String?
   home_sub_district         String?
@@ -2134,7 +2174,7 @@ model customeruser {
   department                String?
   knowform                  String?
   referred_by               String?
-  uninstalled_at            DateTime?                 @db.Timestamptz(6)
+  uninstalled_at            DateTime?                  @db.Timestamptz(6)
   line_user_id              String?
   facebook_psid             String?
   source                    String?
@@ -2154,9 +2194,10 @@ model customeruser {
   customer_tax_invoices     customer_tax_invoices[]
   customer_tier             customer_tier?
   customerevent             customerevent[]
+  customerexternalactivity  customerexternalactivity[]
   customerseminar           customerseminar[]
-  users                     auth_users?               @relation(fields: [authid], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  referral_settings         referral_settings?        @relation(fields: [referral_campaign_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users                     auth_users?                @relation(fields: [authid], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  referral_settings         referral_settings?         @relation(fields: [referral_campaign_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   customeruser_users        customeruser_users[]
   customervoucher           customervoucher[]
   email_logs                email_logs[]
@@ -2197,8 +2238,10 @@ model customervoucher {
   use_detail          String?
   used_at             DateTime?            @db.Date
   voucherid           String               @unique
+  gift_voucher_id     Int?
   booth_game_sessions booth_game_sessions?
   customeruser        customeruser?        @relation(fields: [customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  gift_voucher        gift_voucher?        @relation(fields: [gift_voucher_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   voucher             voucher?             @relation(fields: [voucher_id], references: [id], onDelete: Cascade)
 
   @@schema("public")
@@ -2721,6 +2764,7 @@ model noti_read_log {
   customernoti customernoti @relation(fields: [noti_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   users        auth_users?  @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
+  @@unique([noti_id, user_id, event_type], map: "noti_read_log_unique_event")
   @@index([noti_id], map: "noti_read_log_noti_idx")
   @@schema("public")
 }
@@ -3052,6 +3096,7 @@ model public_products {
   product_categories     public_product_categories?      @relation(fields: [category_id], references: [id], onDelete: Cascade)
   companies              public_companies?               @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
+  @@index([product_name(ops: raw("gin_trgm_ops"))], map: "idx_products_name_trgm", type: Gin)
   @@map("products")
   @@schema("public")
 }
@@ -3129,6 +3174,7 @@ model public_promotion {
   promotion_bundle_deal_get_products      public_promotion_bundle_deal_get_products[]
   promotion_bundle_deal_grand_total_tiers promotion_bundle_deal_grand_total_tiers[]
   promotion_claim_history                 promotion_claim_history[]
+  promotion_clearance_products            promotion_clearance_products[]
   promotion_discount_products             public_promotion_discount_products[]
   promotion_extra_points_products         public_promotion_extra_points_products[]
   promotion_extra_points_tier_rules       promotion_extra_points_tier_rules[]
@@ -3656,10 +3702,13 @@ model social_messages {
   post_id              String?
   post_snippet         String?
   is_internal          Boolean               @default(false)
+  product_id           Int?
+  product_snapshot     Json?
   social_conversations social_conversations? @relation(fields: [conversation_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([conversation_id], map: "idx_social_messages_conversation")
   @@index([created_at], map: "idx_social_messages_created")
+  @@index([product_id], map: "idx_social_messages_product_id", where: raw("(product_id IS NOT NULL)"))
   @@schema("public")
 }
 
@@ -3983,32 +4032,35 @@ model public_users {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model voucher {
-  id                      Int                       @id @default(autoincrement())
-  created_at              DateTime                  @default(now()) @db.Timestamptz(6)
-  name                    String?
-  detail                  String?
-  pic                     String?
-  condition               String?
-  tier                    String?
-  voucherpic              String?
-  type                    String                    @default("amount")
-  discount_value          Decimal                   @default(0) @db.Decimal
-  max_discount            Decimal?                  @db.Decimal
-  min_order               Decimal?                  @default(0) @db.Decimal
-  combinable              Boolean                   @default(false)
-  status                  Boolean                   @default(true)
-  startdate               DateTime?                 @db.Timestamptz(6)
-  enddate                 DateTime?                 @db.Timestamptz(6)
-  discount_type           String?
-  usage_limit             String?
-  redemption_method       String?
-  unlocks_game            String?
-  customernoti            customernoti[]
-  customervoucher         customervoucher[]
-  order                   order[]
-  promotion               public_promotion[]
-  promotion_claim_history promotion_claim_history[]
-  promotion_voucher       promotion_voucher[]
+  id                            Int                       @id @default(autoincrement())
+  created_at                    DateTime                  @default(now()) @db.Timestamptz(6)
+  name                          String?
+  detail                        String?
+  pic                           String?
+  condition                     String?
+  tier                          String?
+  voucherpic                    String?
+  type                          String                    @default("amount")
+  discount_value                Decimal                   @default(0) @db.Decimal
+  max_discount                  Decimal?                  @db.Decimal
+  min_order                     Decimal?                  @default(0) @db.Decimal
+  combinable                    Boolean                   @default(false)
+  status                        Boolean                   @default(true)
+  startdate                     DateTime?                 @db.Timestamptz(6)
+  enddate                       DateTime?                 @db.Timestamptz(6)
+  discount_type                 String?
+  usage_limit                   String?
+  redemption_method             String?
+  unlocks_game                  String?
+  is_accept_overlapse_promotion Boolean?
+  event_trigger                 String?
+  tier_trigger_name             String?
+  customernoti                  customernoti[]
+  customervoucher               customervoucher[]
+  order                         order[]
+  promotion                     public_promotion[]
+  promotion_claim_history       promotion_claim_history[]
+  promotion_voucher             promotion_voucher[]
 
   @@schema("public")
 }
@@ -4152,6 +4204,7 @@ model customer_invoice_address {
   set_default     Boolean?
   invoicehead_id  Int?
   invoicehead     invoicehead? @relation(fields: [invoicehead_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  IM              IM[]
 
   @@schema("3nconnect")
 }
@@ -4210,11 +4263,12 @@ model report_inventory_snapshot {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model report_recipients {
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email      String   @unique
-  name       String?
-  active     Boolean  @default(true)
-  created_at DateTime @default(now()) @db.Timestamptz(6)
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email        String   @unique
+  name         String?
+  active       Boolean  @default(true)
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+  report_types String[] @default(["executive", "daily_bill"])
 
   @@schema("public")
 }
@@ -4427,18 +4481,62 @@ model social_channel_visibility {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model promotion_clearance_products {
-  id                BigInt                 @id @default(autoincrement())
-  promotion_id      BigInt
+  id                Int                    @id @default(autoincrement())
+  promotion_id      Int?
   product_option_id Int
-  stock_source      String
-  stock_row_id      BigInt
+  stock_source      String?
+  mat_unit_identity String?
   mr_code           String
-  sale_price        Decimal?               @db.Decimal
-  sale_percent      Decimal?               @db.Decimal
+  sale_price        Float?
+  sale_percent      Float?
   created_at        DateTime               @default(now()) @db.Timestamptz(6)
+  lot               String?
+  location_code     String?
   product_options   public_product_options @relation(fields: [product_option_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  promotion         public_promotion?      @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@unique([promotion_id, stock_source, stock_row_id])
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model product_embeddings {
+  productdata_id Int                   @id
+  embedding      Unsupported("vector")
+  updated_at     DateTime              @default(now()) @db.Timestamptz(6)
+
+  @@index([embedding], map: "idx_product_embeddings_vector")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model product_search_synonyms {
+  id         BigInt   @id @default(autoincrement())
+  term       String
+  synonym    String
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([term, synonym])
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model customerexternalactivity {
+  id               String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  customeruser_id  String       @db.Uuid
+  activity_uuid    String       @db.Uuid
+  activity_id      String
+  registered_at    DateTime     @default(now()) @db.Timestamptz(6)
+  title            String?
+  image_url        String?
+  event_start_date DateTime?    @db.Timestamptz(6)
+  event_end_date   DateTime?    @db.Timestamptz(6)
+  location         String?
+  description      String?
+  organizer        String?
+  customeruser     customeruser @relation(fields: [customeruser_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([customeruser_id], map: "customerexternalactivity_customeruser_idx")
+  @@index([activity_uuid], map: "customerexternalactivity_uuid_idx")
   @@schema("public")
 }
 
@@ -4539,6 +4637,8 @@ view vw_flashsale_products_list {
   url_image           String?
   promotion_id        Int?
   is_promotion_active Boolean?
+  quantity_limit      Int?
+  quantity_sold       Int?
 
   @@schema("3nconnect")
 }
@@ -4728,6 +4828,8 @@ view vw_promotion_products_index {
   is_pre_order                  Boolean?
   company_name                  String?
   company_id                    Int?
+  quantity_limit                Int?
+  quantity_sold                 Int?
 
   @@schema("3nconnect")
 }

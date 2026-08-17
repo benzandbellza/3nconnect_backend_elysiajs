@@ -36,7 +36,17 @@ SELECT
   p.is_online_active,
   p.is_pre_order,
   com.name AS company_name,
-  com.id AS company_id
+  com.id AS company_id,
+  COALESCE(
+    flash_sale_table.quantity_limit,
+    discount_table.quantity_limit,
+    NULL :: integer
+  ) AS quantity_limit,
+  COALESCE(
+    flash_sale_table.quantity_sold,
+    discount_table.quantity_sold,
+    0
+  ) AS quantity_sold
 FROM
   (
     (
@@ -58,7 +68,9 @@ FROM
               pfp.product_option_id,
               pfp.sale_price,
               pfp.sale_percent,
-              p_1.is_accept_overlapse_promotion
+              p_1.is_accept_overlapse_promotion,
+              pfp.quantity_limit,
+              pfp.quantity_sold
             FROM
               (
                 promotion p_1
@@ -66,7 +78,7 @@ FROM
               )
             WHERE
               (
-                (p_1.type = 'flash_sale' :: text)
+                (p_1.subtype = 'flash_sale' :: text)
                 AND (p_1.startdate <= NOW())
                 AND (p_1.enddate >= NOW())
                 AND (p_1.status = TRUE)
@@ -80,7 +92,9 @@ FROM
             pdp.product_option_id,
             pdp.sale_price,
             pdp.sale_percent,
-            p_1.is_accept_overlapse_promotion
+            p_1.is_accept_overlapse_promotion,
+            NULL :: integer AS quantity_limit,
+            0 AS quantity_sold
           FROM
             (
               promotion p_1
@@ -88,7 +102,7 @@ FROM
             )
           WHERE
             (
-              (p_1.type = 'discount' :: text)
+              (p_1.subtype = 'discount' :: text)
               AND (p_1.startdate <= NOW())
               AND (p_1.enddate >= NOW())
               AND (p_1.status = TRUE)

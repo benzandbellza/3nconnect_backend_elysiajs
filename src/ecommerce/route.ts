@@ -14,21 +14,6 @@ import { GoTrueAdminApi, GoTrueClient } from "@supabase/supabase-js";
 const now: Date = new Date();
 // const utc7: Date = new Date(now.getTime() + 7 * 60 * 60 * 1000);
 
-const parseNullableDate = (value?: string | null) => {
-  if (!value || value === "-" || value === "0") return null;
-
-  const slashDateMatch = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value);
-  if (slashDateMatch) {
-    const [, dd, mm, yyyy] = slashDateMatch;
-    const christianYear =
-      Number(yyyy) > 2400 ? Number(yyyy) - 543 : Number(yyyy);
-    return new Date(`${christianYear}-${mm}-${dd}`);
-  }
-
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date;
-};
-
 const parseNullableDateTime = (value?: string | null) => {
   if (!value || value === "-" || value === "0") return null;
 
@@ -2787,6 +2772,55 @@ export const ecommerceRoute = new Elysia({
       },
     },
   )
+  .post(
+    "/stock-inventory",
+    async({ headers, set, body}) => {
+      try {
+        const { lot, location_id, invoice_id_mat_in } = body;
+        const response = await prisma.vw_planetone_stocks.findFirst({
+          where: {
+            Lot: lot,
+            location_id: location_id,
+            invoice_id_mat_in: invoice_id_mat_in
+          },
+          select: {
+            qty_total: true,
+          }
+        })
+        if(!response){
+          set.status = 404
+          return { message: "Failed to get stock inventory by information" }
+        }
+
+        return { lot_quantity: response.qty_total };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching inventory stocks:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        lot: t.String(),
+        location_id: t.String(),
+        invoice_id_mat_in: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Inventory Stocks - Find by information",
+        description: `
+          This endpoint retrieves all inventory stocks in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
   .get(
     "/attribute-groups",
     async ({ headers, set }) => {
@@ -3350,6 +3384,7 @@ export const ecommerceRoute = new Elysia({
             product_option_id: item.product_option_id,
             sale_price: item.sale_price,
             sale_percent: item.sale_percent,
+            quantity_limit: item.quantity_limit,
           }))
         });
 
@@ -3379,6 +3414,7 @@ export const ecommerceRoute = new Elysia({
           product_option_id: t.Number(),
           sale_price: t.Number(),
           sale_percent: t.Number(),
+          quantity_limit: t.Number(),
         })),
       }),
       detail: {
@@ -3449,6 +3485,7 @@ export const ecommerceRoute = new Elysia({
             product_option_id: item.product_option_id,
             sale_price: item.sale_price,
             sale_percent: item.sale_percent,
+            quantity_limit: item.quantity_limit,
           })),
         });
 
@@ -3479,6 +3516,7 @@ export const ecommerceRoute = new Elysia({
           product_option_id: t.Number(),
           sale_price: t.Number(),
           sale_percent: t.Number(),
+          quantity_limit: t.Number(),
         })),
       }),
       params: t.Object({
@@ -3533,6 +3571,325 @@ export const ecommerceRoute = new Elysia({
         summary: "Promotions Flash Sale - Delete",
         description: `
           This endpoint deletes an existing flash sale promotion in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    }
+  )
+  .get(
+    "/promotions/clearance/:promotion_id",
+    async ({ headers, params, set }) => {
+      try {
+        const { promotion_id } = params;
+        const response = await prisma.public_promotion.findUnique({
+          where: {
+            id: promotion_id,
+          },
+          select: {
+            banner: true,
+            url_image: true,
+            promotion_image: true,
+            promotion_name: true,
+            promotion_description: true,
+            promotion_type: true,
+            subtype: true,
+            promotion_start: true,
+            promotion_end: true,
+            is_active: true,
+            is_accept_overlapse_promotion: true,
+            promotion_clearance_products: {
+              select: {
+                product_option_id: true,
+                stock_source: true,
+                mat_unit_identity: true,
+                location_code: true,
+                lot: true,
+                mr_code: true,
+                sale_price: true,
+                sale_percent: true,
+              },
+            },
+          },
+        });
+
+        if (!response) {
+          set.status = 404;
+          return { message: "Clearance sale promotion not found" };
+        }
+        return response;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching clearance sale promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      params: t.Object({
+        promotion_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions Clearance Sale - GET By Promotion ID",
+        description: `
+          This endpoint retrieves the details of a Clearance Sale promotion in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    },
+  )
+  .post(
+    "/promotions/clearance",
+    async({ headers, body, set }) => {
+      try {
+        const {
+          url_image,
+          promotion_name,
+          promotion_description,
+          promotion_start,
+          promotion_end,
+          is_accept_overlapse_promotion,
+          items
+        } = body;
+
+        const response = await prisma.public_promotion.create({
+          data: {
+            url_image: url_image ?? null,
+            banner: url_image ?? null,
+            promotion_name: promotion_name,
+            promotion_description: promotion_description,
+            promotion_type: 'product',
+            subtype: 'clearance_sale',
+            promotion_start: promotion_start,
+            promotion_end: promotion_end,
+            is_accept_overlapse_promotion: is_accept_overlapse_promotion,
+            is_active: true,
+            created_at: now,
+          },
+          select: {
+            id: true,
+          }
+        });
+
+        if (!response) {
+          set.status = 400;
+          return { message: "Failed to create clearance sale promotion" };
+        }
+        const promotionId = response.id;
+        
+        await prisma.promotion_clearance_products.createMany({
+          data: items.map((item: any) => ({
+            promotion_id: promotionId,
+            product_option_id: item.product_option_id,
+            stock_source: item.company_name === "Gibthai" ? "gibstock" : item.company_name === "Lab Leader" ? "lableaderstock" : "biodesignstock",
+            mat_unit_identity: item.sku,
+            mr_code: item.invoice_id_mat_in,
+            sale_price: item.sale_price,
+            sale_percent: item.sale_percent,
+            location_code: item.localtion_code,
+            lot: item.lot_code
+          }))
+        });
+
+        return { message: "Clearance sale promotion created successfully" };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error creating clearance sale promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        url_image: t.Any(),
+        promotion_description: t.Any(),
+        promotion_end: t.Date(),
+        is_accept_overlapse_promotion: t.Boolean(),
+        is_active: t.Boolean(),
+        promotion_start: t.Date(),
+        promotion_name: t.String(),
+        promotion_type: t.String(),
+        items: t.Array(
+          t.Object({
+            company_name: t.String(),
+            invoice_id_mat_in : t.String(),
+            sale_percent: t.Number(),
+            localtion_code: t.String(),
+            lot_code: t.String(),
+            product_option_id: t.Number(),
+            product_owner: t.String(),
+            sale_price: t.Number(),
+            sku: t.String(),
+            stock_age: t.Any(),
+          })
+        ) 
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions Clearance Sale - Create",
+        description: `
+          This endpoint creates a new clearance sale promotion in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    }
+  )
+  .put(
+    "/promotions/clearance/:promotion_id",
+    async({ headers, body, params, set }) => {
+      try {
+        const { promotion_id } = params;
+        const {
+          url_image,
+          promotion_name,
+          promotion_description,
+          promotion_start,
+          promotion_end,
+          is_active,
+          is_accept_overlapse_promotion,
+          items
+        } = body;
+
+        const response = await prisma.public_promotion.update({
+          where: {
+            id: promotion_id,
+          },
+          data: {
+            url_image: url_image ?? null,
+            banner: url_image ?? null,
+            promotion_name: promotion_name,
+            promotion_description: promotion_description,
+            promotion_start: promotion_start,
+            promotion_end: promotion_end,
+            is_active: is_active,
+            is_accept_overlapse_promotion: is_accept_overlapse_promotion,
+            updated_at: now,
+          },
+        });
+
+        if (!response) {
+          set.status = 400;
+          return { message: "Failed to update clearance sale promotion" };
+        }
+
+        await prisma.promotion_clearance_products.deleteMany({
+          where: {
+            promotion_id: promotion_id,
+          },
+        });
+
+        await prisma.promotion_clearance_products.createMany({
+          data: items.map((item: any) => ({
+            promotion_id: promotion_id,
+            product_option_id: item.product_option_id,
+            stock_source: item.company_name === "Gibthai" ? "gibstock" : item.company_name === "Lab Leader" ? "lableaderstock" : "biodesignstock",
+            mat_unit_identity: item.sku,
+            mr_code: item.invoice_id_mat_in,
+            sale_price: item.sale_price,
+            sale_percent: item.sale_percent,
+            location_code: item.localtion_code,
+            lot: item.lot_code
+          }))
+        });
+
+        return { message: "Clearance sale promotion updated successfully" };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error updating clearance sale promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        url_image: t.Any(),
+        promotion_description: t.Any(),
+        promotion_end: t.Date(),
+        is_accept_overlapse_promotion: t.Boolean(),
+        is_active: t.Boolean(),
+        promotion_start: t.Date(),
+        promotion_name: t.String(),
+        promotion_type: t.String(),
+        items: t.Array(
+          t.Object({
+            company_name: t.String(),
+            invoice_id_mat_in : t.String(),
+            sale_percent: t.Number(),
+            localtion_code: t.String(),
+            lot_code: t.String(),
+            product_option_id: t.Number(),
+            sale_price: t.Number(),
+            sku: t.String(),
+            stock_age: t.Any(),
+          })
+        ),
+      }),
+      params: t.Object({
+        promotion_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions Flash Sale - Update",
+        description: `
+          This endpoint updates an existing flash sale promotion in the 3NConnect.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+        // you can also add `deprecated`, `security`, etc.
+      },
+    }
+  )
+  .delete(
+    "/promotions/clearance/:promotion_id",
+    async({ params, set }) => {
+      try {
+        const { promotion_id } = params;
+
+        const response = await prisma.public_promotion.delete({
+          where: {
+            id: promotion_id,
+          },
+        });
+
+        if (!response) {
+          set.status = 404;
+          return { message: "Clearance sale promotion not found" };
+        }
+
+        return { message: "Clearance sale promotion deleted successfully" };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error deleting clearance sale promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      params: t.Object({
+        promotion_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions Clearance Sale - Delete",
+        description: `
+          This endpoint deletes an existing clearance sale promotion in the 3NConnect.
         `.trim(),
         security: [{ bearerAuth: [] }],
         tags: ["3NConnect"],
@@ -6811,6 +7168,7 @@ export const ecommerceRoute = new Elysia({
             }
           },
           select: {
+            company_name: true,
             Lot: true,
             location_id: true,
             purchaser_personnel: true,

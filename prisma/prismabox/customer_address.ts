@@ -63,6 +63,57 @@ export const customer_addressRelations = t.Object(
       ),
       { additionalProperties: false },
     ),
+    IM: t.Array(
+      t.Object(
+        {
+          id: t.Integer(),
+          created_at: t.Date(),
+          docid: t.String(),
+          customer: __nullable__(t.String()),
+          note: __nullable__(t.String()),
+          create_by: __nullable__(t.String()),
+          status: __nullable__(t.String()),
+          im: __nullable__(t.String()),
+          customer_name: __nullable__(t.String()),
+          tel: __nullable__(t.String()),
+          updated_at: __nullable__(t.Date()),
+          update_by: __nullable__(t.String()),
+          history: __nullable__(t.Any()),
+          type: __nullable__(t.String()),
+          delivery_address_id: __nullable__(t.String()),
+          invoice_id: __nullable__(t.Integer()),
+          shipping_address: __nullable__(t.String()),
+          has_fifo_violation: __nullable__(t.Boolean()),
+          price_valid_days: __nullable__(t.String()),
+          delivery_days: __nullable__(t.String()),
+          payment_days: __nullable__(t.String()),
+          customeruser_id: __nullable__(t.String()),
+          prefix: __nullable__(t.String()),
+          need_smapprove: __nullable__(t.Boolean()),
+          sopt_id: __nullable__(t.Integer()),
+          payment_status: __nullable__(t.String()),
+          log_payment: __nullable__(t.Date()),
+          order_uuid: __nullable__(t.String()),
+          company_id: __nullable__(t.Integer()),
+          shipping_cost: __nullable__(t.Number()),
+          admin_verify_status: __nullable__(t.String()),
+          payment_invoice_no: __nullable__(t.String()),
+          credit_terms_day: __nullable__(t.Integer()),
+          is_admin_order_created: __nullable__(t.Boolean()),
+          admin_updated_at: __nullable__(t.Date()),
+          shipping_address_id: __nullable__(t.Integer()),
+          order_created_by: __nullable__(t.String()),
+          payment_method_type: __nullable__(t.String()),
+          customer_invoice_address_id: __nullable__(t.Integer()),
+          is_review_completed: __nullable__(t.Boolean()),
+        },
+        {
+          additionalProperties: false,
+          description: `This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments`,
+        },
+      ),
+      { additionalProperties: false },
+    ),
   },
   {
     additionalProperties: false,
@@ -128,6 +179,22 @@ export const customer_addressRelationsInputCreate = t.Object(
         { additionalProperties: false },
       ),
     ),
+    IM: t.Optional(
+      t.Object(
+        {
+          connect: t.Array(
+            t.Object(
+              {
+                id: t.Integer({ additionalProperties: false }),
+              },
+              { additionalProperties: false },
+            ),
+            { additionalProperties: false },
+          ),
+        },
+        { additionalProperties: false },
+      ),
+    ),
   },
   {
     additionalProperties: false,
@@ -139,6 +206,31 @@ export const customer_addressRelationsInputUpdate = t.Partial(
   t.Object(
     {
       order_billing: t.Partial(
+        t.Object(
+          {
+            connect: t.Array(
+              t.Object(
+                {
+                  id: t.Integer({ additionalProperties: false }),
+                },
+                { additionalProperties: false },
+              ),
+              { additionalProperties: false },
+            ),
+            disconnect: t.Array(
+              t.Object(
+                {
+                  id: t.Integer({ additionalProperties: false }),
+                },
+                { additionalProperties: false },
+              ),
+              { additionalProperties: false },
+            ),
+          },
+          { additionalProperties: false },
+        ),
+      ),
+      IM: t.Partial(
         t.Object(
           {
             connect: t.Array(
@@ -276,6 +368,7 @@ export const customer_addressSelect = t.Partial(
       post_code: t.Boolean(),
       set_default: t.Boolean(),
       order_billing: t.Boolean(),
+      IM: t.Boolean(),
       _count: t.Boolean(),
     },
     {
@@ -287,7 +380,7 @@ export const customer_addressSelect = t.Partial(
 
 export const customer_addressInclude = t.Partial(
   t.Object(
-    { order_billing: t.Boolean(), _count: t.Boolean() },
+    { order_billing: t.Boolean(), IM: t.Boolean(), _count: t.Boolean() },
     {
       additionalProperties: false,
       description: `This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.`,

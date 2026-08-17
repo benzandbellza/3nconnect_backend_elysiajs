@@ -23,7 +23,7 @@ WITH temp_products_option AS (
     )
 )
 SELECT
-  p.type AS promotion_type,
+  p.subtype AS promotion_type,
   p.proname AS promotion_name,
   get_option_products_table.company_name AS get_company_name,
   get_option_products_table.brand_name AS get_brand_name,
@@ -64,4 +64,4 @@ FROM
     )
   )
 WHERE
-  (p.type = 'bundle_deal_get_x_free_y' :: text);
+  (p.subtype = 'bundle_deal_get_x_free_y' :: text);

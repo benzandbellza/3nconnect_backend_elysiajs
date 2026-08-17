@@ -24,6 +24,8 @@ export const vw_promotion_products_indexPlain = t.Object(
     is_pre_order: __nullable__(t.Boolean()),
     company_name: __nullable__(t.String()),
     company_id: __nullable__(t.Integer()),
+    quantity_limit: __nullable__(t.Integer()),
+    quantity_sold: __nullable__(t.Integer()),
   },
   { additionalProperties: false },
 );
@@ -49,6 +51,8 @@ export const vw_promotion_products_indexPlainInputCreate = t.Object(
     is_online_active: t.Optional(__nullable__(t.Boolean())),
     is_pre_order: t.Optional(__nullable__(t.Boolean())),
     company_name: t.Optional(__nullable__(t.String())),
+    quantity_limit: t.Optional(__nullable__(t.Integer())),
+    quantity_sold: t.Optional(__nullable__(t.Integer())),
   },
   { additionalProperties: false },
 );
@@ -71,6 +75,8 @@ export const vw_promotion_products_indexPlainInputUpdate = t.Object(
     is_online_active: t.Optional(__nullable__(t.Boolean())),
     is_pre_order: t.Optional(__nullable__(t.Boolean())),
     company_name: t.Optional(__nullable__(t.String())),
+    quantity_limit: t.Optional(__nullable__(t.Integer())),
+    quantity_sold: t.Optional(__nullable__(t.Integer())),
   },
   { additionalProperties: false },
 );
@@ -112,6 +118,8 @@ export const vw_promotion_products_indexWhere = t.Partial(
           is_pre_order: t.Boolean(),
           company_name: t.String(),
           company_id: t.Integer(),
+          quantity_limit: t.Integer(),
+          quantity_sold: t.Integer(),
         },
         { additionalProperties: false },
       ),
@@ -164,6 +172,8 @@ export const vw_promotion_products_indexWhereUnique = t.Recursive(
               is_pre_order: t.Boolean(),
               company_name: t.String(),
               company_id: t.Integer(),
+              quantity_limit: t.Integer(),
+              quantity_sold: t.Integer(),
             },
             { additionalProperties: false },
           ),
@@ -195,6 +205,8 @@ export const vw_promotion_products_indexSelect = t.Partial(
       is_pre_order: t.Boolean(),
       company_name: t.Boolean(),
       company_id: t.Boolean(),
+      quantity_limit: t.Boolean(),
+      quantity_sold: t.Boolean(),
       _count: t.Boolean(),
     },
     { additionalProperties: false },
@@ -261,6 +273,12 @@ export const vw_promotion_products_indexOrderBy = t.Partial(
         additionalProperties: false,
       }),
       company_id: t.Union([t.Literal("asc"), t.Literal("desc")], {
+        additionalProperties: false,
+      }),
+      quantity_limit: t.Union([t.Literal("asc"), t.Literal("desc")], {
+        additionalProperties: false,
+      }),
+      quantity_sold: t.Union([t.Literal("asc"), t.Literal("desc")], {
         additionalProperties: false,
       }),
     },

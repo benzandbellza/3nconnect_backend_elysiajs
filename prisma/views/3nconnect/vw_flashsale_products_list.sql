@@ -1,5 +1,5 @@
 SELECT
-  p.type AS promotion_type,
+  p.subtype AS promotion_type,
   p.proname AS promotion_name,
   c.name AS company_name,
   b.brand_name,
@@ -33,7 +33,9 @@ SELECT
       AND (p.enddate >= NOW())
     ) THEN TRUE
     ELSE false
-  END AS is_promotion_active
+  END AS is_promotion_active,
+  pfp.quantity_limit,
+  pfp.quantity_sold
 FROM
   (
     (
@@ -55,4 +57,4 @@ FROM
     JOIN product_categories pc ON ((p2.category_id = pc.id))
   )
 WHERE
-  (p.type = 'flash_sale' :: text);
+  (p.subtype = 'flash_sale' :: text);
