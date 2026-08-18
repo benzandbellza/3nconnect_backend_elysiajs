@@ -1,5 +1,5 @@
 SELECT
-  p.id AS product_id,
+  DISTINCT p.id AS product_id,
   po.id AS product_option_id,
   t.url_image,
   p.category_hierarchy,

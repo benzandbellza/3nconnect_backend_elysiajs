@@ -4,6 +4,7 @@ import "dotenv/config";
 import { createClient } from '@supabase/supabase-js'
 import { mapPreOrderProducts, mapPublicEvents } from './public-model-mappers'
 import { buildProductCategoryTree } from './product-category-tree'
+import { ObjectEnumValue } from "@prisma/client/runtime/client";
 
 const now: Date = new Date();
 
@@ -123,6 +124,95 @@ export const publicRoute = new Elysia({
         tags: ["Publics"],
       },
     },    
+  )
+  .get(
+    "/products/clearance-sale",
+    async ({ set }) => {
+      try { 
+        const clearance_detail = await prisma.public_promotion.findFirst({
+          where: {
+            subtype: 'clearance_sale',
+            is_active: true,
+            promotion_start: {
+              lte: now
+            },
+            promotion_end: {
+              gte: now
+            },
+          },
+          select: {
+            id: true,
+            promotion_name: true,
+            promotion_start: true,
+            promotion_end: true,
+            banner: true,
+          }
+        });
+
+        if(!clearance_detail){
+          return {
+            success: true,
+            message: 'No active clearance sale',
+            data: {
+              detail: null,
+              products: []
+            }
+          }
+        }
+        
+        const promotion_id = clearance_detail?.id;
+        const clearance_products = await prisma.vw_promotion_products_index.findMany({
+          where: {
+            promotion_id: promotion_id,
+            promotion_type: 'clearance_sale'
+          },
+          select:{
+            product_option_id: true,
+            product_name: true,
+            unit: true,
+            online_price: true,
+            sale_price: true,
+            sale_percent: true,
+            url_image: true,
+            mat_identity: true,
+            is_accept_overlapse_promotion: true,
+            promotion_type: true,
+            option_name: true,
+            quantity_limit: true,
+            quantity_sold: true,
+          },
+          orderBy: {
+            sale_percent: 'desc'
+          }
+        });
+
+        return {
+          success: true,
+          message: 'Clearance sale products',
+          data: {
+            detail: clearance_detail,
+            products: clearance_products
+          }
+        }
+      } catch (error) {
+        set.status = 500
+        return {
+          success: false,
+          message: 'Internal server error'
+        }
+      }
+    },
+    {
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Products - Clearance Sale",
+        description: `
+          This endpoint gets clearance sale products.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["Publics"],
+      },
+    }
   )
   .get(
     "/products/flashsale",
@@ -445,7 +535,7 @@ export const publicRoute = new Elysia({
         const response = await prisma.public_products.findFirst({
           where: {
             id: productId,
-          },
+          }, 
           select: {
             id: true,
             product_name: true,
@@ -559,7 +649,7 @@ export const publicRoute = new Elysia({
         console.error("Error fetching product:", error);
         return { message: errorMessage };
       }
-    },
+    }, 
     {
       params: t.Object({
         product_option_id: t.Number(),
@@ -711,7 +801,7 @@ export const publicRoute = new Elysia({
     },
   )
   .post(
-    "mycart-information",
+    "/mycart-information",
     async ({ body, set }) => {
       try{
         const { products } = body;
@@ -737,6 +827,7 @@ export const publicRoute = new Elysia({
               option_name: true,
               is_accept_overlapse_promotion: true,
               is_pre_order: true,
+              quantity_limit: true,
             }
           });
 
@@ -769,11 +860,12 @@ export const publicRoute = new Elysia({
               stock_qty: stock_qty,
               company_name: findPromotionProducts.company_name,
               company_id: findPromotionProducts.company_id,
+              quantity_limit: findPromotionProducts.quantity_limit,
               get_x_free_y: [] as Array<any>,
               extra_points: 1 as number, // สมมติว่ามีการให้คะแนนสะสมพิเศษสำหรับโปรโมชั่นนี้
             }
             // เข้าร่วมรายการ Flash Sale หรือ Discount
-            if(findPromotionProducts.promotion_type === 'flash_sale' || findPromotionProducts.promotion_type === 'discount'){
+            if(findPromotionProducts.promotion_type === 'flash_sale' || findPromotionProducts.promotion_type === 'discount' || findPromotionProducts.promotion_type === 'clearance_sale'){
               //  สามารถทับซ้อนกับโปรโมชั่นอื่นได้
               if(findPromotionProducts.is_accept_overlapse_promotion){
                 // ดึงข้อมูลโปรโมชั่นแบบซื้อ X แถม Y ที่สามารถทับซ้อนกับโปรโมชั่น Flash Sale หรือ Discount ได้
@@ -1567,7 +1659,7 @@ export const publicRoute = new Elysia({
         set.status = 500;
         return {message: error};
       }
-    },
+    }, 
     {
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],

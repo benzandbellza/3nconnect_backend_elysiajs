@@ -4,6 +4,7 @@ import { mapCustomerOrderItemToImGoods } from "./order-submit-mapping";
 import { allocateNextOrderNumber } from "../ecommerce/order-number";
 import { auth } from "../plugins/auth";
 import "dotenv/config";
+import { tryParse } from "elysia/type-system/utils";
 
 const now: Date = new Date();
 
@@ -766,6 +767,7 @@ export const ecommerceCustomerRoute = new Elysia({
               option_name: true,
               is_accept_overlapse_promotion: true,
               is_pre_order: true,
+              quantity_limit: true,
             }
           });
 
@@ -796,13 +798,14 @@ export const ecommerceCustomerRoute = new Elysia({
               unit: findPromotionProducts.unit ?? null,
               url_image: findPromotionProducts.url_image ?? null,
               stock_qty: stock_qty,
+              quantity_limit: findPromotionProducts.quantity_limit,
               company_name: findPromotionProducts.company_name ?? null,
               get_x_free_y: [] as Array<any>,
               extra_points: 1 as number, // สมมติว่ามีการให้คะแนนสะสมพิเศษสำหรับโปรโมชั่นนี้
               is_pre_order: findPromotionProducts.is_pre_order ?? null,
             }
             // เข้าร่วมรายการ Flash Sale หรือ Discount
-            if(findPromotionProducts.promotion_type === 'flash_sale' || findPromotionProducts.promotion_type === 'discount'){
+            if(findPromotionProducts.promotion_type === 'flash_sale' || findPromotionProducts.promotion_type === 'discount' || findPromotionProducts.promotion_type === 'clearance_subtype'){
               //  สามารถทับซ้อนกับโปรโมชั่นอื่นได้
               if(findPromotionProducts.is_accept_overlapse_promotion){
                 // ดึงข้อมูลโปรโมชั่นแบบซื้อ X แถม Y ที่สามารถทับซ้อนกับโปรโมชั่น Flash Sale หรือ Discount ได้

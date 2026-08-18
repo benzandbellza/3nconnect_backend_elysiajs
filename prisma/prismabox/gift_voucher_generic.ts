@@ -12,7 +12,7 @@ export const gift_voucher_genericPlain = t.Object(
     min_purchase: __nullable__(t.Number()),
     percent_discount: __nullable__(t.Number()),
     max_discount: __nullable__(t.Number()),
-    usage_period_day: __nullable__(t.Integer()),
+    expire_period_day: __nullable__(t.Integer()),
   },
   {
     additionalProperties: false,
@@ -71,7 +71,7 @@ export const gift_voucher_genericPlainInputCreate = t.Object(
     min_purchase: t.Optional(__nullable__(t.Number())),
     percent_discount: t.Optional(__nullable__(t.Number())),
     max_discount: t.Optional(__nullable__(t.Number())),
-    usage_period_day: t.Optional(__nullable__(t.Integer())),
+    expire_period_day: t.Optional(__nullable__(t.Integer())),
   },
   {
     additionalProperties: false,
@@ -85,7 +85,7 @@ export const gift_voucher_genericPlainInputUpdate = t.Object(
     min_purchase: t.Optional(__nullable__(t.Number())),
     percent_discount: t.Optional(__nullable__(t.Number())),
     max_discount: t.Optional(__nullable__(t.Number())),
-    usage_period_day: t.Optional(__nullable__(t.Integer())),
+    expire_period_day: t.Optional(__nullable__(t.Integer())),
   },
   {
     additionalProperties: false,
@@ -154,7 +154,7 @@ export const gift_voucher_genericWhere = t.Partial(
           min_purchase: t.Number(),
           percent_discount: t.Number(),
           max_discount: t.Number(),
-          usage_period_day: t.Integer(),
+          expire_period_day: t.Integer(),
         },
         {
           additionalProperties: false,
@@ -205,7 +205,7 @@ export const gift_voucher_genericWhereUnique = t.Recursive(
               min_purchase: t.Number(),
               percent_discount: t.Number(),
               max_discount: t.Number(),
-              usage_period_day: t.Integer(),
+              expire_period_day: t.Integer(),
             },
             { additionalProperties: false },
           ),
@@ -225,7 +225,7 @@ export const gift_voucher_genericSelect = t.Partial(
       min_purchase: t.Boolean(),
       percent_discount: t.Boolean(),
       max_discount: t.Boolean(),
-      usage_period_day: t.Boolean(),
+      expire_period_day: t.Boolean(),
       gift_voucher: t.Boolean(),
       _count: t.Boolean(),
     },
@@ -267,7 +267,7 @@ export const gift_voucher_genericOrderBy = t.Partial(
       max_discount: t.Union([t.Literal("asc"), t.Literal("desc")], {
         additionalProperties: false,
       }),
-      usage_period_day: t.Union([t.Literal("asc"), t.Literal("desc")], {
+      expire_period_day: t.Union([t.Literal("asc"), t.Literal("desc")], {
         additionalProperties: false,
       }),
     },

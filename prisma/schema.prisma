@@ -226,14 +226,14 @@ model gift_voucher_campaign_voucher {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model gift_voucher_generic {
-  id               Int           @id @default(autoincrement())
-  gift_voucher_id  Int?
-  discount_type    String?
-  min_purchase     Float?
-  percent_discount Float?
-  max_discount     Float?
-  usage_period_day Int?
-  gift_voucher     gift_voucher? @relation(fields: [gift_voucher_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id                Int           @id @default(autoincrement())
+  gift_voucher_id   Int?
+  discount_type     String?
+  min_purchase      Float?
+  percent_discount  Float?
+  max_discount      Float?
+  expire_period_day Int?
+  gift_voucher      gift_voucher? @relation(fields: [gift_voucher_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("3nconnect")
 }
@@ -1540,33 +1540,7 @@ model bill_tracking {
   dateprocess        String?
   Sx_No_             String? @map("Sx No.")
   Process            String?
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  // สร้างเมื่อ DateTime? @default(now()) @map("สร้างเมื่อ") @db.Timestamptz(6)
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   note               String?
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  // สิ่งที่แนบมา String? @map("สิ่งที่แนบมา")
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   shipby             String?
   outsource_no       String?
   ID                 Int     @id(map: "bill tracking_pkey") @default(autoincrement())
@@ -1575,19 +1549,6 @@ model bill_tracking {
   delivery_condition String?
   email              String?
   enroll_date        String? @map("enroll date")
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  // พนักงานขาย String? @map("พนักงานขาย")
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   REFDOC             String?
   TEL                String?
   SR                 String?
@@ -2039,18 +2000,22 @@ model customer_tier {
 }
 
 model customerevent {
-  id              String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  created_at      DateTime      @default(now()) @db.Timestamptz(6)
-  event_id        String?       @db.Uuid
-  customeruser_id String?       @db.Uuid
-  registerdate    DateTime?     @db.Timestamptz(6)
-  attendevent     DateTime?     @db.Timestamptz(6)
-  type            String?
-  checked_in      Boolean?      @default(false)
-  checkin_at      DateTime?     @db.Timestamptz(6)
-  qr_token        String?       @unique(map: "idx_customerevent_qr_token") @default(dbgenerated("(gen_random_uuid())::text"))
-  customeruser    customeruser? @relation(fields: [customeruser_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  email_logs      email_logs[]
+  id                   String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at           DateTime      @default(now()) @db.Timestamptz(6)
+  event_id             String?       @db.Uuid
+  customeruser_id      String?       @db.Uuid
+  registerdate         DateTime?     @db.Timestamptz(6)
+  attendevent          DateTime?     @db.Timestamptz(6)
+  type                 String?
+  checked_in           Boolean?      @default(false)
+  checkin_at           DateTime?     @db.Timestamptz(6)
+  qr_token             String?       @unique(map: "idx_customerevent_qr_token") @default(dbgenerated("(gen_random_uuid())::text"))
+  payment_status       String        @default("not_required")
+  payment_slip_url     String?
+  payment_deadline     DateTime?     @db.Timestamptz(6)
+  payment_confirmed_at DateTime?     @db.Timestamptz(6)
+  customeruser         customeruser? @relation(fields: [customeruser_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  email_logs           email_logs[]
 
   @@index([event_id], map: "idx_customerevent_event_id")
   @@schema("public")
@@ -2408,24 +2373,30 @@ model emailpreregister {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model public_events {
-  id                 String        @id(map: "event_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  created_at         DateTime      @default(now()) @db.Timestamptz(6)
-  eventname          String?
-  event_detail       String?
-  event_registerdate String?
-  event_preregister  String?
-  eventStartDate     String?
-  event_pic          String?
-  location           String?
-  category           String?
-  tierregister       String?
-  tierpreregister    String?
-  attendee           Decimal?      @db.Decimal
-  eventEndDate       String?
-  link               String?
-  event_category_id  Int?
-  is_active          Boolean?
-  popup_image        popup_image[]
+  id                     String        @id(map: "event_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at             DateTime      @default(now()) @db.Timestamptz(6)
+  eventname              String?
+  event_detail           String?
+  event_registerdate     DateTime?     @db.Timestamptz(6)
+  event_preregister      DateTime?     @db.Timestamptz(6)
+  eventStartDate         String?
+  event_pic              String?
+  location               String?
+  category               String?
+  tierregister           String?
+  tierpreregister        String?
+  attendee               Decimal?      @db.Decimal
+  eventEndDate           String?
+  link                   String?
+  event_category_id      Int?
+  is_active              Boolean?
+  requires_payment       Boolean       @default(false)
+  payment_amount         Decimal?      @db.Decimal
+  preregister_unlisted   Boolean       @default(false)
+  payment_bank_name      String?
+  payment_account_number String?
+  payment_promptpay_id   String?
+  popup_image            popup_image[]
 
   @@map("events")
   @@schema("public")
@@ -4543,14 +4514,68 @@ model customerexternalactivity {
   @@schema("public")
 }
 
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model event_prize_draw_sessions {
+  id                        String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_id                  String       @db.Uuid
+  event_name                String?
+  prize_id                  BigInt
+  prize_name                String?
+  prize_image               String?
+  prize_color               String?
+  status                    String       @default("pending")
+  remote_start_requested_at DateTime?    @db.Timestamptz(6)
+  winner_customeruser_id    String?      @db.Uuid
+  winner_name               String?
+  spun_at                   DateTime?    @db.Timestamptz(6)
+  created_at                DateTime     @default(now()) @db.Timestamptz(6)
+  event_prizes              event_prizes @relation(fields: [prize_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model event_prize_winners {
+  id              BigInt       @id @default(autoincrement())
+  event_id        String       @db.Uuid
+  prize_id        BigInt
+  customeruser_id String       @db.Uuid
+  tier_at_draw    String
+  won_at          DateTime     @default(now()) @db.Timestamptz(6)
+  event_prizes    event_prizes @relation(fields: [prize_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model event_prizes {
+  id                        BigInt                      @id @default(autoincrement())
+  event_id                  String                      @db.Uuid
+  name                      String
+  image                     String?
+  color                     String?                     @default("#00897B")
+  quantity                  Int                         @default(1)
+  remaining                 Int                         @default(1)
+  sort_order                Int                         @default(0)
+  weight_bronze             Decimal                     @default(1) @db.Decimal
+  weight_silver             Decimal                     @default(2) @db.Decimal
+  weight_gold               Decimal                     @default(3) @db.Decimal
+  weight_platinum           Decimal                     @default(5) @db.Decimal
+  created_at                DateTime                    @default(now()) @db.Timestamptz(6)
+  event_prize_draw_sessions event_prize_draw_sessions[]
+  event_prize_winners       event_prize_winners[]
+
+  @@schema("public")
+}
+
 view vw_all_events {
-  event_id         String?  @db.Uuid
+  event_id         String?   @db.Uuid
   event_image      String?
   event_cate_name  String?
   event_name       String?
   event_detail     String?
-  register_date    String?
-  preregister_date String?
+  register_date    DateTime? @db.Timestamptz(6)
+  preregister_date DateTime? @db.Timestamptz(6)
   event_startdate  String?
   event_enddate    String?
   location_name    String?

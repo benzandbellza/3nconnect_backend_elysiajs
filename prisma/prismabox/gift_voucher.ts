@@ -62,7 +62,7 @@ export const gift_voucherRelations = t.Object(
           min_purchase: __nullable__(t.Number()),
           percent_discount: __nullable__(t.Number()),
           max_discount: __nullable__(t.Number()),
-          usage_period_day: __nullable__(t.Integer()),
+          expire_period_day: __nullable__(t.Integer()),
         },
         {
           additionalProperties: false,

@@ -46,8 +46,8 @@ export type PublicEventRow = {
   event_pic: string | null;
   eventname: string | null;
   event_detail: string | null;
-  event_registerdate: string | null;
-  event_preregister: string | null;
+  event_registerdate: Date | null;
+  event_preregister: Date | null;
   eventStartDate: string | null;
   eventEndDate: string | null;
   location: string | null;

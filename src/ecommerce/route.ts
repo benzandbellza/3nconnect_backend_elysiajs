@@ -4,12 +4,13 @@ import { allocateNextOrderNumber } from "./order-number";
 import {
   mapImGoodsToOrderItemResponse,
   mapOrderItemToImGoods,
-  normalizeBuyerCustomerUserId,
 } from "./order-mapping";
 import { mapEventTierFields } from "./event-tier-mapping";
 import { auth } from "../plugins/auth";
 import "dotenv/config";
-import { GoTrueAdminApi, GoTrueClient } from "@supabase/supabase-js";
+import { generateBarcode } from "./generateBarcode";
+import { printSchema } from "graphql";
+
 
 const now: Date = new Date();
 // const utc7: Date = new Date(now.getTime() + 7 * 60 * 60 * 1000);
@@ -5573,6 +5574,7 @@ export const ecommerceRoute = new Elysia({
                 max_discount: true,
                 min_purchase: true,
                 percent_discount: true,
+                expire_period_day: true,
               }
             }
           }
@@ -5625,6 +5627,7 @@ export const ecommerceRoute = new Elysia({
           voucher_description,
           voucher_name,
           voucher_image,
+          expire_period_day
         } = body;
 
         const response = await prisma.gift_voucher.create({
@@ -5652,7 +5655,7 @@ export const ecommerceRoute = new Elysia({
           set.status = 400;
           return { "message" : "Failed to create generic gift voucher." }
         }
-
+ 
         if(gift_voucher_generic) {
           const giftVoucherId = response.id;
           
@@ -5663,6 +5666,7 @@ export const ecommerceRoute = new Elysia({
               max_discount: gift_voucher_generic.max_discount,
               min_purchase: gift_voucher_generic.min_purchase,
               percent_discount: gift_voucher_generic.percent_discount,
+              expire_period_day: expire_period_day,
             }
           });
         }
@@ -5691,6 +5695,7 @@ export const ecommerceRoute = new Elysia({
         voucher_description: t.String(),
         voucher_name: t.String(),
         voucher_image: t.Any(),
+        expire_period_day: t.Any(),
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
@@ -5720,6 +5725,7 @@ export const ecommerceRoute = new Elysia({
           voucher_description,
           voucher_name,
           voucher_image,
+          expire_period_day
         } = body;
 
         const response = await prisma.gift_voucher.update({
@@ -5759,6 +5765,7 @@ export const ecommerceRoute = new Elysia({
             max_discount: gift_voucher_generic.max_discount,
             min_purchase: gift_voucher_generic.min_purchase,
             percent_discount: gift_voucher_generic.percent_discount,
+            expire_period_day: expire_period_day,
           }
         });
 
@@ -5784,6 +5791,7 @@ export const ecommerceRoute = new Elysia({
           min_purchase: t.Any(),
           percent_discount: t.Any(),
         }),
+        expire_period_day: t.Any(),
         gift_voucher_method: t.String(),
         is_active: t.Boolean(),
         is_limit_voucher: t.Boolean(),
@@ -7960,3 +7968,51 @@ export const ecommerceRoute = new Elysia({
       },
     }
   )
+  .post(
+    "/gift-voucher/generic/send-to/customerusers",
+    async({ headers, set, body }) => {
+      try {
+        const customer_ids = body.customer_ids;
+        const gift_voucher_id = body.voucher_id;
+        
+        for(const val of customer_ids){
+          const barcode: string = generateBarcode();
+          
+          await prisma.customervoucher.createMany({
+            data: {
+              customer_id: val,
+              gift_voucher_id: gift_voucher_id,
+              voucherid: barcode
+            }
+          })
+
+        }
+        
+        return { message : "Send Gift Voucher to Customer successfully." };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error getting customers:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      body: t.Object({
+        customer_ids: t.Array(t.String()),
+        voucher_id: t.Number(),
+      }),
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Gift Voucher - Send Generic Voucher to Customer User",
+        description: `
+          This endpoint send generic voucer to customer user.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      },
+    }
+  )
+  
