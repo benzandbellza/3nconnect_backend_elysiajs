@@ -1,10 +1,10 @@
-import { Elysia, replaceUrlPath, t } from "elysia";
+import { Elysia, t } from "elysia";
 import { prisma } from "./prisma_connection";
 import { mapCustomerOrderItemToImGoods } from "./order-submit-mapping";
 import { allocateNextOrderNumber } from "../ecommerce/order-number";
 import { auth } from "../plugins/auth";
 import "dotenv/config";
-import { tryParse } from "elysia/type-system/utils";
+import { addDaysAndFormat } from "./expireVoucher";
 
 const now: Date = new Date();
 
@@ -1046,142 +1046,42 @@ export const ecommerceCustomerRoute = new Elysia({
           return { message: "Review token has expired." };
         }
 
-        const eventVouchers = await prisma.gift_voucher.findMany({
+        const customeruser_id = review.customeruser_id;
+        const response = await prisma.customervoucher.findMany({
           where: {
-            gift_voucher_type: "event",
-            is_active: true,
+            customer_id: customeruser_id,
+            used: false,
+            exp: {
+              gte: now
+            }
           },
           select: {
-            id: true,
-            voucher_name: true,
-          }
-        });
-
-        const eventVoucherIds = eventVouchers.map((voucher) => voucher.id);
-
-        const campaignVouchers = eventVoucherIds.length > 0
-          ? await prisma.gift_voucher_campaign_voucher.findMany({
-              where: {
-                gift_voucher_id: {
-                  in: eventVoucherIds,
-                },
-                generic_voucher_id: {
-                  not: null,
-                },
-              },
+            gift_voucher_id: true,
+            exp: true,
+            voucherid: true,
+            gift_voucher: {
               select: {
-                gift_voucher_id: true,
-                generic_voucher_id: true,
-              }
-            })
-          : [];
-
-        const eventVoucherNameById = new Map(
-          eventVouchers.map((voucher) => [voucher.id, voucher.voucher_name ?? ""])
-        );
-
-        const campaignNameByGenericVoucherId = new Map<number, string>();
-        for (const campaignVoucher of campaignVouchers) {
-          if (
-            campaignVoucher.generic_voucher_id !== null &&
-            !campaignNameByGenericVoucherId.has(campaignVoucher.generic_voucher_id)
-          ) {
-            campaignNameByGenericVoucherId.set(
-              campaignVoucher.generic_voucher_id,
-              eventVoucherNameById.get(campaignVoucher.gift_voucher_id ?? -1) ?? ""
-            );
-          }
-        }
-
-        const genericVoucherIds = [...campaignNameByGenericVoucherId.keys()];
-
-        const vouchers = genericVoucherIds.length > 0
-          ? await prisma.gift_voucher.findMany({
-              where: {
-                id: {
-                  in: genericVoucherIds,
-                },
-                gift_voucher_type: "generic",
-                is_active: true,
-                ...(has_any_promotion
-                  ? { is_accept_overlapse_promotion: true }
-                  : {}),
-                OR: [
-                  { is_lifetime_period: true },
-                  {
-                    AND: [
-                      {
-                        OR: [
-                          { campaign_start: null },
-                          { campaign_start: { lte: now } },
-                        ]
-                      },
-                      {
-                        OR: [
-                          { campaign_end: null },
-                          { campaign_end: { gte: now } },
-                        ]
-                      }
-                    ]
-                  }
-                ]
-              },
-              select: {
-                id: true,
-                voucher_uuid: true,
+                url_image: true,
                 voucher_name: true,
-                is_specific_customers: true,
-                specific_customers: true,
+                voucher_description: true,
+                voucher_conditions: true,
+                campaign_start: true,
+                campaign_end: true,
                 gift_voucher_generic: {
                   select: {
                     discount_type: true,
                     min_purchase: true,
-                    max_discount: true,
                     percent_discount: true,
+                    max_discount: true,
+                    expire_period_day: true,
                   }
                 }
               }
-            })
-          : [];
-
-        const eligibleVouchers = vouchers
-          .filter((voucher) => {
-            if(!voucher.is_specific_customers){
-              return true;
             }
+          }
+        });
 
-            if(!review.customeruser_id){
-              return false;
-            }
-
-            return voucher.specific_customers.includes(review.customeruser_id);
-          })
-          .map((voucher) => {
-            const genericVoucher = voucher.gift_voucher_generic[0];
-
-            const value =
-              genericVoucher?.discount_type === 'percentage' ? genericVoucher?.percent_discount : genericVoucher?.max_discount;
-              
-            const discount_type = 
-              genericVoucher?.discount_type === 'percentage' ? 'percent' : 'thb';
-            
-            const min_purchase = genericVoucher?.min_purchase ?? 0;
-            const max_discount = genericVoucher?.max_discount;
-
-            return {
-              code: voucher.voucher_uuid,
-              title: voucher.voucher_name,
-              campaignName: campaignNameByGenericVoucherId.get(voucher.id) ?? "",
-              value: value,
-              discount_type: discount_type,
-              max_discount: max_discount,
-              min_purchase: min_purchase,
-            };
-          });
-
-        return {
-          eligible_vouchers: eligibleVouchers
-        };
+        return response;
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Unknown error";
         set.status = 500;
@@ -2164,6 +2064,222 @@ export const ecommerceCustomerRoute = new Elysia({
         summary: "Order Review - Customer Submit Review",
         description: `
           This endpoint allows customers to submit reviews for a specific order.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      }
+    }
+  )
+  .get(
+    "/notifications/:customeruser_id",
+    async({headers, set, params}) => {
+      try{
+        const customeruser_id = params.customeruser_id
+        const response = await prisma.notifications_board.findMany({
+          where: {
+            customeruser_id: customeruser_id,
+            status : 'unread',
+          },
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            route_url: true,
+            created_at: true,
+          }
+        })
+
+        if(!response){
+          set.status = 404;
+          return { message: "Failed to get notifications board." }
+        }
+
+        return response;
+
+      }catch(error){
+        set.status = 500;
+        return { message: error }
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      params: t.Object({
+        customeruser_id : t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Notifications - Find by customeruser",
+        description: `
+          This endpoint use for get all notifications is unread by customeruser_id.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      }
+    }
+  )
+  .post(
+    "/notification/read",
+    async ({ headers, set, body }) => {
+      try{
+        const customeruser_id = body.customeruser_id;
+        const notification_id = body.notification_id;
+
+        await prisma.notifications_board.updateMany({
+          where: {
+            customeruser_id: customeruser_id,
+            id: notification_id
+          },
+          data: {
+            status : 'read',
+            updated_at: now,
+          }
+        })
+
+        return { message: "Update read notification successfully." }
+
+      } catch (error) {
+        set.status = 500;
+        return { message: error }
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        customeruser_id : t.String(),
+        notification_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Notifications - Update Read Notification",
+        description: `
+          This endpoint use for update action read of notification.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      }
+    }
+  )
+  .get(
+    "/myaccount/vouchers/:customeruser_id",
+    async ({ headers, set, params}) => {
+      try{
+        const customeruser_id = params.customeruser_id;
+        const response = await prisma.customervoucher.findMany({
+          where : {
+            customer_id: customeruser_id,
+          },
+          select: {
+            gift_voucher_id: true,
+            exp: true,
+            voucherid: true,
+            gift_voucher: {
+              select: {
+                url_image: true,
+                voucher_name: true,
+                voucher_description: true,
+                voucher_conditions: true,
+                campaign_start: true,
+                campaign_end: true,
+                gift_voucher_generic: {
+                  select: {
+                    discount_type: true,
+                    min_purchase: true,
+                    percent_discount: true,
+                    max_discount: true,
+                    expire_period_day: true,
+                  }
+                }
+              }
+            }
+          }
+        })
+
+        if(!response){
+          set.status = 404;
+          return { message: "Failed to get gift vouchers." }
+        }
+
+        return response;
+      } catch (error) {
+        set.status = 500;
+        return { message: error }
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      params: t.Object({
+        customeruser_id : t.String(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "eCommerce Customer - Find Gift Vouchers by customeruser_id",
+        description: `
+          This endpoint use for find gift vouchers by customeruser_id.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["3NConnect"],
+      }
+    }
+  )
+  .post(
+    "/myaccount/vouchers/keep",
+    async ({ headers, set, body }) => {
+      try{
+        const customeruser_id = body.customeruser_id;
+        const gift_voucher_id = body.gift_voucher_id;
+        
+        const response = await prisma.gift_voucher_generic.findFirst({
+          where: {
+            gift_voucher_id: gift_voucher_id
+          },
+          select: {
+            expire_period_day: true,
+          }
+        });
+
+        if(!response){
+          set.status = 404;
+          return { message: "Failed to keep voucher." }
+        }
+
+        const expire_period_day : number = response.expire_period_day ?? 0;
+        const expDate = addDaysAndFormat(expire_period_day);
+        
+        await prisma.customervoucher.updateMany({
+          where: {
+            gift_voucher_id: gift_voucher_id,
+            customer_id: customeruser_id
+          },
+          data: {
+            exp: expDate,
+          }
+        });
+
+        return { message: "Keep gift voucher successfully." }
+      } catch (error) {
+        set.status = 404;
+        return { message: error  }
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        customeruser_id : t.String(),
+        gift_voucher_id : t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "eCommerce Customer - Customer Keep Gift Voucher",
+        description: `
+          This endpoint use for customer keep gift voucher.
         `.trim(),
         security: [{ bearerAuth: [] }],
         tags: ["3NConnect"],

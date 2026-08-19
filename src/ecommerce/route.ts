@@ -1,4 +1,4 @@
-import { Elysia, replaceUrlPath, t } from "elysia";
+import { Elysia, t } from "elysia";
 import { prisma } from "./prisma_connection";
 import { allocateNextOrderNumber } from "./order-number";
 import {
@@ -9,7 +9,6 @@ import { mapEventTierFields } from "./event-tier-mapping";
 import { auth } from "../plugins/auth";
 import "dotenv/config";
 import { generateBarcode } from "./generateBarcode";
-import { printSchema } from "graphql";
 
 
 const now: Date = new Date();
@@ -7983,6 +7982,16 @@ export const ecommerceRoute = new Elysia({
               customer_id: val,
               gift_voucher_id: gift_voucher_id,
               voucherid: barcode
+            }
+          })
+
+          await prisma.notifications_board.createMany({
+            data: {
+              customeruser_id: val,
+              title: 'คุณได้รับคูปองส่วนลดใหม่!',
+              description: 'คูปองใหม่เข้ากระเป๋าแล้ว กดรับส่วนลดแล้วนำไปใช้ช้อปได้เลยทันที!',
+              route_url: 'http://119.59.103.241/MyAccount/Vouchers',
+              created_at: now,
             }
           })
 

@@ -4,7 +4,6 @@ import "dotenv/config";
 import { createClient } from '@supabase/supabase-js'
 import { mapPreOrderProducts, mapPublicEvents } from './public-model-mappers'
 import { buildProductCategoryTree } from './product-category-tree'
-import { ObjectEnumValue } from "@prisma/client/runtime/client";
 
 const now: Date = new Date();
 

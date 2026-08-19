@@ -1034,6 +1034,7 @@ model auth_users {
   customeruser                customeruser?
   deliveries                  deliveries[]
   dhl_shipments               dhl_shipments[]
+  event_posts                 event_posts[]
   noti_read_log               noti_read_log[]
   user_favorites              user_favorites[]
   user_login_history          user_login_history[]
@@ -1540,7 +1541,11 @@ model bill_tracking {
   dateprocess        String?
   Sx_No_             String? @map("Sx No.")
   Process            String?
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  // สร้างเมื่อ DateTime? @default(now()) @map("สร้างเมื่อ") @db.Timestamptz(6)
   note               String?
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  // สิ่งที่แนบมา String? @map("สิ่งที่แนบมา")
   shipby             String?
   outsource_no       String?
   ID                 Int     @id(map: "bill tracking_pkey") @default(autoincrement())
@@ -1549,6 +1554,8 @@ model bill_tracking {
   delivery_condition String?
   email              String?
   enroll_date        String? @map("enroll date")
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  // พนักงานขาย String? @map("พนักงานขาย")
   REFDOC             String?
   TEL                String?
   SR                 String?
@@ -2149,6 +2156,7 @@ model customeruser {
   tel2                      String?
   referral_campaign_id      Int?
   nickname                  String?
+  idcard_image_url          String?
   IM                        IM[]
   assett                    assett[]
   booth_game_sessions       booth_game_sessions[]
@@ -2169,6 +2177,9 @@ model customeruser {
   customeruser_users        customeruser_users[]
   customervoucher           customervoucher[]
   email_logs                email_logs[]
+  event_post_comments       event_post_comments[]
+  event_post_likes          event_post_likes[]
+  event_prize_winners       event_prize_winners[]
   noti_auto_send_log        noti_auto_send_log[]
   notification_logs         notification_logs[]
   order                     order[]
@@ -2396,6 +2407,7 @@ model public_events {
   payment_bank_name      String?
   payment_account_number String?
   payment_promptpay_id   String?
+  event_posts            event_posts[]
   popup_image            popup_image[]
 
   @@map("events")
@@ -4529,6 +4541,7 @@ model event_prize_draw_sessions {
   winner_name               String?
   spun_at                   DateTime?    @db.Timestamptz(6)
   created_at                DateTime     @default(now()) @db.Timestamptz(6)
+  winners                   Json?
   event_prizes              event_prizes @relation(fields: [prize_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("public")
@@ -4542,6 +4555,7 @@ model event_prize_winners {
   customeruser_id String       @db.Uuid
   tier_at_draw    String
   won_at          DateTime     @default(now()) @db.Timestamptz(6)
+  customeruser    customeruser @relation(fields: [customeruser_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   event_prizes    event_prizes @relation(fields: [prize_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("public")
@@ -4562,9 +4576,87 @@ model event_prizes {
   weight_gold               Decimal                     @default(3) @db.Decimal
   weight_platinum           Decimal                     @default(5) @db.Decimal
   created_at                DateTime                    @default(now()) @db.Timestamptz(6)
+  winners_per_draw          Int                         @default(1)
   event_prize_draw_sessions event_prize_draw_sessions[]
   event_prize_winners       event_prize_winners[]
 
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model notifications_board {
+  id              Int       @id @default(autoincrement())
+  customeruser_id String?   @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title           String?
+  description     String?
+  status          String?   @default("unread")
+  route_url       String?
+  created_at      DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime? @db.Timestamptz(6)
+
+  @@schema("3nconnect")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model event_post_comments {
+  id                 BigInt       @id @default(autoincrement())
+  post_id            BigInt
+  customeruser_id    String       @db.Uuid
+  comment_text       String
+  created_at         DateTime     @default(now()) @db.Timestamptz(6)
+  commenter_nickname String?
+  customeruser       customeruser @relation(fields: [customeruser_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  event_posts        event_posts  @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([post_id], map: "idx_event_post_comments_post_id")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model event_post_images {
+  id          BigInt      @id @default(autoincrement())
+  post_id     BigInt
+  image_url   String
+  sort_order  Int         @default(0)
+  created_at  DateTime    @default(now()) @db.Timestamptz(6)
+  event_posts event_posts @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([post_id], map: "idx_event_post_images_post_id")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model event_post_likes {
+  id              BigInt       @id @default(autoincrement())
+  post_id         BigInt
+  customeruser_id String       @db.Uuid
+  created_at      DateTime     @default(now()) @db.Timestamptz(6)
+  customeruser    customeruser @relation(fields: [customeruser_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  event_posts     event_posts  @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([post_id, customeruser_id])
+  @@index([post_id], map: "idx_event_post_likes_post_id")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model event_posts {
+  id                  BigInt                @id @default(autoincrement())
+  event_id            String?               @db.Uuid
+  image_url           String?
+  caption             String?
+  created_at          DateTime              @default(now()) @db.Timestamptz(6)
+  posted_by_type      String                @default("staff")
+  posted_by_auth_id   String?               @db.Uuid
+  custom_label        String?
+  event_post_comments event_post_comments[]
+  event_post_images   event_post_images[]
+  event_post_likes    event_post_likes[]
+  events              public_events?        @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users               auth_users?           @relation(fields: [posted_by_auth_id], references: [id], onUpdate: NoAction)
+
+  @@index([event_id], map: "idx_event_posts_event_id")
   @@schema("public")
 }
 
