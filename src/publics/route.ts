@@ -635,7 +635,8 @@ export const publicRoute = new Elysia({
 
         const productReviews = await prisma.vw_product_reviews.findMany({
           where: {
-            product_id: productId
+            product_id: productId,
+            admin_review_status: "approved",
           },
           select: {
             review_comment: true,
