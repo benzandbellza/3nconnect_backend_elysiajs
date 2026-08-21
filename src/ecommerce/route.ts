@@ -9,6 +9,7 @@ import { mapEventTierFields } from "./event-tier-mapping";
 import { auth } from "../plugins/auth";
 import "dotenv/config";
 import { generateBarcode } from "./generateBarcode";
+import { customeruser_usersInclude } from "../../prisma/prismabox/barrel";
 
 
 const now: Date = new Date();
@@ -28,6 +29,15 @@ const mapAdminVerifyStatusToOrderStatus = (status?: string | null) => {
   if (status === "Tranferring") return "Tranferring";
   if (status === "Completed") return "Completed";
   return "Processing";
+};
+
+const mapAdminVerifyTextStatusToOrderStatus = (status?: string | null) => {
+  if (status === "Pending" || status === "Paid" || status === "Approved")
+    return "คำสั่งซื้อของคุณได้รับการยืนยันคำสั่งซื้อแล้ว";
+  if (status === "Cancelled") return "คำสั่งซื้อของคุณถูกยกเลิก";
+  if (status === "Tranferring") return "คำสั่งซื้อของคุณกำลังจัดส่ง";
+  if (status === "Completed") return "คำสั่งซื้อเสร็จสมบูรณ์แล้ว";
+  return "กำลังจัดเตรียมสินค้า";
 };
 
 export const ecommerceRoute = new Elysia({
@@ -7225,6 +7235,7 @@ export const ecommerceRoute = new Elysia({
       try {
         const loggedAt = parseNullableDateTime(body.logged_at);
         const orderDate = new Date();
+        const customeruser_id = body.buyer_customeruser_id;
 
         const result = await prisma.$transaction(async (tx) => {
           if (body.order_uuid) {
@@ -7244,10 +7255,11 @@ export const ecommerceRoute = new Elysia({
 
           const orderNo = await allocateNextOrderNumber(tx, orderDate, body.company_id);
 
+
           const createdOrder = await tx.iM.create({
             data: {
               docid: orderNo,
-              customeruser_id: body.buyer_customeruser_id,
+              customeruser_id: customeruser_id,
               status: mapAdminVerifyStatusToOrderStatus(body.admin_verify_status),
               im: body.im_no,
               type: 'inv_online',
@@ -7313,6 +7325,18 @@ export const ecommerceRoute = new Elysia({
               is_free: true,
               promotion_from_product_option_id: true,
             },
+          });
+
+          // Send notification to customer
+          await prisma.notifications_board.create({
+            data : {
+              customeruser_id: customeruser_id,
+              title: `คำสั่งซื้อของคุณได้รับการยืนยันแล้ว`,
+              description: `คุณสามารถตรวจสอบคำสั่งซื้อเลขที่ ${orderNo} ได้ที่คำสั่งซื้อของคุณหรือคลิกที่นี่`,
+              status: 'unread',
+              route_url: `http://119.59.103.241/MyAccount/Orders/${createdOrder.order_uuid}`,
+              created_at: now,
+            }
           });
 
           return {
@@ -7489,6 +7513,20 @@ export const ecommerceRoute = new Elysia({
               is_free: true,
               promotion_from_product_option_id: true,
             },
+          });
+
+          const title: string = mapAdminVerifyTextStatusToOrderStatus(body.admin_verify_status) ;
+
+          // Send notification to customer
+          await prisma.notifications_board.create({
+            data : {
+              customeruser_id: updatedOrder.customeruser_id,
+              title: title,
+              description: `คุณสามารถตรวจสอบคำสั่งซื้อเลขที่ ${updatedOrder.docid} ได้ที่คำสั่งซื้อของคุณหรือคลิกที่นี่`,
+              status: 'unread',
+              route_url: `http://119.59.103.241/MyAccount/Orders/${updatedOrder.order_uuid}`,
+              updated_at: now,
+            }
           });
 
           return {
