@@ -1663,10 +1663,13 @@ export const ecommerceCustomerRoute = new Elysia({
           update_by: true,
           company_id: true,
           is_review_completed: true,
+        },
+        orderBy: {
+          created_at: "desc"
         }
       })
 
-      if(!response){
+      if(!response){ 
         set.status = 404;
         return { "message" : "No orders found." }
       }

@@ -6749,6 +6749,8 @@ export const ecommerceRoute = new Elysia({
             payment_invoice_no: true,
             admin_verify_status: true,
             payment_method_type: true,
+            is_review_completed: true,
+            update_by: true,
           }
         });
 
