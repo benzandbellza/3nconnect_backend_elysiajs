@@ -1155,7 +1155,7 @@ export const publicRoute = new Elysia({
               gte: now
             },
             subtype: {
-              in : ['flash_sale', 'discount', 'bundle_deal_get_x_free_y', 'bundle_deal_grand_total_free_y', 'extra_points_bill_total', 'extra_points_products'              ]
+              in : ['flash_sale', 'discount', 'bundle_deal_get_x_free_y', 'bundle_deal_grand_total_free_y', 'extra_points_bill_total', 'extra_points_products', 'clearance_sale']
             }
           },
           select: {
@@ -1351,6 +1351,84 @@ export const publicRoute = new Elysia({
         summary: "Promotions - Find Discount By Promotion ID",
         description: `
           This endpoint retrieves discount promotion by its promotion ID.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["Publics"],
+      },
+    },
+  )
+  .get(
+    "/promotions/clearance-sale/:promotion_id",
+    async ({ params, set }) => {
+      try {
+        const promotion_id = params.promotion_id;
+        const promotionDetail = await prisma.public_promotion.findFirst({
+          where: {
+            id: promotion_id,
+            is_active: true,
+          },
+          select: {
+            url_image: true,
+            banner: true,
+            promotion_name: true,
+            promotion_description: true,
+            promotion_start: true,
+            promotion_end: true,
+            is_accept_overlapse_promotion: true,
+          }
+        });
+
+        if(!promotionDetail){
+          set.status = 404;
+          return { message: "No valid clearance sale promotion found" };
+        }
+
+        const discountPromotion = await prisma.vw_promotion_products_index.findMany({
+          where: {
+            promotion_id: promotion_id,
+            promotion_type: 'clearance_sale',
+          },
+          select: {
+            product_option_id: true,
+            url_image: true,
+            product_name: true,
+            option_name: true,
+            unit: true,
+            online_price: true,
+            sale_price: true,
+            sale_percent: true,
+            mat_identity: true,
+          },
+          orderBy: {
+            sale_percent: 'desc'
+          }
+        });
+
+        if(!discountPromotion){
+          set.status = 404;
+          return { message: "No valid clearance sale promotion found" };
+        }
+
+        return {
+          ...promotionDetail,
+          products: discountPromotion
+        };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching clearance sale promotion:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      params: t.Object({
+        promotion_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions - Find Clearance Sale By Promotion ID",
+        description: `
+          This endpoint retrieves clearance sale promotion by its promotion ID.
         `.trim(),
         security: [{ bearerAuth: [] }],
         tags: ["Publics"],
