@@ -2209,13 +2209,20 @@ export const ecommerceRoute = new Elysia({
           return { message: "Failed to update product" };
         }
 
-        await prisma.public_product_payment_method.updateMany({
-          where : {
+        await prisma.public_product_payment_method.deleteMany({
+          where: {
             product_id: response.id
           },
-          data : {
-          }
-        })
+        });
+
+        for(const paymentMethod of payment_methods){
+          await prisma.public_product_payment_method.create({
+            data : {
+              product_id: response.id,
+              payment_method_id: paymentMethod.payment_method_id,
+            }
+          })
+        }
 
         return { message: "Product updated successfully" };
       } catch (error) {
@@ -2237,12 +2244,12 @@ export const ecommerceRoute = new Elysia({
         category_id: t.String(),
         company_id: t.Number(),
         is_online_active: t.Boolean(),
-        payment_methods: t.Object({
-          qr_code_promptpay: t.Boolean(),
-          visa_card: t.Boolean(),
-          mobile_banking: t.Boolean(),
-          credit_terms: t.Boolean(),
-        }),
+        payment_methods: t.Array(
+          t.Object({
+            payment_method_id: t.Number(),
+            payment_method_type: t.String(),
+          })
+        ),
       }),
       detail: {
         servers: [{ url: process.env.APP_API_PREFIX || "" }],
