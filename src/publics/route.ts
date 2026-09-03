@@ -322,6 +322,9 @@ export const publicRoute = new Elysia({
             ],
             is_pre_order: {
               not: true
+            },
+            category_hierarchy: {
+              isEmpty: false
             }
           },
           select: {
@@ -820,6 +823,9 @@ export const publicRoute = new Elysia({
             where: {
               product_option_id: product.product_option_id,
               mat_identity: product.mat_identity,
+              category_hierarchy: {
+                isEmpty: false
+              }
             },
             select: {
               company_id: true,
@@ -1231,6 +1237,9 @@ export const publicRoute = new Elysia({
           where: {
             promotion_id: promotion_id,
             promotion_type: 'flash_sale',
+            category_hierarchy: {
+              isEmpty: false
+            }
           },
           select: {
             product_option_id: true,
@@ -1309,6 +1318,9 @@ export const publicRoute = new Elysia({
           where: {
             promotion_id: promotion_id,
             promotion_type: 'discount',
+            category_hierarchy: {
+              isEmpty: false
+            }
           },
           select: {
             product_option_id: true,
@@ -1387,6 +1399,9 @@ export const publicRoute = new Elysia({
           where: {
             promotion_id: promotion_id,
             promotion_type: 'clearance_sale',
+            category_hierarchy: {
+              isEmpty: false
+            }
           },
           select: {
             product_option_id: true,
