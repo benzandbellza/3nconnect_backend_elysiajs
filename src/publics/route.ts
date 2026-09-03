@@ -163,7 +163,10 @@ export const publicRoute = new Elysia({
         const clearance_products = await prisma.vw_promotion_products_index.findMany({
           where: {
             promotion_id: promotion_id,
-            promotion_type: 'clearance_sale'
+            promotion_type: 'clearance_sale',
+            category_hierarchy: {
+              isEmpty: false
+            }
           },
           select:{
             product_option_id: true,
@@ -252,7 +255,10 @@ export const publicRoute = new Elysia({
         const flashsale_products = await prisma.vw_promotion_products_index.findMany({
           where: {
             promotion_id: promotion_id,
-            promotion_type: 'flash_sale'
+            promotion_type: 'flash_sale',
+            category_hierarchy: {
+              isEmpty: false
+            }
           },
           select:{
             product_option_id: true,
@@ -600,7 +606,10 @@ export const publicRoute = new Elysia({
 
         const promoteProductIndex = await prisma.vw_promotion_products_index.findMany({
             where: {
-              product_id: productId
+              product_id: productId,
+              category_hierarchy: {
+                isEmpty: false
+              }
             },
             select: {
               product_option_id: true,
