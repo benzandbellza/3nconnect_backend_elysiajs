@@ -3309,6 +3309,7 @@ export const ecommerceRoute = new Elysia({
                 product_option_id: true,
                 sale_price: true,
                 sale_percent: true,
+                quantity_limit: true,
               },
             },
           },
