@@ -206,10 +206,16 @@ model gift_voucher {
   usage_period_day              Int?
   event_trigger                 String?
   tier_trigger_name             String?
+  voucherpic                    String?
   gift_voucher_campaign_voucher gift_voucher_campaign_voucher[]
   gift_voucher_generic          gift_voucher_generic[]
   gift_voucher_redeem_code      gift_voucher_redeem_code[]
+  customernoti                  customernoti[]
   customervoucher               customervoucher[]
+  promotion                     public_promotion[]
+  promotion_claim_history       promotion_claim_history[]
+  promotion_voucher             promotion_voucher[]
+  quiz_event_prizes             quiz_event_prizes[]
 
   @@schema("3nconnect")
 }
@@ -1034,6 +1040,7 @@ model auth_users {
   customeruser                customeruser?
   deliveries                  deliveries[]
   dhl_shipments               dhl_shipments[]
+  event_badge_links           event_badge_links[]
   event_posts                 event_posts[]
   noti_read_log               noti_read_log[]
   user_favorites              user_favorites[]
@@ -1113,54 +1120,57 @@ model ConversationMemory {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model IM {
-  id                          Int                       @id @default(autoincrement())
-  created_at                  DateTime                  @default(now()) @db.Timestamptz(6)
-  docid                       String                    @unique(map: "IM_io_id_key")
-  customer                    String?
-  note                        String?
-  create_by                   String?                   @db.Uuid
-  status                      String?
-  im                          String?
-  customer_name               String?
-  tel                         String?
-  updated_at                  DateTime?                 @default(now()) @db.Timestamptz(6)
-  update_by                   String?
-  history                     Json?
-  type                        String?
-  delivery_address_id         String?                   @db.Uuid
-  invoice_id                  Int?
-  shipping_address            String?
-  has_fifo_violation          Boolean?                  @default(false)
-  price_valid_days            String?
-  delivery_days               String?
-  payment_days                String?
-  customeruser_id             String?                   @db.Uuid
-  prefix                      String?
-  need_smapprove              Boolean?                  @default(false)
-  sopt_id                     Int?
-  payment_status              String?
-  log_payment                 DateTime?                 @db.Timestamptz(6)
-  order_uuid                  String?                   @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  company_id                  Int?
-  shipping_cost               Float?
-  admin_verify_status         String?
-  payment_invoice_no          String?
-  credit_terms_day            Int?
-  is_admin_order_created      Boolean?
-  admin_updated_at            DateTime?                 @db.Timestamptz(6)
-  shipping_address_id         Int?
-  order_created_by            String?                   @db.Uuid
-  payment_method_type         String?
-  customer_invoice_address_id Int?
-  is_review_completed         Boolean?                  @default(false)
-  users                       public_users?             @relation(fields: [create_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  customeruser                customeruser?             @relation(fields: [customeruser_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  customer_delivery           customer_delivery?        @relation(fields: [delivery_address_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  invoicehead                 invoicehead?              @relation(fields: [invoice_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  customer_address            customer_address?         @relation(fields: [shipping_address_id], references: [id], onDelete: Cascade)
-  sopt_head                   sopt_head?                @relation(fields: [sopt_id], references: [id], onDelete: Cascade)
-  customer_invoice_address    customer_invoice_address? @relation(fields: [customer_invoice_address_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "im_customer_invoice_address_id_fkey")
-  im_goods                    im_goods[]
+  id                                         Int                       @id @default(autoincrement())
+  created_at                                 DateTime                  @default(now()) @db.Timestamptz(6)
+  docid                                      String                    @unique(map: "IM_io_id_key")
+  customer                                   String?
+  note                                       String?
+  create_by                                  String?                   @db.Uuid
+  status                                     String?
+  im                                         String?
+  customer_name                              String?
+  tel                                        String?
+  updated_at                                 DateTime?                 @default(now()) @db.Timestamptz(6)
+  update_by                                  String?
+  history                                    Json?
+  type                                       String?
+  delivery_address_id                        String?                   @db.Uuid
+  invoice_id                                 Int?
+  shipping_address                           String?
+  has_fifo_violation                         Boolean?                  @default(false)
+  price_valid_days                           String?
+  delivery_days                              String?
+  payment_days                               String?
+  customeruser_id                            String?                   @db.Uuid
+  prefix                                     String?
+  need_smapprove                             Boolean?                  @default(false)
+  sopt_id                                    Int?
+  payment_status                             String?
+  log_payment                                DateTime?                 @db.Timestamptz(6)
+  order_uuid                                 String?                   @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company_id                                 Int?
+  shipping_cost                              Float?
+  admin_verify_status                        String?
+  payment_invoice_no                         String?
+  credit_terms_day                           Int?
+  is_admin_order_created                     Boolean?
+  admin_updated_at                           DateTime?                 @db.Timestamptz(6)
+  shipping_address_id                        Int?
+  order_created_by                           String?                   @db.Uuid
+  payment_method_type                        String?
+  customer_invoice_address_id                Int?
+  is_review_completed                        Boolean?                  @default(false)
+  invoicehead_id                             Int?
+  points_credited_at                         DateTime?                 @db.Timestamptz(6)
+  users                                      public_users?             @relation(fields: [create_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  customeruser                               customeruser?             @relation(fields: [customeruser_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  customer_delivery                          customer_delivery?        @relation(fields: [delivery_address_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  invoicehead                                invoicehead?              @relation(fields: [invoice_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  invoicehead_IM_invoicehead_idToinvoicehead invoicehead?              @relation("IM_invoicehead_idToinvoicehead", fields: [invoicehead_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  customer_address                           customer_address?         @relation(fields: [shipping_address_id], references: [id], onDelete: Cascade)
+  sopt_head                                  sopt_head?                @relation(fields: [sopt_id], references: [id], onDelete: Cascade)
+  customer_invoice_address                   customer_invoice_address? @relation(fields: [customer_invoice_address_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "im_customer_invoice_address_id_fkey")
+  im_goods                                   im_goods[]
 
   @@schema("public")
 }
@@ -1543,9 +1553,13 @@ model bill_tracking {
   Process            String?
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // สร้างเมื่อ DateTime? @default(now()) @map("สร้างเมื่อ") @db.Timestamptz(6)
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   note               String?
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // สิ่งที่แนบมา String? @map("สิ่งที่แนบมา")
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   shipby             String?
   outsource_no       String?
   ID                 Int     @id(map: "bill tracking_pkey") @default(autoincrement())
@@ -1556,6 +1570,8 @@ model bill_tracking {
   enroll_date        String? @map("enroll date")
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // พนักงานขาย String? @map("พนักงานขาย")
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   REFDOC             String?
   TEL                String?
   SR                 String?
@@ -1679,6 +1695,7 @@ model ces_job {
   ref        String?
   ces_status ces_status[]
 
+  @@index([created_at(sort: Desc)], map: "idx_ces_job_created_at")
   @@schema("public")
 }
 
@@ -1693,6 +1710,9 @@ model ces_status {
   ces_job    ces_job?      @relation(fields: [ces_job_id], references: [id], onDelete: Cascade)
   users      public_users? @relation(fields: [created_by], references: [authid], onDelete: SetDefault)
 
+  @@index([ces_job_id], map: "idx_ces_status_ces_job_id")
+  @@index([created_by], map: "idx_ces_status_created_by")
+  @@index([status], map: "idx_ces_status_status")
   @@schema("public")
 }
 
@@ -1846,7 +1866,9 @@ model customer_events {
   end_date          DateTime            @db.Date
   active            Boolean             @default(true)
   created_at        DateTime            @default(now()) @db.Timestamptz(6)
+  allow_badge_scan  Boolean             @default(false)
   customer_requests customer_requests[]
+  event_badge_links event_badge_links[]
 
   @@schema("public")
 }
@@ -1901,28 +1923,31 @@ model customer_invoice {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model customer_requests {
-  id                 Int              @id @default(autoincrement())
-  customeruser_id    String?          @db.Uuid
-  name               String?
-  tel                String?
-  company            String?
-  event_id           Int?
-  request            String?
-  created_by         String?          @db.Uuid
-  created_at         DateTime         @default(now()) @db.Timestamptz(6)
-  assigned_users_id  String?          @db.Uuid
-  sopt_head_id       Int?
-  assigned_users_ids String[]         @default([]) @db.Uuid
-  sopt_head_ids      Int[]            @default([])
-  email              String?
-  has_data           Boolean?
-  is_active          Boolean          @default(true)
-  public_users       public_users?    @relation(fields: [assigned_users_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  auth_users         auth_users?      @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  customeruser       customeruser?    @relation(fields: [customeruser_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  customer_events    customer_events? @relation(fields: [event_id], references: [id], onDelete: Cascade)
-  sopt_head          sopt_head?       @relation(fields: [sopt_head_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id                  Int              @id @default(autoincrement())
+  customeruser_id     String?          @db.Uuid
+  name                String?
+  tel                 String?
+  company             String?
+  event_id            Int?
+  request             String?
+  created_by          String?          @db.Uuid
+  created_at          DateTime         @default(now()) @db.Timestamptz(6)
+  assigned_users_id   String?          @db.Uuid
+  sopt_head_id        Int?
+  assigned_users_ids  String[]         @default([]) @db.Uuid
+  sopt_head_ids       Int[]            @default([])
+  email               String?
+  has_data            Boolean?
+  is_active           Boolean          @default(true)
+  photo_url           String?
+  external_badge_code String?
+  public_users        public_users?    @relation(fields: [assigned_users_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  auth_users          auth_users?      @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  customeruser        customeruser?    @relation(fields: [customeruser_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  customer_events     customer_events? @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  sopt_head           sopt_head?       @relation(fields: [sopt_head_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
+  @@index([event_id, external_badge_code], map: "idx_customer_requests_badge_code", where: raw("(external_badge_code IS NOT NULL)"))
   @@schema("public")
 }
 
@@ -2007,22 +2032,24 @@ model customer_tier {
 }
 
 model customerevent {
-  id                   String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  created_at           DateTime      @default(now()) @db.Timestamptz(6)
-  event_id             String?       @db.Uuid
-  customeruser_id      String?       @db.Uuid
-  registerdate         DateTime?     @db.Timestamptz(6)
-  attendevent          DateTime?     @db.Timestamptz(6)
-  type                 String?
-  checked_in           Boolean?      @default(false)
-  checkin_at           DateTime?     @db.Timestamptz(6)
-  qr_token             String?       @unique(map: "idx_customerevent_qr_token") @default(dbgenerated("(gen_random_uuid())::text"))
-  payment_status       String        @default("not_required")
-  payment_slip_url     String?
-  payment_deadline     DateTime?     @db.Timestamptz(6)
-  payment_confirmed_at DateTime?     @db.Timestamptz(6)
-  customeruser         customeruser? @relation(fields: [customeruser_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  email_logs           email_logs[]
+  id                         String                       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at                 DateTime                     @default(now()) @db.Timestamptz(6)
+  event_id                   String?                      @db.Uuid
+  customeruser_id            String?                      @db.Uuid
+  registerdate               DateTime?                    @db.Timestamptz(6)
+  attendevent                DateTime?                    @db.Timestamptz(6)
+  type                       String?
+  checked_in                 Boolean?                     @default(false)
+  checkin_at                 DateTime?                    @db.Timestamptz(6)
+  qr_token                   String?                      @unique(map: "idx_customerevent_qr_token") @default(dbgenerated("(gen_random_uuid())::text"))
+  payment_status             String                       @default("not_required")
+  payment_slip_url           String?
+  payment_deadline           DateTime?                    @db.Timestamptz(6)
+  payment_confirmed_at       DateTime?                    @db.Timestamptz(6)
+  customeruser               customeruser?                @relation(fields: [customeruser_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  email_logs                 email_logs[]
+  event_companions           event_companions[]
+  event_registration_answers event_registration_answers[]
 
   @@index([event_id], map: "idx_customerevent_event_id")
   @@schema("public")
@@ -2030,14 +2057,14 @@ model customerevent {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model customernoti {
-  id                                    Int                  @id @default(autoincrement())
-  created_at                            DateTime             @default(now()) @db.Timestamptz(6)
+  id                                    Int                      @id @default(autoincrement())
+  created_at                            DateTime                 @default(now()) @db.Timestamptz(6)
   title                                 String
   message                               String?
-  senddate                              DateTime             @db.Timestamptz(6)
+  senddate                              DateTime                 @db.Timestamptz(6)
   tier                                  String?
-  status                                String?              @default("draft")
-  sent_at                               DateTime?            @db.Timestamptz(6)
+  status                                String?                  @default("draft")
+  sent_at                               DateTime?                @db.Timestamptz(6)
   navigation                            String?
   age_range                             String?
   province                              String?
@@ -2046,33 +2073,36 @@ model customernoti {
   weblink                               String?
   image                                 String?
   voucher_id                            Int?
-  target_type                           String?              @default("tier")
+  target_type                           String?                  @default("tier")
   target_auth_ids                       String[]
-  sent_count                            Int?                 @default(0)
+  sent_count                            Int?                     @default(0)
   target_promotion_id                   Int?
   target_event_id                       String?
   target_seminar_dwid                   String?
   target_seminar_company                String?
-  send_channels                         String[]             @default(["app"])
-  segment_id                            String?              @db.Uuid
-  target_customer_group_id              String?              @db.Uuid
-  targeting_logic                       String               @default("and")
-  click_tag_id                          String?              @db.Uuid
-  target_tag_id                         String?              @db.Uuid
-  target_tag_mode                       String?              @default("current")
-  target_tag_date_from                  DateTime?            @db.Date
-  target_tag_date_to                    DateTime?            @db.Date
-  click_tag_ids                         Json?                @default("[]")
-  send_mode                             String               @default("immediate")
-  target_channel_config_ids             String[]             @db.Uuid
-  tags_customernoti_click_tag_idTotags  tags?                @relation("customernoti_click_tag_idTotags", fields: [click_tag_id], references: [id], onUpdate: NoAction)
-  customer_segment                      customer_segment?    @relation(fields: [segment_id], references: [id], onUpdate: NoAction)
-  customer_group                        customer_group?      @relation(fields: [target_customer_group_id], references: [id], onUpdate: NoAction)
-  tags_customernoti_target_tag_idTotags tags?                @relation("customernoti_target_tag_idTotags", fields: [target_tag_id], references: [id], onUpdate: NoAction)
-  voucher                               voucher?             @relation(fields: [voucher_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  send_channels                         String[]                 @default(["app"])
+  segment_id                            String?                  @db.Uuid
+  target_customer_group_id              String?                  @db.Uuid
+  targeting_logic                       String                   @default("and")
+  click_tag_id                          String?                  @db.Uuid
+  target_tag_id                         String?                  @db.Uuid
+  target_tag_mode                       String?                  @default("current")
+  target_tag_date_from                  DateTime?                @db.Date
+  target_tag_date_to                    DateTime?                @db.Date
+  click_tag_ids                         Json?                    @default("[]")
+  send_mode                             String                   @default("immediate")
+  target_channel_config_ids             String[]                 @db.Uuid
+  gift_voucher_id                       Int?
+  tags_customernoti_click_tag_idTotags  tags?                    @relation("customernoti_click_tag_idTotags", fields: [click_tag_id], references: [id], onUpdate: NoAction)
+  gift_voucher                          gift_voucher?            @relation(fields: [gift_voucher_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  customer_segment                      customer_segment?        @relation(fields: [segment_id], references: [id], onUpdate: NoAction)
+  customer_group                        customer_group?          @relation(fields: [target_customer_group_id], references: [id], onUpdate: NoAction)
+  tags_customernoti_target_tag_idTotags tags?                    @relation("customernoti_target_tag_idTotags", fields: [target_tag_id], references: [id], onUpdate: NoAction)
+  voucher                               voucher?                 @relation(fields: [voucher_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   noti_auto_send_log                    noti_auto_send_log[]
   noti_channel_stats                    noti_channel_stats?
   noti_read_log                         noti_read_log[]
+  noti_taximail_messages                noti_taximail_messages[]
 
   @@schema("public")
 }
@@ -2101,95 +2131,111 @@ model customerseminar {
   @@schema("public")
 }
 
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model customeruser {
-  id                        String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  authid                    String?                    @unique @default(dbgenerated("auth.uid()")) @db.Uuid
-  member_id                 String?                    @unique(map: "customeruser_idno_key")
-  created_at                DateTime                   @default(now()) @db.Timestamptz(6)
-  prefix                    String?
-  namesurname               String?
-  email                     String?
-  tel                       String?
-  pdpa_accepted             Boolean?
-  pdpa_accepted_at          DateTime?                  @db.Timestamptz(6)
-  pdpa_version              String?
-  gender                    String?
-  birthday                  DateTime?                  @db.Date
-  home_address_line1        String?
-  home_address_line2        String?
-  home_sub_district         String?
-  home_district             String?
-  home_province             String?
-  home_postal_code          String?
-  w1_address_line1          String?
-  w1_address_line2          String?
-  w1_sub_district           String?
-  w1_district               String?
-  w1_province               String?
-  w1_postal_code            String?
-  position                  String?
-  w1_name                   String?
-  status                    String?
-  note                      String?
-  Preferred_Contact_Channel String?
-  fcm_token                 String?
-  avatar_url                String?
-  line_id                   String?
-  is_online                 Boolean?
-  last_online               String?
-  picprofile                String?
-  wtel                      String?
-  gibthailink               Json?
-  biodesignlink             Json?
-  lableaderlink             Json?
-  aeclink                   Json?
-  doctorcallink             Json?
-  miclink                   Json?
-  log                       String?
-  department                String?
-  knowform                  String?
-  referred_by               String?
-  uninstalled_at            DateTime?                  @db.Timestamptz(6)
-  line_user_id              String?
-  facebook_psid             String?
-  source                    String?
-  tel2                      String?
-  referral_campaign_id      Int?
-  nickname                  String?
-  idcard_image_url          String?
-  IM                        IM[]
-  assett                    assett[]
-  booth_game_sessions       booth_game_sessions[]
-  claim_requests            claim_requests[]
-  customer_delivery         customer_delivery[]
-  customer_invoice          customer_invoice[]
-  customer_line_accounts    customer_line_accounts[]
-  customer_requests         customer_requests[]
-  customer_saved_cards      customer_saved_cards[]
-  customer_tags             customer_tags[]
-  customer_tax_invoices     customer_tax_invoices[]
-  customer_tier             customer_tier?
-  customerevent             customerevent[]
-  customerexternalactivity  customerexternalactivity[]
-  customerseminar           customerseminar[]
-  users                     auth_users?                @relation(fields: [authid], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  referral_settings         referral_settings?         @relation(fields: [referral_campaign_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  customeruser_users        customeruser_users[]
-  customervoucher           customervoucher[]
-  email_logs                email_logs[]
-  event_post_comments       event_post_comments[]
-  event_post_likes          event_post_likes[]
-  event_prize_winners       event_prize_winners[]
-  noti_auto_send_log        noti_auto_send_log[]
-  notification_logs         notification_logs[]
-  order                     order[]
-  promotion_claim_history   promotion_claim_history[]
-  quiz_attempts             quiz_attempts[]
-  reward_points             reward_points[]
-  reward_redemptions        reward_redemptions[]
-  sopt_head                 sopt_head[]
-  survey_responses          survey_responses[]
-  user_reading_progress     user_reading_progress[]
+  id                                                                                             String                           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  authid                                                                                         String?                          @unique @default(dbgenerated("auth.uid()")) @db.Uuid
+  member_id                                                                                      String?                          @unique(map: "customeruser_idno_key")
+  created_at                                                                                     DateTime                         @default(now()) @db.Timestamptz(6)
+  prefix                                                                                         String?
+  namesurname                                                                                    String?
+  email                                                                                          String?
+  tel                                                                                            String?
+  pdpa_accepted                                                                                  Boolean?
+  pdpa_accepted_at                                                                               DateTime?                        @db.Timestamptz(6)
+  pdpa_version                                                                                   String?
+  gender                                                                                         String?
+  birthday                                                                                       DateTime?                        @db.Date
+  home_address_line1                                                                             String?
+  home_address_line2                                                                             String?
+  home_sub_district                                                                              String?
+  home_district                                                                                  String?
+  home_province                                                                                  String?
+  home_postal_code                                                                               String?
+  w1_address_line1                                                                               String?
+  w1_address_line2                                                                               String?
+  w1_sub_district                                                                                String?
+  w1_district                                                                                    String?
+  w1_province                                                                                    String?
+  w1_postal_code                                                                                 String?
+  position                                                                                       String?
+  w1_name                                                                                        String?
+  status                                                                                         String?
+  note                                                                                           String?
+  Preferred_Contact_Channel                                                                      String?
+  fcm_token                                                                                      String?
+  avatar_url                                                                                     String?
+  line_id                                                                                        String?
+  is_online                                                                                      Boolean?
+  last_online                                                                                    String?
+  picprofile                                                                                     String?
+  wtel                                                                                           String?
+  gibthailink                                                                                    Json?
+  biodesignlink                                                                                  Json?
+  lableaderlink                                                                                  Json?
+  aeclink                                                                                        Json?
+  doctorcallink                                                                                  Json?
+  miclink                                                                                        Json?
+  log                                                                                            String?
+  department                                                                                     String?
+  knowform                                                                                       String?
+  referred_by                                                                                    String?
+  uninstalled_at                                                                                 DateTime?                        @db.Timestamptz(6)
+  line_user_id                                                                                   String?
+  facebook_psid                                                                                  String?
+  source                                                                                         String?
+  tel2                                                                                           String?
+  referral_campaign_id                                                                           Int?
+  nickname                                                                                       String?
+  idcard_image_url                                                                               String?
+  id_card_number                                                                                 String?
+  id_card_photo_path                                                                             String?
+  IM                                                                                             IM[]
+  assett                                                                                         assett[]
+  booth_game_sessions                                                                            booth_game_sessions[]
+  claim_requests                                                                                 claim_requests[]
+  customer_companions                                                                            customer_companions[]
+  customer_delivery                                                                              customer_delivery[]
+  customer_invoice                                                                               customer_invoice[]
+  customer_line_accounts                                                                         customer_line_accounts[]
+  customer_requests                                                                              customer_requests[]
+  customer_saved_cards                                                                           customer_saved_cards[]
+  customer_tags                                                                                  customer_tags[]
+  customer_tax_invoices                                                                          customer_tax_invoices[]
+  customer_tier                                                                                  customer_tier?
+  customerevent                                                                                  customerevent[]
+  customerexternalactivity                                                                       customerexternalactivity[]
+  customerseminar                                                                                customerseminar[]
+  users                                                                                          auth_users?                      @relation(fields: [authid], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  referral_settings                                                                              referral_settings?               @relation(fields: [referral_campaign_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  customeruser_users                                                                             customeruser_users[]
+  customervoucher                                                                                customervoucher[]
+  email_logs                                                                                     email_logs[]
+  event_badge_links                                                                              event_badge_links[]
+  event_post_comments                                                                            event_post_comments[]
+  event_post_likes                                                                               event_post_likes[]
+  event_prize_designated_winners                                                                 event_prize_designated_winners[]
+  event_prize_excluded_customers                                                                 event_prize_excluded_customers[]
+  event_prize_winners                                                                            event_prize_winners[]
+  noti_auto_send_log                                                                             noti_auto_send_log[]
+  notification_logs                                                                              notification_logs[]
+  order                                                                                          order[]
+  promotion_claim_history                                                                        promotion_claim_history[]
+  quiz_attempts                                                                                  quiz_attempts[]
+  quiz_banned_customers                                                                          quiz_banned_customers[]
+  quiz_marathon_bonus_days                                                                       quiz_marathon_bonus_days[]
+  quiz_marathon_custom_questions_quiz_marathon_custom_questions_source_customer_idTocustomeruser quiz_marathon_custom_questions[] @relation("quiz_marathon_custom_questions_source_customer_idTocustomeruser")
+  quiz_marathon_custom_questions_quiz_marathon_custom_questions_target_customer_idTocustomeruser quiz_marathon_custom_questions[] @relation("quiz_marathon_custom_questions_target_customer_idTocustomeruser")
+  quiz_marathon_inventory                                                                        quiz_marathon_inventory[]
+  quiz_marathon_item_log_quiz_marathon_item_log_reflected_by_customer_idTocustomeruser           quiz_marathon_item_log[]         @relation("quiz_marathon_item_log_reflected_by_customer_idTocustomeruser")
+  quiz_marathon_item_log_quiz_marathon_item_log_source_customer_idTocustomeruser                 quiz_marathon_item_log[]         @relation("quiz_marathon_item_log_source_customer_idTocustomeruser")
+  quiz_marathon_item_log_quiz_marathon_item_log_target_customer_idTocustomeruser                 quiz_marathon_item_log[]         @relation("quiz_marathon_item_log_target_customer_idTocustomeruser")
+  quiz_marathon_item_purchases                                                                   quiz_marathon_item_purchases[]
+  reward_points                                                                                  reward_points[]
+  reward_redemptions                                                                             reward_redemptions[]
+  sopt_head                                                                                      sopt_head[]
+  survey_responses                                                                               survey_responses[]
+  user_reading_progress                                                                          user_reading_progress[]
 
   @@index([facebook_psid], map: "idx_customeruser_facebook_psid", where: raw("(facebook_psid IS NOT NULL)"))
   @@schema("public")
@@ -2384,31 +2430,39 @@ model emailpreregister {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model public_events {
-  id                     String        @id(map: "event_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  created_at             DateTime      @default(now()) @db.Timestamptz(6)
-  eventname              String?
-  event_detail           String?
-  event_registerdate     DateTime?     @db.Timestamptz(6)
-  event_preregister      DateTime?     @db.Timestamptz(6)
-  eventStartDate         String?
-  event_pic              String?
-  location               String?
-  category               String?
-  tierregister           String?
-  tierpreregister        String?
-  attendee               Decimal?      @db.Decimal
-  eventEndDate           String?
-  link                   String?
-  event_category_id      Int?
-  is_active              Boolean?
-  requires_payment       Boolean       @default(false)
-  payment_amount         Decimal?      @db.Decimal
-  preregister_unlisted   Boolean       @default(false)
-  payment_bank_name      String?
-  payment_account_number String?
-  payment_promptpay_id   String?
-  event_posts            event_posts[]
-  popup_image            popup_image[]
+  id                              String                         @id(map: "event_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at                      DateTime                       @default(now()) @db.Timestamptz(6)
+  eventname                       String?
+  event_detail                    String?
+  event_registerdate              DateTime?                      @db.Timestamptz(6)
+  event_preregister               DateTime?                      @db.Timestamptz(6)
+  eventStartDate                  String?
+  event_pic                       String?
+  location                        String?
+  category                        String?
+  tierregister                    String?
+  tierpreregister                 String?
+  attendee                        Decimal?                       @db.Decimal
+  eventEndDate                    String?
+  link                            String?
+  event_category_id               Int?
+  is_active                       Boolean?
+  requires_payment                Boolean                        @default(false)
+  payment_amount                  Decimal?                       @db.Decimal
+  preregister_unlisted            Boolean                        @default(false)
+  payment_bank_name               String?
+  payment_account_number          String?
+  payment_promptpay_id            String?
+  youtube_link                    String?
+  max_companions_per_registration Int                            @default(0)
+  payment_expiry_threshold_pct    Int                            @default(90)
+  survey_id                       Int?
+  auto_send_survey                Boolean                        @default(false)
+  survey_sent_at                  DateTime?                      @db.Timestamptz(6)
+  event_posts                     event_posts[]
+  event_registration_questions    event_registration_questions[]
+  surveys                         surveys?                       @relation(fields: [survey_id], references: [id], onUpdate: NoAction)
+  popup_image                     popup_image[]
 
   @@map("events")
   @@schema("public")
@@ -2550,6 +2604,8 @@ model im_goods {
   is_free                              Boolean?
   promotion_from_product_option_id     Int?
   admin_updated_by                     String?       @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  points_multiplier                    Decimal?      @db.Decimal
+  points_multiplier_promo_name         String?
   users_im_goods_approved_by_pmTousers public_users? @relation("im_goods_approved_by_pmTousers", fields: [approved_by_pm], references: [id], onDelete: NoAction, onUpdate: NoAction)
   IM                                   IM            @relation(fields: [docid], references: [id], onDelete: Cascade)
   users_im_goods_users_idTousers       public_users? @relation("im_goods_users_idTousers", fields: [users_id], references: [id], onDelete: Cascade)
@@ -2558,23 +2614,24 @@ model im_goods {
 }
 
 model invoicehead {
-  id                       Int                        @id @default(autoincrement())
-  created_at               DateTime                   @default(now()) @db.Timestamptz(6)
-  company_name             String?                    @unique
-  Entity_ID                String                     @unique @map("Entity ID")
-  Entity_Name              String?                    @map("Entity Name")
-  Address1                 String?
-  Address2                 String?
-  Province                 String?
-  Country                  String?
-  PostCode                 String?
-  Tax_Number               String?                    @map("Tax Number")
-  Branch_Tax_Name          String?                    @map("Branch Tax Name")
-  Branch_Tax_ID            String?                    @map("Branch Tax ID")
-  customer_invoice_address customer_invoice_address[]
-  IM                       IM[]
-  PO                       PO[]
-  customer_invoice         customer_invoice[]
+  id                                Int                        @id @default(autoincrement())
+  created_at                        DateTime                   @default(now()) @db.Timestamptz(6)
+  company_name                      String?                    @unique
+  Entity_ID                         String                     @unique @map("Entity ID")
+  Entity_Name                       String?                    @map("Entity Name")
+  Address1                          String?
+  Address2                          String?
+  Province                          String?
+  Country                           String?
+  PostCode                          String?
+  Tax_Number                        String?                    @map("Tax Number")
+  Branch_Tax_Name                   String?                    @map("Branch Tax Name")
+  Branch_Tax_ID                     String?                    @map("Branch Tax ID")
+  customer_invoice_address          customer_invoice_address[]
+  IM                                IM[]
+  IM_IM_invoicehead_idToinvoicehead IM[]                       @relation("IM_invoicehead_idToinvoicehead")
+  PO                                PO[]
+  customer_invoice                  customer_invoice[]
 
   @@schema("public")
 }
@@ -2748,7 +2805,7 @@ model noti_read_log {
   event_type   String
   created_at   DateTime     @default(now()) @db.Timestamptz(6)
   customernoti customernoti @relation(fields: [noti_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  users        auth_users?  @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users        auth_users?  @relation(fields: [user_id], references: [id], onUpdate: NoAction)
 
   @@unique([noti_id, user_id, event_type], map: "noti_read_log_unique_event")
   @@index([noti_id], map: "noti_read_log_noti_idx")
@@ -3075,6 +3132,9 @@ model public_products {
   youtube_url            String?
   is_pre_order           Boolean?
   is_custom_options      Boolean?
+  slug                   String?                         @unique(map: "idx_products_slug", where: raw("(slug IS NOT NULL)"))
+  seo_title              String?
+  seo_description        String?
   product_images         public_product_images[]
   product_options        public_product_options[]
   product_payment_method public_product_payment_method[]
@@ -3154,7 +3214,9 @@ model public_promotion {
   updated_at                              DateTime?                                   @db.Timestamptz(6)
   is_accept_overlapse_promotion           Boolean?
   customer_tiers                          String[]
+  gift_voucher_id                         Int?
   popup_image                             popup_image[]
+  gift_voucher                            gift_voucher?                               @relation(fields: [gift_voucher_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   voucher                                 voucher?                                    @relation(fields: [voucher_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   promotion_analytics                     promotion_analytics[]
   promotion_bundle_deal_get_products      public_promotion_bundle_deal_get_products[]
@@ -3224,15 +3286,17 @@ model public_promotion_bundle_deal_grand_total_free_products {
 }
 
 model promotion_claim_history {
-  id             Int              @id @default(autoincrement())
-  promotion_id   Int
-  user_id        String           @db.Uuid
-  claimed_at     DateTime?        @default(now()) @db.Timestamp(6)
-  points_awarded Int
-  voucher_id     Int?
-  promotion      public_promotion @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  customeruser   customeruser     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  voucher        voucher?         @relation(fields: [voucher_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id              Int              @id @default(autoincrement())
+  promotion_id    Int
+  user_id         String           @db.Uuid
+  claimed_at      DateTime?        @default(now()) @db.Timestamp(6)
+  points_awarded  Int
+  voucher_id      Int?
+  gift_voucher_id Int?
+  gift_voucher    gift_voucher?    @relation(fields: [gift_voucher_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  promotion       public_promotion @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  customeruser    customeruser     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  voucher         voucher?         @relation(fields: [voucher_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([promotion_id, user_id])
   @@index([promotion_id], map: "idx_promotion_claim_promo")
@@ -3322,12 +3386,14 @@ model promotion_redeem {
 }
 
 model promotion_voucher {
-  id           Int               @id @default(autoincrement())
-  promotion_id Int?
-  voucher_id   Int?
-  created_at   DateTime?         @default(now()) @db.Timestamptz(6)
-  promotion    public_promotion? @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  voucher      voucher?          @relation(fields: [voucher_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id              Int               @id @default(autoincrement())
+  promotion_id    Int?
+  voucher_id      Int?
+  created_at      DateTime?         @default(now()) @db.Timestamptz(6)
+  gift_voucher_id Int?
+  gift_voucher    gift_voucher?     @relation(fields: [gift_voucher_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  promotion       public_promotion? @relation(fields: [promotion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  voucher         voucher?          @relation(fields: [voucher_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("public")
 }
@@ -3439,7 +3505,7 @@ model reward_points {
   points            Int
   created_at        DateTime?           @default(now()) @db.Timestamptz(6)
   expired_at        DateTime            @default(dbgenerated("(now() + '1 year'::interval)")) @db.Timestamptz(6)
-  doc_id            String?
+  doc_id            String?             @unique(map: "reward_points_purchase_doc_id_uidx", where: raw("(doc_id ~~ 'SX%'::text)"))
   redeem_point      Decimal?            @db.Decimal
   redeem_exp        DateTime?           @default(dbgenerated("(now() + '3 years'::interval)")) @db.Date
   reason            String?
@@ -3831,6 +3897,7 @@ model surveys {
   is_active         Boolean?           @default(true)
   created_at        DateTime?          @default(now()) @db.Timestamptz(6)
   updated_at        DateTime?          @default(now()) @db.Timestamptz(6)
+  events            public_events[]
   survey_questions  survey_questions[]
   survey_responses  survey_responses[]
 
@@ -4012,6 +4079,7 @@ model public_users {
 
   @@index([is_active], map: "idx_users_is_active")
   @@index([team], map: "idx_users_team")
+  @@index([authid], map: "idx_users_authid")
   @@map("users")
   @@schema("public")
 }
@@ -4047,6 +4115,7 @@ model voucher {
   promotion                     public_promotion[]
   promotion_claim_history       promotion_claim_history[]
   promotion_voucher             promotion_voucher[]
+  quiz_event_prizes             quiz_event_prizes[]
 
   @@schema("public")
 }
@@ -4295,10 +4364,11 @@ model staff_line_accounts {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model booth_game_config {
-  phone_entry_enabled Boolean  @default(false)
-  max_plays_per_phone Int      @default(1)
-  updated_at          DateTime @default(now()) @db.Timestamptz(6)
-  game_type           String   @id
+  phone_entry_enabled    Boolean  @default(false)
+  max_plays_per_phone    Int      @default(1)
+  updated_at             DateTime @default(now()) @db.Timestamptz(6)
+  game_type              String   @id
+  phone_entry_on_display Boolean  @default(false)
 
   @@schema("public")
 }
@@ -4329,6 +4399,8 @@ model booth_game_prizes {
   sort_order          Int                   @default(0)
   created_at          DateTime              @default(now()) @db.Timestamptz(6)
   game_type           String                @default("wheel")
+  round_id            String?               @db.Uuid
+  booth_game_rounds   booth_game_rounds?    @relation(fields: [round_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   booth_game_sessions booth_game_sessions[]
 
   @@schema("public")
@@ -4352,6 +4424,8 @@ model booth_game_sessions {
   phone                     String?
   game_type                 String             @default("wheel")
   remote_start_requested_at DateTime?          @db.Timestamptz(6)
+  round_id                  String?            @db.Uuid
+  booth_game_rounds         booth_game_rounds? @relation(fields: [round_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   customeruser              customeruser       @relation(fields: [customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "lucky_wheel_sessions_customer_id_fkey")
   customervoucher           customervoucher?   @relation(fields: [customervoucher_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "lucky_wheel_sessions_customervoucher_id_fkey")
   booth_game_prizes         booth_game_prizes? @relation(fields: [prize_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "lucky_wheel_sessions_prize_id_fkey")
@@ -4362,16 +4436,18 @@ model booth_game_sessions {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model quiz_attempt_questions {
-  id             String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  attempt_id     String         @db.Uuid
-  question_id    String         @db.Uuid
-  order_index    Int
-  selected_index Int?
-  is_correct     Boolean?
-  time_taken_ms  Int?
-  answered_at    DateTime?      @db.Timestamptz(6)
-  quiz_attempts  quiz_attempts  @relation(fields: [attempt_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  quiz_questions quiz_questions @relation(fields: [question_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id                             String                          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  attempt_id                     String                          @db.Uuid
+  question_id                    String?                         @db.Uuid
+  order_index                    Int
+  selected_index                 Int?
+  is_correct                     Boolean?
+  time_taken_ms                  Int?
+  answered_at                    DateTime?                       @db.Timestamptz(6)
+  custom_question_id             String?                         @db.Uuid
+  quiz_attempts                  quiz_attempts                   @relation(fields: [attempt_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  quiz_marathon_custom_questions quiz_marathon_custom_questions? @relation(fields: [custom_question_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  quiz_questions                 quiz_questions?                 @relation(fields: [question_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([attempt_id, order_index])
   @@schema("public")
@@ -4380,19 +4456,24 @@ model quiz_attempt_questions {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model quiz_attempts {
-  id                     String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  event_id               String                   @db.Uuid
-  customer_id            String                   @db.Uuid
-  customer_name          String
-  status                 String                   @default("in_progress")
-  correct_count          Int                      @default(0)
-  total_time_ms          BigInt                   @default(0)
-  attempt_date           DateTime                 @default(dbgenerated("CURRENT_DATE")) @db.Date
-  started_at             DateTime                 @default(now()) @db.Timestamptz(6)
-  finished_at            DateTime?                @db.Timestamptz(6)
-  quiz_attempt_questions quiz_attempt_questions[]
-  customeruser           customeruser             @relation(fields: [customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  quiz_events            quiz_events              @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id                             String                           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_id                       String                           @db.Uuid
+  customer_id                    String                           @db.Uuid
+  customer_name                  String
+  status                         String                           @default("in_progress")
+  correct_count                  Int                              @default(0)
+  total_time_ms                  BigInt                           @default(0)
+  attempt_date                   DateTime                         @default(dbgenerated("CURRENT_DATE")) @db.Date
+  started_at                     DateTime                         @default(now()) @db.Timestamptz(6)
+  finished_at                    DateTime?                        @db.Timestamptz(6)
+  used_swap                      Boolean                          @default(false)
+  used_5050                      Boolean                          @default(false)
+  eligibility_key                String?                          @unique(map: "quiz_attempts_eligibility_key_unique")
+  used_points                    Boolean                          @default(false)
+  quiz_attempt_questions         quiz_attempt_questions[]
+  customeruser                   customeruser                     @relation(fields: [customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  quiz_events                    quiz_events                      @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  quiz_marathon_custom_questions quiz_marathon_custom_questions[]
 
   @@index([event_id, status, correct_count(sort: Desc), total_time_ms], map: "quiz_attempts_leaderboard_idx")
   @@schema("public")
@@ -4401,14 +4482,19 @@ model quiz_attempts {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model quiz_event_prizes {
-  id          String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  event_id    String      @db.Uuid
-  rank        Int
-  prize_type  String
-  reward_id   String?     @db.Uuid
-  points      Int?
-  quiz_events quiz_events @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  rewards     rewards?    @relation(fields: [reward_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id              String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_id        String        @db.Uuid
+  rank            Int
+  prize_type      String
+  reward_id       String?       @db.Uuid
+  points          Int?
+  gift_voucher_id Int?
+  manual_label    String?
+  voucher_id      Int?
+  quiz_events     quiz_events   @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  gift_voucher    gift_voucher? @relation(fields: [gift_voucher_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  rewards         rewards?      @relation(fields: [reward_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  voucher         voucher?      @relation(fields: [voucher_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([event_id, rank])
   @@schema("public")
@@ -4417,23 +4503,34 @@ model quiz_event_prizes {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model quiz_events {
-  id                        String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name                      String
-  start_at                  DateTime            @db.Timestamptz(6)
-  end_at                    DateTime            @db.Timestamptz(6)
-  questions_per_attempt     Int                 @default(10)
-  seconds_per_question      Int                 @default(30)
-  attempt_limit_mode        String              @default("once_per_event")
-  active                    Boolean             @default(true)
-  finalized_at              DateTime?           @db.Timestamptz(6)
-  created_at                DateTime            @default(now()) @db.Timestamptz(6)
-  banner                    String?
-  description               String?
-  terms                     String?
-  extra_attempt_points_cost Int?
-  quiz_attempts             quiz_attempts[]
-  quiz_event_prizes         quiz_event_prizes[]
-  quiz_questions            quiz_questions[]
+  id                             String                           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                           String
+  start_at                       DateTime                         @db.Timestamptz(6)
+  end_at                         DateTime                         @db.Timestamptz(6)
+  questions_per_attempt          Int                              @default(10)
+  seconds_per_question           Int                              @default(30)
+  attempt_limit_mode             String                           @default("once_per_event")
+  active                         Boolean                          @default(true)
+  finalized_at                   DateTime?                        @db.Timestamptz(6)
+  created_at                     DateTime                         @default(now()) @db.Timestamptz(6)
+  banner                         String?
+  description                    String?
+  terms                          String?
+  extra_attempt_points_cost      Int?
+  game_mode                      String                           @default("classic")
+  marathon_max_days              Int                              @default(5)
+  marathon_item_draw_points_cost Int?
+  marathon_item_draw_daily_limit Int                              @default(1)
+  quiz_attempts                  quiz_attempts[]
+  quiz_banned_customers          quiz_banned_customers[]
+  quiz_event_prizes              quiz_event_prizes[]
+  quiz_marathon_bonus_days       quiz_marathon_bonus_days[]
+  quiz_marathon_custom_questions quiz_marathon_custom_questions[]
+  quiz_marathon_inventory        quiz_marathon_inventory[]
+  quiz_marathon_item_log         quiz_marathon_item_log[]
+  quiz_marathon_item_purchases   quiz_marathon_item_purchases[]
+  quiz_marathon_items            quiz_marathon_items[]
+  quiz_questions                 quiz_questions[]
 
   @@schema("public")
 }
@@ -4542,6 +4639,8 @@ model event_prize_draw_sessions {
   spun_at                   DateTime?    @db.Timestamptz(6)
   created_at                DateTime     @default(now()) @db.Timestamptz(6)
   winners                   Json?
+  only_checked_in           Boolean      @default(true)
+  test_mode                 Boolean      @default(false)
   event_prizes              event_prizes @relation(fields: [prize_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("public")
@@ -4555,6 +4654,7 @@ model event_prize_winners {
   customeruser_id String       @db.Uuid
   tier_at_draw    String
   won_at          DateTime     @default(now()) @db.Timestamptz(6)
+  forfeited_at    DateTime?    @db.Timestamptz(6)
   customeruser    customeruser @relation(fields: [customeruser_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   event_prizes    event_prizes @relation(fields: [prize_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
@@ -4563,22 +4663,23 @@ model event_prize_winners {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model event_prizes {
-  id                        BigInt                      @id @default(autoincrement())
-  event_id                  String                      @db.Uuid
-  name                      String
-  image                     String?
-  color                     String?                     @default("#00897B")
-  quantity                  Int                         @default(1)
-  remaining                 Int                         @default(1)
-  sort_order                Int                         @default(0)
-  weight_bronze             Decimal                     @default(1) @db.Decimal
-  weight_silver             Decimal                     @default(2) @db.Decimal
-  weight_gold               Decimal                     @default(3) @db.Decimal
-  weight_platinum           Decimal                     @default(5) @db.Decimal
-  created_at                DateTime                    @default(now()) @db.Timestamptz(6)
-  winners_per_draw          Int                         @default(1)
-  event_prize_draw_sessions event_prize_draw_sessions[]
-  event_prize_winners       event_prize_winners[]
+  id                             BigInt                           @id @default(autoincrement())
+  event_id                       String                           @db.Uuid
+  name                           String
+  image                          String?
+  color                          String?                          @default("#00897B")
+  quantity                       Int                              @default(1)
+  remaining                      Int                              @default(1)
+  sort_order                     Int                              @default(0)
+  weight_bronze                  Decimal                          @default(1) @db.Decimal
+  weight_silver                  Decimal                          @default(2) @db.Decimal
+  weight_gold                    Decimal                          @default(3) @db.Decimal
+  weight_platinum                Decimal                          @default(5) @db.Decimal
+  created_at                     DateTime                         @default(now()) @db.Timestamptz(6)
+  winners_per_draw               Int                              @default(1)
+  event_prize_designated_winners event_prize_designated_winners[]
+  event_prize_draw_sessions      event_prize_draw_sessions[]
+  event_prize_winners            event_prize_winners[]
 
   @@schema("public")
 }
@@ -4650,6 +4751,7 @@ model event_posts {
   posted_by_type      String                @default("staff")
   posted_by_auth_id   String?               @db.Uuid
   custom_label        String?
+  facebook_post_id    String?
   event_post_comments event_post_comments[]
   event_post_images   event_post_images[]
   event_post_likes    event_post_likes[]
@@ -4657,6 +4759,275 @@ model event_posts {
   users               auth_users?           @relation(fields: [posted_by_auth_id], references: [id], onUpdate: NoAction)
 
   @@index([event_id], map: "idx_event_posts_event_id")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model booth_game_rounds {
+  id                  String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  game_type           String                @unique(map: "idx_booth_game_rounds_one_current", where: raw("is_current"))
+  name                String
+  is_current          Boolean               @default(false)
+  created_at          DateTime              @default(now()) @db.Timestamptz(6)
+  booth_game_prizes   booth_game_prizes[]
+  booth_game_sessions booth_game_sessions[]
+
+  @@index([game_type], map: "idx_booth_game_rounds_game_type")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model customer_companions {
+  id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  customeruser_id  String             @db.Uuid
+  name             String
+  relationship     String?
+  created_at       DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime           @default(now()) @db.Timestamptz(6)
+  customeruser     customeruser       @relation(fields: [customeruser_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  event_companions event_companions[]
+
+  @@unique([customeruser_id, name], map: "idx_customer_companions_unique")
+  @@index([customeruser_id], map: "idx_customer_companions_customeruser_id")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model event_badge_links {
+  id              Int             @id @default(autoincrement())
+  event_id        Int
+  badge_code      String
+  customeruser_id String?         @db.Uuid
+  linked_name     String?
+  linked_tel      String?
+  linked_email    String?
+  linked_company  String?
+  linked_by       String?         @db.Uuid
+  linked_at       DateTime        @default(now()) @db.Timestamptz(6)
+  customeruser    customeruser?   @relation(fields: [customeruser_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  customer_events customer_events @relation(fields: [event_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users           auth_users?     @relation(fields: [linked_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([event_id, badge_code])
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model event_companions {
+  id                    String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  customerevent_id      String               @db.Uuid
+  name                  String
+  created_at            DateTime             @default(now()) @db.Timestamptz(6)
+  relationship          String?
+  customer_companion_id String?              @db.Uuid
+  customer_companions   customer_companions? @relation(fields: [customer_companion_id], references: [id], onUpdate: NoAction)
+  customerevent         customerevent        @relation(fields: [customerevent_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([customerevent_id], map: "idx_event_companions_customerevent_id")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model event_prize_designated_winners {
+  id              String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_id        String       @db.Uuid
+  prize_id        BigInt
+  customeruser_id String       @db.Uuid
+  drawn           Boolean      @default(false)
+  created_at      DateTime     @default(now()) @db.Timestamptz(6)
+  customeruser    customeruser @relation(fields: [customeruser_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  event_prizes    event_prizes @relation(fields: [prize_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([prize_id, customeruser_id])
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model event_prize_excluded_customers {
+  id              String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_id        String       @db.Uuid
+  customeruser_id String       @db.Uuid
+  created_at      DateTime     @default(now()) @db.Timestamptz(6)
+  customeruser    customeruser @relation(fields: [customeruser_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([event_id, customeruser_id])
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model event_registration_answers {
+  id                           String                       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  customerevent_id             String                       @db.Uuid
+  question_id                  String                       @db.Uuid
+  answer_text                  String?
+  answer_value                 Json?
+  created_at                   DateTime                     @default(now()) @db.Timestamptz(6)
+  customerevent                customerevent                @relation(fields: [customerevent_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  event_registration_questions event_registration_questions @relation(fields: [question_id], references: [id], onUpdate: NoAction)
+
+  @@index([customerevent_id], map: "idx_event_registration_answers_customerevent_id")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model event_registration_questions {
+  id                         String                       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_id                   String                       @db.Uuid
+  question_text              String
+  question_type              String
+  options                    Json?
+  is_required                Boolean                      @default(true)
+  order_index                Int                          @default(0)
+  created_at                 DateTime                     @default(now()) @db.Timestamptz(6)
+  event_registration_answers event_registration_answers[]
+  events                     public_events                @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([event_id, order_index], map: "idx_event_registration_questions_event_id")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model noti_taximail_messages {
+  id             BigInt       @id @default(autoincrement())
+  noti_id        Int
+  platform       String
+  recipient      String
+  message_id     String
+  status         String?
+  delivered_at   DateTime?    @db.Timestamptz(6)
+  opened_at      DateTime?    @db.Timestamptz(6)
+  clicked_at     DateTime?    @db.Timestamptz(6)
+  raw_last_event Json?
+  created_at     DateTime     @default(now()) @db.Timestamptz(6)
+  customernoti   customernoti @relation(fields: [noti_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([platform, message_id])
+  @@index([message_id])
+  @@index([noti_id], map: "noti_taximail_messages_noti_idx")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model quiz_banned_customers {
+  id              String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_id        String       @db.Uuid
+  customeruser_id String       @db.Uuid
+  banned_at       DateTime     @default(now()) @db.Timestamptz(6)
+  customeruser    customeruser @relation(fields: [customeruser_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  quiz_events     quiz_events  @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([event_id, customeruser_id])
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model quiz_marathon_bonus_days {
+  event_id     String       @db.Uuid
+  customer_id  String       @db.Uuid
+  bonus_days   Int          @default(0)
+  id           Int          @id @default(autoincrement())
+  customeruser customeruser @relation(fields: [customer_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  quiz_events  quiz_events  @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model quiz_marathon_custom_questions {
+  id                                                                           String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_id                                                                     String                   @db.Uuid
+  source_customer_id                                                           String                   @db.Uuid
+  target_customer_id                                                           String                   @db.Uuid
+  question_text                                                                String
+  choices                                                                      Json
+  correct_index                                                                Int
+  consumed_at                                                                  DateTime?                @db.Timestamptz(6)
+  consumed_in_attempt_id                                                       String?                  @db.Uuid
+  answered_correct                                                             Boolean?
+  created_at                                                                   DateTime                 @default(now()) @db.Timestamptz(6)
+  quiz_attempt_questions                                                       quiz_attempt_questions[]
+  quiz_attempts                                                                quiz_attempts?           @relation(fields: [consumed_in_attempt_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  quiz_events                                                                  quiz_events              @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  customeruser_quiz_marathon_custom_questions_source_customer_idTocustomeruser customeruser             @relation("quiz_marathon_custom_questions_source_customer_idTocustomeruser", fields: [source_customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  customeruser_quiz_marathon_custom_questions_target_customer_idTocustomeruser customeruser             @relation("quiz_marathon_custom_questions_target_customer_idTocustomeruser", fields: [target_customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([event_id, target_customer_id, consumed_at], map: "idx_quiz_marathon_custom_questions_target")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model quiz_marathon_inventory {
+  id                     String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_id               String                   @db.Uuid
+  customer_id            String                   @db.Uuid
+  item_id                String                   @db.Uuid
+  granted_at             DateTime                 @default(now()) @db.Timestamptz(6)
+  used_at                DateTime?                @db.Timestamptz(6)
+  customeruser           customeruser             @relation(fields: [customer_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  quiz_events            quiz_events              @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  quiz_marathon_items    quiz_marathon_items      @relation(fields: [item_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  quiz_marathon_item_log quiz_marathon_item_log[]
+
+  @@index([event_id, customer_id], map: "idx_quiz_marathon_inventory_customer")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model quiz_marathon_item_log {
+  id                                                                         String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_id                                                                   String                  @db.Uuid
+  inventory_id                                                               String                  @db.Uuid
+  source_customer_id                                                         String                  @db.Uuid
+  target_customer_id                                                         String                  @db.Uuid
+  item_code                                                                  String
+  time_delta_ms                                                              BigInt                  @default(0)
+  score_delta                                                                Int                     @default(0)
+  blocked                                                                    Boolean                 @default(false)
+  created_at                                                                 DateTime                @default(now()) @db.Timestamptz(6)
+  reflected_by_customer_id                                                   String?                 @db.Uuid
+  quiz_events                                                                quiz_events             @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  quiz_marathon_inventory                                                    quiz_marathon_inventory @relation(fields: [inventory_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  customeruser_quiz_marathon_item_log_reflected_by_customer_idTocustomeruser customeruser?           @relation("quiz_marathon_item_log_reflected_by_customer_idTocustomeruser", fields: [reflected_by_customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  customeruser_quiz_marathon_item_log_source_customer_idTocustomeruser       customeruser            @relation("quiz_marathon_item_log_source_customer_idTocustomeruser", fields: [source_customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  customeruser_quiz_marathon_item_log_target_customer_idTocustomeruser       customeruser            @relation("quiz_marathon_item_log_target_customer_idTocustomeruser", fields: [target_customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([event_id, target_customer_id], map: "idx_quiz_marathon_item_log_target")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model quiz_marathon_item_purchases {
+  id            String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_id      String       @db.Uuid
+  customer_id   String       @db.Uuid
+  purchase_date DateTime     @default(dbgenerated("((now() AT TIME ZONE 'utc'::text))::date")) @db.Date
+  points_spent  Int
+  created_at    DateTime     @default(now()) @db.Timestamptz(6)
+  customeruser  customeruser @relation(fields: [customer_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  quiz_events   quiz_events  @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([event_id, customer_id, purchase_date], map: "idx_quiz_marathon_item_purchases_daily")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model quiz_marathon_items {
+  id                      String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  event_id                String                    @db.Uuid
+  code                    String
+  name                    String
+  description             String?
+  tier                    String                    @default("common")
+  targets_other           Boolean                   @default(false)
+  min_magnitude           Int?
+  max_magnitude           Int?
+  active                  Boolean                   @default(true)
+  quiz_marathon_inventory quiz_marathon_inventory[]
+  quiz_events             quiz_events               @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([event_id], map: "idx_quiz_marathon_items_event")
   @@schema("public")
 }
 
@@ -5054,6 +5425,16 @@ view vw_product_reviews {
   admin_quote         String?
 
   @@schema("3nconnect")
+}
+
+view quiz_marathon_standings {
+  event_id      String?  @db.Uuid
+  customer_id   String?  @db.Uuid
+  customer_name String?
+  total_score   BigInt?
+  total_time_ms Decimal? @db.Decimal
+
+  @@schema("public")
 }
 
 enum aal_level {

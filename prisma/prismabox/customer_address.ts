@@ -106,6 +106,8 @@ export const customer_addressRelations = t.Object(
           payment_method_type: __nullable__(t.String()),
           customer_invoice_address_id: __nullable__(t.Integer()),
           is_review_completed: __nullable__(t.Boolean()),
+          invoicehead_id: __nullable__(t.Integer()),
+          points_credited_at: __nullable__(t.Date()),
         },
         {
           additionalProperties: false,

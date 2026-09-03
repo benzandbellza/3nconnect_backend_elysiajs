@@ -47,6 +47,7 @@ export const gift_voucher_campaign_voucherRelations = t.Object(
           usage_period_day: __nullable__(t.Integer()),
           event_trigger: __nullable__(t.String()),
           tier_trigger_name: __nullable__(t.String()),
+          voucherpic: __nullable__(t.String()),
         },
         {
           additionalProperties: false,
