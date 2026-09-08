@@ -314,21 +314,17 @@ export const publicRoute = new Elysia({
       try { 
         const products = await prisma.vw_promotion_products_index.findMany({
           where: {
-            AND: [
+            promotion_type: {
+              notIn: ['flash_sale', 'clearance_sale']
+            },
+            OR: [
               {
-                promotion_type: {
-                  not: 'flash_sale'
-                }
+                is_pre_order: null,
               },
               {
-                promotion_type: {
-                  not: 'clearance_sale'
-                }
+                is_pre_order: false,
               }
             ],
-            is_pre_order: {
-              not: true
-            },
             category_hierarchy: {
               isEmpty: false
             }
