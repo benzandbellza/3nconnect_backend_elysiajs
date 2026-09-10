@@ -4763,6 +4763,7 @@ export const ecommerceRoute = new Elysia({
           is_accept_overlapse_promotion,
           customer_tiers,
           tiers,
+          is_active,
         } = body;
 
         const { promotion_id } = params;
@@ -4783,6 +4784,7 @@ export const ecommerceRoute = new Elysia({
             promotion_end: promotion_end,
             is_accept_overlapse_promotion: is_accept_overlapse_promotion,
             customer_tiers: customer_tiers,
+            is_active: is_active,
             updated_at: now,
           },
         });
@@ -4851,6 +4853,7 @@ export const ecommerceRoute = new Elysia({
         promotion_end: t.Date(),
         is_accept_overlapse_promotion: t.Boolean(),
         customer_tiers: t.Array(t.String()),
+        is_active: t.Boolean(),
         tiers: t.Array(
           t.Object({
             level_no: t.Number(),
