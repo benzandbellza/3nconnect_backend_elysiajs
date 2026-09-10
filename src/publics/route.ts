@@ -563,6 +563,16 @@ export const publicRoute = new Elysia({
                 name: true
               }
             },
+            brands: {
+              select: {
+                brand_name: true
+              }
+            },
+            companies: {
+              select: {
+                name: true
+              }
+            },
             product_images: {
               select : {
                 id: true,

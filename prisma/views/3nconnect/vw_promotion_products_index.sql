@@ -53,7 +53,8 @@ SELECT
     flash_sale_table.quantity_sold,
     discount_table.quantity_sold,
     0
-  ) AS quantity_sold
+  ) AS quantity_sold,
+  p.brand_id
 FROM
   (
     (

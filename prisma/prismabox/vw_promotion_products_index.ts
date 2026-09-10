@@ -26,6 +26,7 @@ export const vw_promotion_products_indexPlain = t.Object(
     company_id: __nullable__(t.Integer()),
     quantity_limit: __nullable__(t.Integer()),
     quantity_sold: __nullable__(t.Integer()),
+    brand_id: __nullable__(t.Integer()),
   },
   { additionalProperties: false },
 );
@@ -120,6 +121,7 @@ export const vw_promotion_products_indexWhere = t.Partial(
           company_id: t.Integer(),
           quantity_limit: t.Integer(),
           quantity_sold: t.Integer(),
+          brand_id: t.Integer(),
         },
         { additionalProperties: false },
       ),
@@ -174,6 +176,7 @@ export const vw_promotion_products_indexWhereUnique = t.Recursive(
               company_id: t.Integer(),
               quantity_limit: t.Integer(),
               quantity_sold: t.Integer(),
+              brand_id: t.Integer(),
             },
             { additionalProperties: false },
           ),
@@ -207,6 +210,7 @@ export const vw_promotion_products_indexSelect = t.Partial(
       company_id: t.Boolean(),
       quantity_limit: t.Boolean(),
       quantity_sold: t.Boolean(),
+      brand_id: t.Boolean(),
       _count: t.Boolean(),
     },
     { additionalProperties: false },
@@ -279,6 +283,9 @@ export const vw_promotion_products_indexOrderBy = t.Partial(
         additionalProperties: false,
       }),
       quantity_sold: t.Union([t.Literal("asc"), t.Literal("desc")], {
+        additionalProperties: false,
+      }),
+      brand_id: t.Union([t.Literal("asc"), t.Literal("desc")], {
         additionalProperties: false,
       }),
     },
