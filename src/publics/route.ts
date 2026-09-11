@@ -1690,6 +1690,49 @@ export const publicRoute = new Elysia({
     },
   )
   .get(
+    "/promotions/extra-points/product/:product_option_id",
+    async ({ params, set }) => {
+      try {
+        const product_option_id = params.product_option_id;
+        const response = await prisma.vw_promotion_extra_points_products_index.findFirst({
+          where : {
+            product_option_id: product_option_id,
+          },
+          select: {
+            points_multiplier: true,
+            is_accept_overlapse_promotion: true,
+          }
+        });
+
+        if(!response){
+          set.status = 404;
+          return { message: "No valid extra points product found" };
+        }
+
+        return response;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        set.status = 500;
+        console.error("Error fetching extra points product:", error);
+        return { message: errorMessage };
+      }
+    },
+    {
+      params: t.Object({
+        product_option_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Promotions - Find Extra Points Products By product_option_id",
+        description: `
+          This endpoint retrieves extra points products promotion by its product option id.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["Publics"],
+      },
+    },
+  )
+  .get(
     "/promotions/extra-points/grand-total/:promotion_id",
     async ({ params, set }) => {
       try {
