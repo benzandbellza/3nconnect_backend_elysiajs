@@ -688,6 +688,48 @@ export const ecommerceCustomerRoute = new Elysia({
     }
   )
   .post(
+    "/clearance-sale/product-information",
+    async({ headers, body, set}) => {
+      try {
+        const { product_option_id, promotion_id } = body;
+        const response = await prisma.promotion_clearance_products.findFirst({
+          where: {
+            promotion_id : promotion_id,
+            product_option_id : product_option_id
+          },
+          select: {
+            mr_code: true,
+            lot: true,
+            location_code: true,
+          }
+        })
+
+
+      } catch (error) {
+        set.status = 500;
+        return { message: error};
+      }
+    },
+    {
+      headers: t.Object({
+        authorization: t.String(),
+      }),
+      body: t.Object({
+        product_option_id: t.Number(),
+        promotion_id: t.Number(),
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Products Payment - Check Payment Each Products",
+        description: `
+          This endpoint check payment each products.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["Publics"],
+      },
+    }
+  )
+  .post(
     "/checkout/review",
     async ({ headers, body, set }) => {
       try{
@@ -805,7 +847,7 @@ export const ecommerceCustomerRoute = new Elysia({
               is_pre_order: findPromotionProducts.is_pre_order ?? null,
             }
             // เข้าร่วมรายการ Flash Sale หรือ Discount
-            if(findPromotionProducts.promotion_type === 'flash_sale' || findPromotionProducts.promotion_type === 'discount' || findPromotionProducts.promotion_type === 'clearance_subtype'){
+            if(findPromotionProducts.promotion_type === 'flash_sale' || findPromotionProducts.promotion_type === 'discount' || findPromotionProducts.promotion_type === 'clearance_sale'){
               //  สามารถทับซ้อนกับโปรโมชั่นอื่นได้
               if(findPromotionProducts.is_accept_overlapse_promotion){
                 // ดึงข้อมูลโปรโมชั่นแบบซื้อ X แถม Y ที่สามารถทับซ้อนกับโปรโมชั่น Flash Sale หรือ Discount ได้
@@ -1414,6 +1456,7 @@ export const ecommerceCustomerRoute = new Elysia({
             });
 
             if (detail.order_items.length > 0) {
+              
               await tx.im_goods.createMany({
                 data: detail.order_items.map((item) =>
                   mapCustomerOrderItemToImGoods(createdOrder.id, item),

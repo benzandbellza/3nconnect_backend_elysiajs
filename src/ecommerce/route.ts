@@ -3626,6 +3626,8 @@ export const ecommerceRoute = new Elysia({
                 mr_code: true,
                 sale_price: true,
                 sale_percent: true,
+                product_owner: true,
+                expire_date: true,
               },
             },
           },
@@ -3711,7 +3713,9 @@ export const ecommerceRoute = new Elysia({
             sale_price: item.sale_price,
             sale_percent: item.sale_percent,
             location_code: item.localtion_code,
-            lot: item.lot_code
+            lot: item.lot_code,
+            product_owner: item.product_owner,
+            expire_date : item.expire_date ?? null,
           }))
         });
 
@@ -3748,6 +3752,7 @@ export const ecommerceRoute = new Elysia({
             sale_price: t.Number(),
             sku: t.String(),
             stock_age: t.Any(),
+            expire_date: t.Any(),
           })
         ) 
       }),
@@ -3817,7 +3822,9 @@ export const ecommerceRoute = new Elysia({
             sale_price: item.sale_price,
             sale_percent: item.sale_percent,
             location_code: item.localtion_code,
-            lot: item.lot_code
+            lot: item.lot_code,
+            product_owner: item.product_owner,
+            expire_date : item.expire_date ?? null,
           }))
         });
 
@@ -3853,6 +3860,8 @@ export const ecommerceRoute = new Elysia({
             sale_price: t.Number(),
             sku: t.String(),
             stock_age: t.Any(),
+            product_owner: t.String(),
+            expire_date: t.Any(),
           })
         ),
       }),
