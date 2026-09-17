@@ -701,10 +701,17 @@ export const ecommerceCustomerRoute = new Elysia({
             mr_code: true,
             lot: true,
             location_code: true,
+            product_owner: true,
+            expire_date: true,
           }
         })
 
+        if(!response){
+          set.status = 404;
+          return { message : "Not found promotion." }
+        }
 
+        return response;
       } catch (error) {
         set.status = 500;
         return { message: error};
