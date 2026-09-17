@@ -37,6 +37,13 @@ const requireNumber = (value: number | null, field: string): number => {
   return value;
 };
 
+const priceExcludeVat = (price: number | null): number | null => {
+  if (price === null || !Number.isFinite(price)) {
+    return null;
+  }
+  return parseFloat((price / 1.07).toFixed(2)); // Assuming VAT is 7%
+}
+
 export const mapCustomerOrderItemToImGoods = (
   docid: number,
   item: CustomerOrderItemInput,
@@ -55,6 +62,7 @@ export const mapCustomerOrderItemToImGoods = (
   admin_updated_at: parseNullableDate(item.admin_updated_at),
   sale_price: requireNumber(item.sale_price, "sale_price"),
   order_price: requireNumber(item.order_price, "order_price"),
+  sale_price_exclude_vat: priceExcludeVat(item.sale_price),
   is_free: item.is_free,
   promotion_from_product_option_id: item.promotion_from_product_option_id,
 });
