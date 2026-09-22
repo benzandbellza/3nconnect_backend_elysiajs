@@ -1877,6 +1877,7 @@ export const ecommerceCustomerRoute = new Elysia({
             option_name: true,
             mat_identity: true,
             is_accept_overlapse_promotion: true,
+            quantity_limit: true,
           },
         });
 
