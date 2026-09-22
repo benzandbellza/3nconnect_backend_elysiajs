@@ -1040,6 +1040,11 @@ model auth_users {
   sessions                    sessions[]
   webauthn_challenges         webauthn_challenges[]
   webauthn_credentials        webauthn_credentials[]
+  assett                      assett[]
+  competitor_posts            competitor_posts[]
+  competitor_profiles         competitor_profiles[]
+  competitor_trend_reports    competitor_trend_reports[]
+  customer_events             customer_events[]
   customer_group              customer_group[]
   customer_requests           customer_requests[]
   customer_segment            customer_segment[]
@@ -1050,6 +1055,7 @@ model auth_users {
   event_posts                 event_posts[]
   noti_read_log               noti_read_log[]
   security_device_allowlist   security_device_allowlist[]
+  spare_part_movements        spare_part_movements[]
   user_favorites              user_favorites[]
   user_login_history          user_login_history[]
   users                       public_users?
@@ -1429,29 +1435,36 @@ model asset_check {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model assett {
-  id                                 Int                 @id(map: "assett_instrument_pkey") @default(autoincrement())
-  created_at                         DateTime            @default(now()) @db.Timestamptz(6)
-  customeruser_id                    String?             @db.Uuid
+  id                                 Int                  @id(map: "assett_instrument_pkey") @default(autoincrement())
+  created_at                         DateTime             @default(now()) @db.Timestamptz(6)
+  customeruser_id                    String?              @db.Uuid
   contact_id                         Int?
   install                            String?
   install_place                      String?
-  installer                          String?             @db.Uuid
-  recorded_by                        String?             @db.Uuid
-  sale_person_id                     String?             @db.Uuid
+  installer                          String?              @db.Uuid
+  recorded_by                        String?              @db.Uuid
+  sale_person_id                     String?              @db.Uuid
   ref_doc                            String?
   note                               String?
   doc_id                             String?
   companies_id                       Int?
   status                             String?
   log                                String?
-  action_date                        DateTime?           @db.Timestamptz(6)
+  action_date                        DateTime?            @db.Timestamptz(6)
   type                               String?
-  users_assett_installerTousers      public_users?       @relation("assett_installerTousers", fields: [installer], references: [id], onDelete: Cascade)
-  companies                          public_companies?   @relation(fields: [companies_id], references: [id], onDelete: Cascade, map: "assett_instrument_companies_id_fkey")
-  contact                            contact?            @relation(fields: [contact_id], references: [id], onDelete: Cascade, map: "assett_instrument_contact_id_fkey")
-  customeruser                       customeruser?       @relation(fields: [customeruser_id], references: [id], onDelete: Cascade, map: "assett_instrument_customeruser_id_fkey")
-  users_assett_recorded_byTousers    public_users?       @relation("assett_recorded_byTousers", fields: [recorded_by], references: [id], onDelete: Cascade, map: "assett_instrument_recorded_by_fkey")
-  users_assett_sale_person_idTousers public_users?       @relation("assett_sale_person_idTousers", fields: [sale_person_id], references: [id], onDelete: Cascade, map: "assett_instrument_sale_person_id_fkey")
+  location_id                        BigInt?
+  approved_by                        String?              @db.Uuid
+  approved_at                        DateTime?            @db.Timestamptz(6)
+  visible_department_ids             Int[]
+  visible_user_ids                   String[]             @db.Uuid
+  users                              auth_users?          @relation(fields: [approved_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_assett_installerTousers      public_users?        @relation("assett_installerTousers", fields: [installer], references: [id], onDelete: Cascade)
+  companies                          public_companies?    @relation(fields: [companies_id], references: [id], onDelete: Cascade, map: "assett_instrument_companies_id_fkey")
+  contact                            contact?             @relation(fields: [contact_id], references: [id], onDelete: Cascade, map: "assett_instrument_contact_id_fkey")
+  customeruser                       customeruser?        @relation(fields: [customeruser_id], references: [id], onDelete: Cascade, map: "assett_instrument_customeruser_id_fkey")
+  users_assett_recorded_byTousers    public_users?        @relation("assett_recorded_byTousers", fields: [recorded_by], references: [id], onDelete: Cascade, map: "assett_instrument_recorded_by_fkey")
+  users_assett_sale_person_idTousers public_users?        @relation("assett_sale_person_idTousers", fields: [sale_person_id], references: [id], onDelete: Cascade, map: "assett_instrument_sale_person_id_fkey")
+  warehouse_locations                warehouse_locations? @relation(fields: [location_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   assett_goods_docs                  assett_goods_docs[]
 
   @@schema("public")
@@ -1459,20 +1472,22 @@ model assett {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model assett_goods {
-  id                Int                 @id @default(autoincrement())
-  created_at        DateTime            @default(now()) @db.Timestamptz(6)
-  sn_no             String?
-  catalog_no        String?
-  name              String?
-  type              String?
-  cost              Decimal?            @db.Decimal
-  product_gr        String?
-  brand             String?
-  depreciation      Int?
-  size              String?
-  asset_check       asset_check[]
-  assett_goods_docs assett_goods_docs[]
-  assett_waranty    assett_waranty[]
+  id                  Int                  @id @default(autoincrement())
+  created_at          DateTime             @default(now()) @db.Timestamptz(6)
+  sn_no               String?
+  catalog_no          String?
+  name                String?
+  type                String?
+  cost                Decimal?             @db.Decimal
+  product_gr          String?
+  brand               String?
+  depreciation        Int?
+  size                String?
+  location_id         BigInt?
+  asset_check         asset_check[]
+  warehouse_locations warehouse_locations? @relation(fields: [location_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  assett_goods_docs   assett_goods_docs[]
+  assett_waranty      assett_waranty[]
 
   @@schema("public")
 }
@@ -1573,9 +1588,17 @@ model bill_tracking {
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   note               String?
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // สิ่งที่แนบมา String? @map("สิ่งที่แนบมา")
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
@@ -1591,6 +1614,10 @@ model bill_tracking {
   enroll_date        String? @map("enroll date")
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // พนักงานขาย String? @map("พนักงานขาย")
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
@@ -1891,6 +1918,8 @@ model customer_events {
   active            Boolean             @default(true)
   created_at        DateTime            @default(now()) @db.Timestamptz(6)
   allow_badge_scan  Boolean             @default(false)
+  created_by        String?             @db.Uuid
+  users             auth_users?         @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   customer_requests customer_requests[]
   event_badge_links event_badge_links[]
 
@@ -2263,6 +2292,7 @@ model customeruser {
   quiz_marathon_item_purchases                                                                   quiz_marathon_item_purchases[]
   rally_completions                                                                              rally_completions[]
   rally_scans                                                                                    rally_scans[]
+  rally_wheel_spins                                                                              rally_wheel_spins[]
   reward_points                                                                                  reward_points[]
   reward_redemptions                                                                             reward_redemptions[]
   sopt_head                                                                                      sopt_head[]
@@ -5486,29 +5516,31 @@ model gibthaisale_staging {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model rallies {
-  id                          String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id                          String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name                        String
   description                 String?
-  status                      String              @default("draft")
-  min_checkpoints_required    Int                 @default(1)
-  requires_event_registration Boolean             @default(false)
-  event_id                    String?             @db.Uuid
-  requires_location           Boolean             @default(false)
+  status                      String               @default("draft")
+  min_checkpoints_required    Int                  @default(1)
+  requires_event_registration Boolean              @default(false)
+  event_id                    String?              @db.Uuid
+  requires_location           Boolean              @default(false)
   location_lat                Float?
   location_lng                Float?
-  location_radius_m           Int?                @default(200)
+  location_radius_m           Int?                 @default(200)
   location_name               String?
-  reward_type                 String              @default("points")
+  reward_type                 String               @default("points")
   reward_points               Int?
   reward_voucher_id           Int?
-  created_at                  DateTime            @default(now()) @db.Timestamptz(6)
+  created_at                  DateTime             @default(now()) @db.Timestamptz(6)
   banner_url                  String?
   background_image_url        String?
-  events                      public_events?      @relation(fields: [event_id], references: [id], onUpdate: NoAction)
-  voucher                     voucher?            @relation(fields: [reward_voucher_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  events                      public_events?       @relation(fields: [event_id], references: [id], onUpdate: NoAction)
+  voucher                     voucher?             @relation(fields: [reward_voucher_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   rally_checkpoints           rally_checkpoints[]
   rally_completions           rally_completions[]
   rally_scans                 rally_scans[]
+  rally_wheel_prizes          rally_wheel_prizes[]
+  rally_wheel_spins           rally_wheel_spins[]
 
   @@schema("public")
 }
@@ -5569,6 +5601,184 @@ model security_device_allowlist {
   created_at DateTime    @default(now()) @db.Timestamptz(6)
   created_by String?     @db.Uuid
   users      auth_users? @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model competitor_posts {
+  id                  BigInt              @id @default(autoincrement())
+  competitor_id       BigInt
+  post_url            String?
+  raw_text            String?
+  screenshot_url      String?
+  product_name        String?
+  price               Decimal?            @db.Decimal
+  promotion_text      String?
+  likes_count         Int?
+  comments_count      Int?
+  shares_count        Int?
+  sentiment           String?
+  sentiment_summary   String?
+  ai_raw_response     Json?
+  posted_at           DateTime?           @db.Date
+  created_at          DateTime            @default(now()) @db.Timestamptz(6)
+  created_by          String?             @db.Uuid
+  competitor_profiles competitor_profiles @relation(fields: [competitor_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users               auth_users?         @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model competitor_profiles {
+  id               BigInt             @id @default(autoincrement())
+  name             String
+  platform         String
+  page_url         String?
+  is_active        Boolean            @default(true)
+  created_at       DateTime           @default(now()) @db.Timestamptz(6)
+  created_by       String?            @db.Uuid
+  competitor_posts competitor_posts[]
+  users            auth_users?        @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model competitor_trend_reports {
+  id              BigInt      @id @default(autoincrement())
+  period_start    DateTime    @db.Date
+  period_end      DateTime    @db.Date
+  summary_text    String
+  top_products    Json        @default("[]")
+  source_post_ids BigInt[]    @default([])
+  generated_at    DateTime    @default(now()) @db.Timestamptz(6)
+  generated_by    String?     @db.Uuid
+  users           auth_users? @relation(fields: [generated_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model document_type_permissions {
+  id             BigInt   @id @default(autoincrement())
+  doc_type       String
+  action         String
+  roles          String[]
+  department_ids Int[]
+  user_ids       String[] @db.Uuid
+
+  @@unique([doc_type, action])
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model document_workflow_steps {
+  id                            BigInt                    @id @default(autoincrement())
+  doc_type                      String
+  step_key                      String
+  step_name                     String
+  parent_step_id                BigInt?
+  sort_order                    Int                       @default(0)
+  roles                         String[]
+  department_ids                Int[]
+  user_ids                      String[]                  @db.Uuid
+  require_manager_of_creator    Boolean                   @default(false)
+  document_workflow_steps       document_workflow_steps?  @relation("document_workflow_stepsTodocument_workflow_steps", fields: [parent_step_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  other_document_workflow_steps document_workflow_steps[] @relation("document_workflow_stepsTodocument_workflow_steps")
+
+  @@unique([doc_type, step_key])
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model rally_wheel_prizes {
+  id                BigInt              @id @default(autoincrement())
+  rally_id          String              @db.Uuid
+  name              String
+  color             String?
+  weight            Int                 @default(1)
+  stock             Int?
+  is_active         Boolean             @default(true)
+  sort_order        Int                 @default(0)
+  created_at        DateTime            @default(now()) @db.Timestamptz(6)
+  image_url         String?
+  rallies           rallies             @relation(fields: [rally_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  rally_wheel_spins rally_wheel_spins[]
+
+  @@index([rally_id], map: "idx_rally_wheel_prizes_rally_id")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model rally_wheel_spins {
+  id                 BigInt              @id @default(autoincrement())
+  rally_id           String              @db.Uuid
+  customeruser_id    String              @db.Uuid
+  prize_id           BigInt?
+  prize_name         String
+  spun_at            DateTime            @default(now()) @db.Timestamptz(6)
+  claim_code         String              @unique
+  claimed_at         DateTime?           @db.Timestamptz(6)
+  customeruser       customeruser        @relation(fields: [customeruser_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  rally_wheel_prizes rally_wheel_prizes? @relation(fields: [prize_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  rallies            rallies             @relation(fields: [rally_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([rally_id, customeruser_id])
+  @@index([claim_code], map: "idx_rally_wheel_spins_claim_code")
+  @@index([customeruser_id], map: "idx_rally_wheel_spins_customeruser_id")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model spare_part_movements {
+  id                      BigInt               @id @default(autoincrement())
+  spare_part_id           BigInt
+  location_id             BigInt?
+  qty                     Int
+  movement_type           String
+  related_assett_goods_id BigInt?
+  related_waranty_id      BigInt?
+  note                    String?
+  created_by              String?              @db.Uuid
+  created_at              DateTime             @default(now()) @db.Timestamptz(6)
+  users                   auth_users?          @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  warehouse_locations     warehouse_locations? @relation(fields: [location_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  spare_parts             spare_parts          @relation(fields: [spare_part_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([related_assett_goods_id], map: "idx_spm_goods")
+  @@index([spare_part_id], map: "idx_spm_part")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model spare_parts {
+  id                   BigInt                 @id @default(autoincrement())
+  name                 String
+  part_no              String?
+  unit                 String                 @default("ชิ้น")
+  created_at           DateTime               @default(now()) @db.Timestamptz(6)
+  spare_part_movements spare_part_movements[]
+
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model warehouse_locations {
+  id                   BigInt                 @id @default(autoincrement())
+  name                 String
+  code                 String?
+  is_active            Boolean                @default(true)
+  created_at           DateTime               @default(now()) @db.Timestamptz(6)
+  assett               assett[]
+  assett_goods         assett_goods[]
+  spare_part_movements spare_part_movements[]
 
   @@schema("public")
 }
