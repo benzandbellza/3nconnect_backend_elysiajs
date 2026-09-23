@@ -1054,6 +1054,7 @@ model auth_users {
   event_badge_links           event_badge_links[]
   event_posts                 event_posts[]
   noti_read_log               noti_read_log[]
+  product_stock_movements     product_stock_movements[]
   security_device_allowlist   security_device_allowlist[]
   spare_part_movements        spare_part_movements[]
   user_favorites              user_favorites[]
@@ -1591,11 +1592,9 @@ model bill_tracking {
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   note               String?
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // สิ่งที่แนบมา String? @map("สิ่งที่แนบมา")
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
@@ -1614,7 +1613,6 @@ model bill_tracking {
   enroll_date        String? @map("enroll date")
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // พนักงานขาย String? @map("พนักงานขาย")
-  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
@@ -4044,16 +4042,16 @@ model user_login_history {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model user_page_permissions {
-  id         Int      @id @default(autoincrement())
-  user_id    String
+  id         BigInt       @id @default(autoincrement())
+  user_id    String       @db.Uuid
   route      String
-  can_view   Boolean  @default(true)
-  can_add    Boolean  @default(true)
-  can_edit   Boolean  @default(true)
-  updated_at DateTime @default(now()) @db.Timestamptz(6)
+  can_view   Boolean      @default(true)
+  can_add    Boolean      @default(true)
+  can_edit   Boolean      @default(true)
+  updated_at DateTime     @default(now()) @db.Timestamptz(6)
+  users      public_users @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([user_id, route])
-  @@index([user_id], map: "idx_user_page_perm_user")
   @@schema("public")
 }
 
@@ -4141,13 +4139,16 @@ model public_users {
   io_goods                                                         io_goods[]
   messages                                                         messages[]
   product_manager                                                  product_manager[]
+  product_stock_movements                                          product_stock_movements[]
   product_target                                                   product_target[]
   sale_target                                                      sale_target[]
   sale_target_attr                                                 sale_target_attr[]
   social_channel_visibility                                        social_channel_visibility[]
   sopt_head                                                        sopt_head[]
   sopt_status                                                      sopt_status[]
+  spare_part_movements                                             spare_part_movements[]
   staff_line_accounts                                              staff_line_accounts[]
+  user_page_permissions                                            user_page_permissions[]
   users                                                            auth_users?                          @relation(fields: [authid], references: [id])
   companies                                                        public_companies?                    @relation(fields: [company], references: [id], onDelete: NoAction, onUpdate: NoAction)
   departments                                                      departments?                         @relation(fields: [department], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -5748,8 +5749,11 @@ model spare_part_movements {
   note                    String?
   created_by              String?              @db.Uuid
   created_at              DateTime             @default(now()) @db.Timestamptz(6)
+  received_by             String?              @db.Uuid
+  transfer_group_id       String?              @db.Uuid
   users                   auth_users?          @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   warehouse_locations     warehouse_locations? @relation(fields: [location_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  public_users            public_users?        @relation(fields: [received_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   spare_parts             spare_parts          @relation(fields: [spare_part_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([related_assett_goods_id], map: "idx_spm_goods")
@@ -5771,14 +5775,65 @@ model spare_parts {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model warehouse_locations {
-  id                   BigInt                 @id @default(autoincrement())
-  name                 String
-  code                 String?
-  is_active            Boolean                @default(true)
-  created_at           DateTime               @default(now()) @db.Timestamptz(6)
-  assett               assett[]
-  assett_goods         assett_goods[]
-  spare_part_movements spare_part_movements[]
+  id                      BigInt                    @id @default(autoincrement())
+  name                    String
+  code                    String?
+  is_active               Boolean                   @default(true)
+  created_at              DateTime                  @default(now()) @db.Timestamptz(6)
+  zone_id                 BigInt
+  assett                  assett[]
+  assett_goods            assett_goods[]
+  product_stock_movements product_stock_movements[]
+  spare_part_movements    spare_part_movements[]
+  warehouse_zones         warehouse_zones           @relation(fields: [zone_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model product_stock_movements {
+  id                  BigInt               @id @default(autoincrement())
+  product_id          BigInt
+  location_id         BigInt?
+  qty                 Int
+  movement_type       String
+  transfer_group_id   String?              @db.Uuid
+  note                String?
+  created_by          String?              @db.Uuid
+  received_by         String?              @db.Uuid
+  created_at          DateTime             @default(now()) @db.Timestamptz(6)
+  users               auth_users?          @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  warehouse_locations warehouse_locations? @relation(fields: [location_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  public_users        public_users?        @relation(fields: [received_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([location_id], map: "idx_psm_location")
+  @@index([product_id], map: "idx_psm_product")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model warehouse_zones {
+  id                  BigInt                @id @default(autoincrement())
+  warehouse_id        BigInt
+  name                String
+  code                String?
+  is_active           Boolean               @default(true)
+  created_at          DateTime              @default(now()) @db.Timestamptz(6)
+  warehouse_locations warehouse_locations[]
+  warehouses          warehouses            @relation(fields: [warehouse_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model warehouses {
+  id              BigInt            @id @default(autoincrement())
+  name            String
+  code            String?
+  is_active       Boolean           @default(true)
+  created_at      DateTime          @default(now()) @db.Timestamptz(6)
+  warehouse_zones warehouse_zones[]
 
   @@schema("public")
 }

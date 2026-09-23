@@ -6926,6 +6926,7 @@ export const ecommerceRoute = new Elysia({
           shipping_cost: response.shipping_cost,
           payment_invoice_no: response.payment_invoice_no,
           admin_verify_status: response.admin_verify_status,
+          is_review_completed: response.is_review_completed,
           order_billing_items: orderItems.map(mapImGoodsToOrderItemResponse),
           company_name: resCompany?.name || null,
           buyer_customer_info: resCustomer,
