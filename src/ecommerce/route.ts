@@ -9,7 +9,6 @@ import { mapEventTierFields } from "./event-tier-mapping";
 import { auth } from "../plugins/auth";
 import "dotenv/config";
 import { generateBarcode } from "./generateBarcode";
-import { customeruser_usersInclude } from "../../prisma/prismabox/barrel";
 
 
 const now: Date = new Date();
