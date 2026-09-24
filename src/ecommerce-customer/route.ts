@@ -5,6 +5,8 @@ import { allocateNextOrderNumber } from "../ecommerce/order-number";
 import { auth } from "../plugins/auth";
 import "dotenv/config";
 import { addDaysAndFormat } from "./expireVoucher";
+import { GoTrueAdminApi } from "@supabase/supabase-js";
+import { IndexKind } from "typescript";
 
 const now: Date = new Date();
 
@@ -1696,11 +1698,12 @@ export const ecommerceCustomerRoute = new Elysia({
     "/orders/:customeruser_id",
     async ({ headers, set, params }) => {
       const customeruser_id = params.customeruser_id;
-      const response = await prisma.iM.findMany({
+      const responseIM = await prisma.iM.findMany({
         where: {
           customeruser_id: customeruser_id,
         },
         select: {
+          id: true,
           docid: true,
           payment_method_type: true,
           status: true,
@@ -1711,7 +1714,6 @@ export const ecommerceCustomerRoute = new Elysia({
           created_at: true,
           order_uuid: true,
           update_by: true,
-          company_id: true,
           is_review_completed: true,
         },
         orderBy: {
@@ -1719,43 +1721,43 @@ export const ecommerceCustomerRoute = new Elysia({
         }
       })
 
-      if(!response){ 
+      if(!responseIM){ 
         set.status = 404;
         return { "message" : "No orders found." }
       }
 
-      const companyIds = response
-        .map((order) => order.company_id)
-        .filter((companyId): companyId is number => companyId !== null);
-      const companies = companyIds.length > 0
-        ? await prisma.nconnect_companies.findMany({
+      const resOrder = await Promise.all(
+        responseIM.map( async (order) => {
+          const product_order_information = await prisma.vw_product_order_information.findMany({
             where: {
-              id: {
-                in: companyIds,
-              },
+              im_id: order.id
             },
             select: {
-              id: true,
-              company_name: true,
-            },
+              im_id: true,
+              sale_price: true,
+              qty: true,
+              product_name: true,
+              option_name: true,
+              unit: true,
+              url_image: true,
+              online_price: true,
+            }
           })
-        : [];
-      const companyMap = new Map(
-        companies.map((company) => [company.id, company.company_name]),
-      );
 
-      return response.map(({ docid, im, status, type, update_by, company_id, ...order }) => ({
-        ...order,
-        order_no: docid,
-        order_status: status,
-        im_no: im,
-        order_type: type,
-        companies: company_id === null
-          ? null
-          : {
-              company_name: companyMap.get(company_id) ?? null,
-            },
-      }));
+          return { 
+            ...order,
+            product_order_information
+          }
+        })
+      )
+      
+      if(!resOrder){
+        set.status = 404;
+        return { message : "Invalid orders." };
+      }
+      
+      return resOrder;
+
     },
     {
       headers: t.Object({

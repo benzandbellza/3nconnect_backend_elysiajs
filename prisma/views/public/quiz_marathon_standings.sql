@@ -35,7 +35,7 @@ SELECT
     a.raw_score + COALESCE(i.score_delta_sum, (0) :: bigint)
   ) AS total_score,
   (
-    a.raw_time_ms + COALESCE(i.time_delta_sum, (0) :: numeric)
+    (a.raw_time_ms) :: numeric + COALESCE((i.time_delta_sum) :: numeric, (0) :: numeric)
   ) AS total_time_ms
 FROM
   (
