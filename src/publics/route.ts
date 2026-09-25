@@ -424,6 +424,123 @@ export const publicRoute = new Elysia({
     }
   )
   .get(
+    "/products/company/:company_name",
+    async ({ params, set }) => {
+      try { 
+        const company_name = params.company_name
+        const products = await prisma.vw_promotion_products_index.findMany({
+          where: {
+            company_name: company_name,
+            OR: [
+              {
+                is_pre_order: null,
+              },
+              {
+                is_pre_order: false,
+              }
+            ],
+            category_hierarchy: {
+              isEmpty: false
+            }
+          },
+          select: {
+            product_id: true,
+            mat_identity: true,
+            product_name: true,
+            promotion_type: true,
+            unit: true,
+            online_price: true,
+            sale_price: true,
+            sale_percent: true,
+            product_option_id: true,
+            url_image: true,
+            option_name: true,
+            is_accept_overlapse_promotion: true,
+          },
+          orderBy: {
+            promotion_type: 'desc'
+          }
+        });
+
+        const productIds = [
+          ...new Set(
+            products
+              .map((product) => product.product_id)
+              .filter((productId): productId is number => productId !== null),
+          ),
+        ];
+
+        const paymentMethods = await prisma.public_product_payment_method.findMany({
+          where: {
+            product_id: { in: productIds },
+          },
+          select: {
+            id: true,
+            product_id: true,
+            payment_method_id: true,
+            payment_methods: {
+              select: {
+                id: true,
+                name: true,
+                icon: true,
+                icon_color: true,
+                is_active: true,
+                sort_order: true,
+                image_url: true,
+                category: true,
+              },
+            },
+          },
+        });
+
+        const paymentMethodsByProductId = new Map<number, typeof paymentMethods>();
+        for (const paymentMethod of paymentMethods) {
+          if (paymentMethod.product_id === null) continue;
+          const current = paymentMethodsByProductId.get(paymentMethod.product_id) ?? [];
+          if (paymentMethod.payment_methods?.is_active !== false) {
+            current.push(paymentMethod);
+          }
+          paymentMethodsByProductId.set(paymentMethod.product_id, current);
+        }
+
+        const productsWithPaymentMethods = products.map((product) => ({
+          ...product,
+          product_payment_method: product.product_id === null
+            ? []
+            : paymentMethodsByProductId.get(product.product_id) ?? [],
+        }));
+
+        return {
+          success: true,
+          message: 'Products',
+          data: {
+            products: productsWithPaymentMethods,
+          }
+        }
+      } catch (error) {
+        set.status = 500
+        return {
+          success: false,
+          message: 'Internal server error'
+        }
+      }
+    },
+    {
+      params: t.Object({
+        company_name : t.String()
+      }),
+      detail: {
+        servers: [{ url: process.env.APP_API_PREFIX || "" }],
+        summary: "Products - List by Company Name",
+        description: `
+          This endpoint gets products by company name.
+        `.trim(),
+        security: [{ bearerAuth: [] }],
+        tags: ["Publics"],
+      },
+    }
+  )
+  .get(
     "/products/pre-order",
     async ({ set }) => {
       try { 

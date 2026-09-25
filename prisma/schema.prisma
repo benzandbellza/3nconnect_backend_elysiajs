@@ -118,6 +118,11 @@ model customer_address {
   province        String?
   post_code       String?
   set_default     Boolean?
+  lat             Float?
+  lng             Float?
+  pin_source      String?
+  pinned_at       DateTime?       @db.Timestamptz(6)
+  pinned_by       String?         @db.Uuid
   order_billing   order_billing[]
   IM              IM[]
 
@@ -1184,6 +1189,7 @@ model IM {
   customer_address                           customer_address?         @relation(fields: [shipping_address_id], references: [id], onDelete: Cascade)
   sopt_head                                  sopt_head?                @relation(fields: [sopt_id], references: [id], onDelete: Cascade)
   customer_invoice_address                   customer_invoice_address? @relation(fields: [customer_invoice_address_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "im_customer_invoice_address_id_fkey")
+  assett                                     assett[]
   im_goods                                   im_goods[]
 
   @@schema("public")
@@ -1458,7 +1464,10 @@ model assett {
   approved_at                        DateTime?              @db.Timestamptz(6)
   visible_department_ids             Int[]
   visible_user_ids                   String[]               @db.Uuid
+  install_address_id                 String?
+  im_id                              Int?
   users                              auth_users?            @relation(fields: [approved_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  IM                                 IM?                    @relation(fields: [im_id], references: [id], onUpdate: NoAction)
   users_assett_installerTousers      public_users?          @relation("assett_installerTousers", fields: [installer], references: [id], onDelete: Cascade)
   companies                          public_companies?      @relation(fields: [companies_id], references: [id], onDelete: Cascade, map: "assett_instrument_companies_id_fkey")
   contact                            contact?               @relation(fields: [contact_id], references: [id], onDelete: Cascade, map: "assett_instrument_contact_id_fkey")
@@ -1471,34 +1480,39 @@ model assett {
   assett_repairs                     assett_repairs?
   spare_part_movements               spare_part_movements[]
 
+  @@index([im_id], where: raw("(im_id IS NOT NULL)"))
   @@schema("public")
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model assett_goods {
-  id                   Int                    @id @default(autoincrement())
-  created_at           DateTime               @default(now()) @db.Timestamptz(6)
-  sn_no                String?
-  catalog_no           String?
-  name                 String?
-  type                 String?
-  cost                 Decimal?               @db.Decimal
-  product_gr           String?
-  brand                String?
-  depreciation         Int?
-  size                 String?
-  location_id          Int?
-  placement_assett_id  Int?
-  placed_at            DateTime?              @db.Timestamptz(6)
-  asset_audits         asset_audits[]
-  asset_check          asset_check[]
-  warehouse_locations  warehouse_locations?   @relation(fields: [location_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  assett               assett?                @relation(fields: [placement_assett_id], references: [id], onUpdate: NoAction)
-  assett_goods_docs    assett_goods_docs[]
-  assett_waranty       assett_waranty[]
-  spare_part_movements spare_part_movements[]
+  id                    Int                    @id @default(autoincrement())
+  created_at            DateTime               @default(now()) @db.Timestamptz(6)
+  sn_no                 String?
+  catalog_no            String?
+  name                  String?
+  type                  String?
+  cost                  Decimal?               @db.Decimal
+  product_gr            String?
+  brand                 String?
+  depreciation          Int?
+  size                  String?
+  location_id           Int?
+  placement_assett_id   Int?
+  placed_at             DateTime?              @db.Timestamptz(6)
+  companies_id          BigInt?
+  owner_customeruser_id String?                @db.Uuid
+  asset_audits          asset_audits[]
+  asset_check           asset_check[]
+  warehouse_locations   warehouse_locations?   @relation(fields: [location_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  assett                assett?                @relation(fields: [placement_assett_id], references: [id], onUpdate: NoAction)
+  assett_goods_docs     assett_goods_docs[]
+  assett_waranty        assett_waranty[]
+  spare_part_movements  spare_part_movements[]
 
   @@index([placement_assett_id], map: "assett_goods_placement_idx", where: raw("(placement_assett_id IS NOT NULL)"))
+  @@index([companies_id], map: "assett_goods_companies_idx")
+  @@index([owner_customeruser_id], map: "assett_goods_owner_idx", where: raw("(owner_customeruser_id IS NOT NULL)"))
   @@schema("public")
 }
 
@@ -1610,9 +1624,15 @@ model bill_tracking {
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   note               String?
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // สิ่งที่แนบมา String? @map("สิ่งที่แนบมา")
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
@@ -1639,6 +1659,9 @@ model bill_tracking {
   enroll_date        String? @map("enroll date")
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // พนักงานขาย String? @map("พนักงานขาย")
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
@@ -1856,6 +1879,11 @@ model public_companies {
   address_en         String?
   phone              String?
   logo_url           String?
+  tax_id             String?
+  fax                String?
+  email              String?
+  authorized_signer  String?
+  authorized_title   String?
   Productdata        Productdata[]
   assett             assett[]
   attribute_groups   public_attribute_groups[]
@@ -1940,6 +1968,11 @@ model customer_delivery {
   postel         String?
   contact_id     Int?
   recerived_name String?
+  lat            Float?
+  lng            Float?
+  pin_source     String?
+  pinned_at      DateTime?     @db.Timestamptz(6)
+  pinned_by      String?       @db.Uuid
   IM             IM[]
   IO             IO[]
   PO             PO[]
@@ -2577,6 +2610,7 @@ model public_events {
   online_join_opens_minutes       Int                            @default(30)
   online_capacity                 Int?
   event_start_at                  DateTime?                      @db.Timestamptz(6)
+  event_images                    String[]                       @default([])
   event_breakout_slots            event_breakout_slots[]
   event_invite_codes              event_invite_codes[]
   event_invite_fingerprints       event_invite_fingerprints[]
