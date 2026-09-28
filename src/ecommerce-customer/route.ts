@@ -1715,6 +1715,7 @@ export const ecommerceCustomerRoute = new Elysia({
           order_uuid: true,
           update_by: true,
           is_review_completed: true,
+          shipping_cost: true,
         },
         orderBy: {
           created_at: "desc"

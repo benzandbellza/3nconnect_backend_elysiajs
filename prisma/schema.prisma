@@ -125,6 +125,7 @@ model customer_address {
   pinned_by       String?         @db.Uuid
   order_billing   order_billing[]
   IM              IM[]
+  assett          assett[]
 
   @@schema("3nconnect")
 }
@@ -1442,77 +1443,100 @@ model asset_check {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model assett {
-  id                                 Int                    @id(map: "assett_instrument_pkey") @default(autoincrement())
-  created_at                         DateTime               @default(now()) @db.Timestamptz(6)
-  customeruser_id                    String?                @db.Uuid
+  id                                 Int                     @id(map: "assett_instrument_pkey") @default(autoincrement())
+  created_at                         DateTime                @default(now()) @db.Timestamptz(6)
+  customeruser_id                    String?                 @db.Uuid
   contact_id                         Int?
   install                            String?
   install_place                      String?
-  installer                          String?                @db.Uuid
-  recorded_by                        String?                @db.Uuid
-  sale_person_id                     String?                @db.Uuid
+  installer                          String?                 @db.Uuid
+  recorded_by                        String?                 @db.Uuid
+  sale_person_id                     String?                 @db.Uuid
   ref_doc                            String?
   note                               String?
   doc_id                             String?
   companies_id                       Int?
   status                             String?
   log                                String?
-  action_date                        DateTime?              @db.Timestamptz(6)
+  action_date                        DateTime?               @db.Timestamptz(6)
   type                               String?
   location_id                        Int?
-  approved_by                        String?                @db.Uuid
-  approved_at                        DateTime?              @db.Timestamptz(6)
+  approved_by                        String?                 @db.Uuid
+  approved_at                        DateTime?               @db.Timestamptz(6)
   visible_department_ids             Int[]
-  visible_user_ids                   String[]               @db.Uuid
-  install_address_id                 String?
+  visible_user_ids                   String[]                @db.Uuid
+  install_address_id                 Int?
   im_id                              Int?
-  users                              auth_users?            @relation(fields: [approved_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  IM                                 IM?                    @relation(fields: [im_id], references: [id], onUpdate: NoAction)
-  users_assett_installerTousers      public_users?          @relation("assett_installerTousers", fields: [installer], references: [id], onDelete: Cascade)
-  companies                          public_companies?      @relation(fields: [companies_id], references: [id], onDelete: Cascade, map: "assett_instrument_companies_id_fkey")
-  contact                            contact?               @relation(fields: [contact_id], references: [id], onDelete: Cascade, map: "assett_instrument_contact_id_fkey")
-  customeruser                       customeruser?          @relation(fields: [customeruser_id], references: [id], onDelete: Cascade, map: "assett_instrument_customeruser_id_fkey")
-  users_assett_recorded_byTousers    public_users?          @relation("assett_recorded_byTousers", fields: [recorded_by], references: [id], onDelete: Cascade, map: "assett_instrument_recorded_by_fkey")
-  users_assett_sale_person_idTousers public_users?          @relation("assett_sale_person_idTousers", fields: [sale_person_id], references: [id], onDelete: Cascade, map: "assett_instrument_sale_person_id_fkey")
-  warehouse_locations                warehouse_locations?   @relation(fields: [location_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  invoicehead_id                     Int?
+  import_batch                       String?
+  users                              auth_users?             @relation(fields: [approved_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  IM                                 IM?                     @relation(fields: [im_id], references: [id], onUpdate: NoAction)
+  customer_address                   customer_address?       @relation(fields: [install_address_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_assett_installerTousers      public_users?           @relation("assett_installerTousers", fields: [installer], references: [id], onDelete: Cascade)
+  companies                          public_companies?       @relation(fields: [companies_id], references: [id], onDelete: Cascade, map: "assett_instrument_companies_id_fkey")
+  contact                            contact?                @relation(fields: [contact_id], references: [id], onDelete: Cascade, map: "assett_instrument_contact_id_fkey")
+  customeruser                       customeruser?           @relation(fields: [customeruser_id], references: [id], onDelete: Cascade, map: "assett_instrument_customeruser_id_fkey")
+  users_assett_recorded_byTousers    public_users?           @relation("assett_recorded_byTousers", fields: [recorded_by], references: [id], onDelete: Cascade, map: "assett_instrument_recorded_by_fkey")
+  users_assett_sale_person_idTousers public_users?           @relation("assett_sale_person_idTousers", fields: [sale_person_id], references: [id], onDelete: Cascade, map: "assett_instrument_sale_person_id_fkey")
+  invoicehead                        invoicehead?            @relation(fields: [invoicehead_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  warehouse_locations                warehouse_locations?    @relation(fields: [location_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   assett_goods                       assett_goods[]
   assett_goods_docs                  assett_goods_docs[]
+  assett_import_staging              assett_import_staging[]
   assett_repairs                     assett_repairs?
   spare_part_movements               spare_part_movements[]
 
+  @@unique([install, ref_doc], map: "uq_assett_import_ref_doc", where: raw("(import_batch IS NOT NULL)"))
   @@index([im_id], where: raw("(im_id IS NOT NULL)"))
+  @@index([invoicehead_id], map: "idx_assett_invoicehead")
   @@schema("public")
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model assett_goods {
-  id                    Int                    @id @default(autoincrement())
-  created_at            DateTime               @default(now()) @db.Timestamptz(6)
-  sn_no                 String?
-  catalog_no            String?
-  name                  String?
-  type                  String?
-  cost                  Decimal?               @db.Decimal
-  product_gr            String?
-  brand                 String?
-  depreciation          Int?
-  size                  String?
-  location_id           Int?
-  placement_assett_id   Int?
-  placed_at             DateTime?              @db.Timestamptz(6)
-  companies_id          BigInt?
-  owner_customeruser_id String?                @db.Uuid
-  asset_audits          asset_audits[]
-  asset_check           asset_check[]
-  warehouse_locations   warehouse_locations?   @relation(fields: [location_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  assett                assett?                @relation(fields: [placement_assett_id], references: [id], onUpdate: NoAction)
-  assett_goods_docs     assett_goods_docs[]
-  assett_waranty        assett_waranty[]
-  spare_part_movements  spare_part_movements[]
+  id                                                                                          Int                              @id @default(autoincrement())
+  created_at                                                                                  DateTime                         @default(now()) @db.Timestamptz(6)
+  sn_no                                                                                       String?
+  catalog_no                                                                                  String?
+  name                                                                                        String?
+  type                                                                                        String?
+  cost                                                                                        Decimal?                         @db.Decimal
+  product_gr                                                                                  String?
+  brand                                                                                       String?
+  depreciation                                                                                Int?
+  size                                                                                        String?
+  location_id                                                                                 Int?
+  placement_assett_id                                                                         Int?
+  placed_at                                                                                   DateTime?                        @db.Timestamptz(6)
+  companies_id                                                                                BigInt?
+  owner_customeruser_id                                                                       String?                          @db.Uuid
+  owner_invoicehead_id                                                                        Int?
+  sn_norm                                                                                     String?
+  brand_norm                                                                                  String?
+  is_used                                                                                     Boolean                          @default(false)
+  missing_at                                                                                  DateTime?                        @db.Timestamptz(6)
+  missing_note                                                                                String?
+  asset_audits                                                                                asset_audits[]
+  asset_check                                                                                 asset_check[]
+  warehouse_locations                                                                         warehouse_locations?             @relation(fields: [location_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  invoicehead                                                                                 invoicehead?                     @relation(fields: [owner_invoicehead_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  assett                                                                                      assett?                          @relation(fields: [placement_assett_id], references: [id], onUpdate: NoAction)
+  assett_goods_docs                                                                           assett_goods_docs[]
+  assett_import_goods_backup                                                                  assett_import_goods_backup?
+  assett_import_staging_assett_import_staging_goods_idToassett_goods                          assett_import_staging[]          @relation("assett_import_staging_goods_idToassett_goods")
+  assett_import_staging_assett_import_staging_goods_id_manualToassett_goods                   assett_import_staging[]          @relation("assett_import_staging_goods_id_manualToassett_goods")
+  assett_waranty                                                                              assett_waranty[]
+  assett_warranty_import_staging_assett_warranty_import_staging_goods_idToassett_goods        assett_warranty_import_staging[] @relation("assett_warranty_import_staging_goods_idToassett_goods")
+  assett_warranty_import_staging_assett_warranty_import_staging_goods_id_manualToassett_goods assett_warranty_import_staging[] @relation("assett_warranty_import_staging_goods_id_manualToassett_goods")
+  spare_part_movements                                                                        spare_part_movements[]
 
   @@index([placement_assett_id], map: "assett_goods_placement_idx", where: raw("(placement_assett_id IS NOT NULL)"))
   @@index([companies_id], map: "assett_goods_companies_idx")
   @@index([owner_customeruser_id], map: "assett_goods_owner_idx", where: raw("(owner_customeruser_id IS NOT NULL)"))
+  @@index([is_used], where: raw("is_used"))
+  @@index([missing_at], map: "assett_goods_missing_idx", where: raw("(missing_at IS NOT NULL)"))
+  @@index([owner_invoicehead_id], map: "idx_assett_goods_owner_invoicehead")
+  @@index([sn_norm, brand_norm], map: "idx_assett_goods_sn_brand")
   @@schema("public")
 }
 
@@ -1627,9 +1651,11 @@ model bill_tracking {
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   note               String?
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // สิ่งที่แนบมา String? @map("สิ่งที่แนบมา")
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
@@ -1659,6 +1685,7 @@ model bill_tracking {
   enroll_date        String? @map("enroll date")
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // พนักงานขาย String? @map("พนักงานขาย")
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
@@ -2771,6 +2798,7 @@ model im_goods {
   @@schema("public")
 }
 
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
 model invoicehead {
   id                                Int                        @id @default(autoincrement())
   created_at                        DateTime                   @default(now()) @db.Timestamptz(6)
@@ -2789,6 +2817,8 @@ model invoicehead {
   IM                                IM[]
   IM_IM_invoicehead_idToinvoicehead IM[]                       @relation("IM_invoicehead_idToinvoicehead")
   PO                                PO[]
+  assett                            assett[]
+  assett_goods                      assett_goods[]
   customer_invoice                  customer_invoice[]
 
   @@schema("public")
@@ -4481,6 +4511,7 @@ model assett_goods_docs {
   assett_goods    assett_goods @relation(fields: [assett_goods_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "assett_goods_docs_goods_fkey")
 
   @@unique([assett_goods_id, assett_id], map: "assett_goods_docs_unique")
+  @@index([assett_id], map: "idx_assett_goods_docs_assett_id")
   @@schema("public")
 }
 
@@ -5910,19 +5941,20 @@ model spare_parts {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model warehouse_locations {
-  id                      Int                       @id @default(autoincrement())
-  name                    String
-  code                    String?
-  is_active               Boolean                   @default(true)
-  created_at              DateTime                  @default(now()) @db.Timestamptz(6)
-  zone_id                 Int
-  assett                  assett[]
-  assett_goods            assett_goods[]
-  product_stock_movements product_stock_movements[]
-  spare_part_movements    spare_part_movements[]
-  stock_count_lines       stock_count_lines[]
-  stock_count_sessions    stock_count_sessions[]
-  warehouse_zones         warehouse_zones           @relation(fields: [zone_id], references: [id], onDelete: Cascade)
+  id                         Int                          @id @default(autoincrement())
+  name                       String
+  code                       String?
+  is_active                  Boolean                      @default(true)
+  created_at                 DateTime                     @default(now()) @db.Timestamptz(6)
+  zone_id                    Int
+  assett                     assett[]
+  assett_goods               assett_goods[]
+  assett_import_location_map assett_import_location_map[]
+  product_stock_movements    product_stock_movements[]
+  spare_part_movements       spare_part_movements[]
+  stock_count_lines          stock_count_lines[]
+  stock_count_sessions       stock_count_sessions[]
+  warehouse_zones            warehouse_zones              @relation(fields: [zone_id], references: [id], onDelete: Cascade)
 
   @@schema("public")
 }
@@ -6149,6 +6181,133 @@ model event_reminder_log {
   sent_at          DateTime      @default(now()) @db.Timestamptz(6)
   id               Int           @id @default(autoincrement())
   customerevent    customerevent @relation(fields: [customerevent_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model assett_goods_missing_events {
+  id              Int      @id @default(autoincrement())
+  assett_goods_id BigInt
+  event           String
+  event_at        DateTime @default(now()) @db.Timestamptz(6)
+  note            String?
+  created_by      String?  @default(dbgenerated("auth.uid()")) @db.Uuid
+  import_ref      String?
+  created_at      DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([assett_goods_id, event, import_ref], map: "assett_goods_missing_events_import_uq", where: raw("(import_ref IS NOT NULL)"))
+  @@index([assett_goods_id, event_at(sort: Desc)], map: "assett_goods_missing_events_goods_idx")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model assett_import_goods_backup {
+  goods_id             Int          @id
+  location_id          Int?
+  placement_assett_id  Int?
+  placed_at            DateTime?    @db.Timestamptz(6)
+  backed_up_at         DateTime     @default(now()) @db.Timestamptz(6)
+  owner_invoicehead_id Int?
+  missing_at           DateTime?    @db.Timestamptz(6)
+  missing_note         String?
+  assett_goods         assett_goods @relation(fields: [goods_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model assett_import_location_map {
+  source              String              @id
+  location_id         Int
+  note                String?
+  warehouse_locations warehouse_locations @relation(fields: [location_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model assett_import_staging {
+  ID                                                               String?
+  SN_No_In                                                         String?
+  CUSOMER_Name                                                     String?
+  Organization                                                     String?
+  Install_Date                                                     String?
+  TEL                                                              String?
+  Email                                                            String?
+  INSTALL_Place                                                    String?
+  PICTURE                                                          String?
+  Sale_Person                                                      String?
+  Uti_Contract_Year                                                String?       @map("Uti_Contract/Year")
+  Recorder                                                         String?
+  DOCUMENT                                                         String?
+  note                                                             String?
+  no                                                               String?
+  Doc_ID_                                                          String?
+  Status                                                           String?
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  // สร้างเมื่อ String? @map("สร้างเมื่อ")
+  row                                                              BigInt        @id @default(autoincrement()) @map("_row")
+  doc_key                                                          String?       @map("_doc_key")
+  action_at                                                        DateTime?     @map("_action_at") @db.Timestamptz(6)
+  created_at                                                       DateTime?     @map("_created_at") @db.Timestamptz(6)
+  goods_id                                                         Int?          @map("_goods_id")
+  company_id                                                       BigInt?       @map("_company_id")
+  sale_person_id                                                   String?       @map("_sale_person_id") @db.Uuid
+  recorded_by                                                      String?       @map("_recorded_by") @db.Uuid
+  issues                                                           String[]      @default([]) @map("_issues")
+  assett_id                                                        Int?          @map("_assett_id")
+  Installer                                                        String?
+  installer                                                        String?       @map("_installer") @db.Uuid
+  Organization_Install                                             String?
+  invoicehead_id                                                   Int?          @map("_invoicehead_id")
+  goods_kind                                                       String?       @map("_goods_kind")
+  warranty_years                                                   Int?          @map("_warranty_years")
+  goods_id_manual                                                  Int?          @map("_goods_id_manual")
+  location_id                                                      Int?          @map("_location_id")
+  missing_event_id                                                 BigInt?       @map("_missing_event_id")
+  assett                                                           assett?       @relation(fields: [assett_id], references: [id], onUpdate: NoAction)
+  assett_goods_assett_import_staging_goods_idToassett_goods        assett_goods? @relation("assett_import_staging_goods_idToassett_goods", fields: [goods_id], references: [id], onUpdate: NoAction)
+  assett_goods_assett_import_staging_goods_id_manualToassett_goods assett_goods? @relation("assett_import_staging_goods_id_manualToassett_goods", fields: [goods_id_manual], references: [id], onUpdate: NoAction)
+
+  @@index([assett_id], map: "idx_assett_import_staging__assett_id")
+  @@index([doc_key], map: "idx_assett_import_staging_doc")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model assett_warranty_import_staging {
+  ID                                                                        String?
+  SN_No_Wa                                                                  String?
+  TYPE                                                                      String?
+  START                                                                     String?
+  END                                                                       String?
+  PM_Count                                                                  String?
+  SALE_Person                                                               String?
+  NOTE                                                                      String?
+  Price                                                                     String?
+  Recorder                                                                  String?
+  Create_PM                                                                 String?
+  Doc_wa_PM                                                                 String?       @map("Doc_wa&PM")
+  row                                                                       BigInt        @id @default(autoincrement()) @map("_row")
+  sn_main                                                                   String?       @map("_sn_main")
+  sn_extra                                                                  String?       @map("_sn_extra")
+  ls_suffix                                                                 Boolean?      @map("_ls_suffix")
+  goods_id                                                                  Int?          @map("_goods_id")
+  start                                                                     DateTime?     @map("_start") @db.Timestamptz(6)
+  end                                                                       DateTime?     @map("_end") @db.Timestamptz(6)
+  doc_created                                                               DateTime?     @map("_doc_created") @db.Timestamptz(6)
+  pm_count                                                                  Int?          @map("_pm_count")
+  price                                                                     Decimal?      @map("_price") @db.Decimal
+  sale_person_id                                                            String?       @map("_sale_person_id") @db.Uuid
+  recorded_by                                                               String?       @map("_recorded_by") @db.Uuid
+  issues                                                                    String[]      @default([]) @map("_issues")
+  waranty_id                                                                Int?          @map("_waranty_id")
+  pm_assett_ids                                                             Int[]         @map("_pm_assett_ids")
+  goods_id_manual                                                           Int?          @map("_goods_id_manual")
+  assett_goods_assett_warranty_import_staging_goods_idToassett_goods        assett_goods? @relation("assett_warranty_import_staging_goods_idToassett_goods", fields: [goods_id], references: [id], onUpdate: NoAction)
+  assett_goods_assett_warranty_import_staging_goods_id_manualToassett_goods assett_goods? @relation("assett_warranty_import_staging_goods_id_manualToassett_goods", fields: [goods_id_manual], references: [id], onUpdate: NoAction)
 
   @@schema("public")
 }
