@@ -1469,6 +1469,7 @@ model assett {
   im_id                              Int?
   invoicehead_id                     Int?
   import_batch                       String?
+  display_date                       DateTime?               @default(dbgenerated("COALESCE(action_date, created_at)")) @db.Timestamptz(6)
   users                              auth_users?             @relation(fields: [approved_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   IM                                 IM?                     @relation(fields: [im_id], references: [id], onUpdate: NoAction)
   customer_address                   customer_address?       @relation(fields: [install_address_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -1489,6 +1490,10 @@ model assett {
   @@unique([install, ref_doc], map: "uq_assett_import_ref_doc", where: raw("(import_batch IS NOT NULL)"))
   @@index([im_id], where: raw("(im_id IS NOT NULL)"))
   @@index([invoicehead_id], map: "idx_assett_invoicehead")
+  @@index([install, action_date])
+  @@index([installer])
+  @@index([display_date(sort: Desc), id(sort: Desc)], map: "assett_display_date_idx")
+  @@index([install, display_date(sort: Desc)])
   @@schema("public")
 }
 
@@ -1522,6 +1527,7 @@ model assett_goods {
   invoicehead                                                                                 invoicehead?                     @relation(fields: [owner_invoicehead_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   assett                                                                                      assett?                          @relation(fields: [placement_assett_id], references: [id], onUpdate: NoAction)
   assett_goods_docs                                                                           assett_goods_docs[]
+  assett_goods_list_cache                                                                     assett_goods_list_cache?
   assett_import_goods_backup                                                                  assett_import_goods_backup?
   assett_import_staging_assett_import_staging_goods_idToassett_goods                          assett_import_staging[]          @relation("assett_import_staging_goods_idToassett_goods")
   assett_import_staging_assett_import_staging_goods_id_manualToassett_goods                   assett_import_staging[]          @relation("assett_import_staging_goods_id_manualToassett_goods")
@@ -1537,6 +1543,7 @@ model assett_goods {
   @@index([missing_at], map: "assett_goods_missing_idx", where: raw("(missing_at IS NOT NULL)"))
   @@index([owner_invoicehead_id], map: "idx_assett_goods_owner_invoicehead")
   @@index([sn_norm, brand_norm], map: "idx_assett_goods_sn_brand")
+  @@index([location_id], map: "assett_goods_location_idx")
   @@schema("public")
 }
 
@@ -1652,9 +1659,13 @@ model bill_tracking {
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   note               String?
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // สิ่งที่แนบมา String? @map("สิ่งที่แนบมา")
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
@@ -1685,6 +1696,8 @@ model bill_tracking {
   enroll_date        String? @map("enroll date")
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // พนักงานขาย String? @map("พนักงานขาย")
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
@@ -4512,6 +4525,7 @@ model assett_goods_docs {
 
   @@unique([assett_goods_id, assett_id], map: "assett_goods_docs_unique")
   @@index([assett_id], map: "idx_assett_goods_docs_assett_id")
+  @@index([assett_goods_id, id(sort: Desc)], map: "assett_goods_docs_goods_id_idx")
   @@schema("public")
 }
 
@@ -5818,6 +5832,7 @@ model document_workflow_steps {
   department_ids                Int[]
   user_ids                      String[]                  @db.Uuid
   require_manager_of_creator    Boolean                   @default(false)
+  allow_creator                 Boolean                   @default(false)
   document_workflow_steps       document_workflow_steps?  @relation("document_workflow_stepsTodocument_workflow_steps", fields: [parent_step_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   other_document_workflow_steps document_workflow_steps[] @relation("document_workflow_stepsTodocument_workflow_steps")
 
@@ -5933,6 +5948,7 @@ model spare_parts {
   cost                 Decimal?               @db.Decimal
   barcode              String?
   spare_part_movements spare_part_movements[]
+  spare_part_requests  spare_part_requests[]
   companies            public_companies?      @relation(fields: [companies_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   stock_count_lines    stock_count_lines[]
 
@@ -5941,20 +5957,22 @@ model spare_parts {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model warehouse_locations {
-  id                         Int                          @id @default(autoincrement())
-  name                       String
-  code                       String?
-  is_active                  Boolean                      @default(true)
-  created_at                 DateTime                     @default(now()) @db.Timestamptz(6)
-  zone_id                    Int
-  assett                     assett[]
-  assett_goods               assett_goods[]
-  assett_import_location_map assett_import_location_map[]
-  product_stock_movements    product_stock_movements[]
-  spare_part_movements       spare_part_movements[]
-  stock_count_lines          stock_count_lines[]
-  stock_count_sessions       stock_count_sessions[]
-  warehouse_zones            warehouse_zones              @relation(fields: [zone_id], references: [id], onDelete: Cascade)
+  id                                                                            Int                          @id @default(autoincrement())
+  name                                                                          String
+  code                                                                          String?
+  is_active                                                                     Boolean                      @default(true)
+  created_at                                                                    DateTime                     @default(now()) @db.Timestamptz(6)
+  zone_id                                                                       Int
+  assett                                                                        assett[]
+  assett_goods                                                                  assett_goods[]
+  assett_import_location_map                                                    assett_import_location_map[]
+  product_stock_movements                                                       product_stock_movements[]
+  spare_part_movements                                                          spare_part_movements[]
+  spare_part_requests_spare_part_requests_from_location_idTowarehouse_locations spare_part_requests[]        @relation("spare_part_requests_from_location_idTowarehouse_locations")
+  spare_part_requests_spare_part_requests_to_location_idTowarehouse_locations   spare_part_requests[]        @relation("spare_part_requests_to_location_idTowarehouse_locations")
+  stock_count_lines                                                             stock_count_lines[]
+  stock_count_sessions                                                          stock_count_sessions[]
+  warehouse_zones                                                               warehouse_zones              @relation(fields: [zone_id], references: [id], onDelete: Cascade)
 
   @@schema("public")
 }
@@ -6022,9 +6040,11 @@ model warehouses {
   is_active       Boolean           @default(true)
   created_at      DateTime          @default(now()) @db.Timestamptz(6)
   companies_id    Int?
+  kind            String            @default("main")
   warehouse_zones warehouse_zones[]
   companies       public_companies? @relation(fields: [companies_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
+  @@index([kind])
   @@schema("public")
 }
 
@@ -6248,12 +6268,14 @@ model assett_import_staging {
   Status                                                           String?
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // สร้างเมื่อ String? @map("สร้างเมื่อ")
-  row                                                              BigInt        @id @default(autoincrement()) @map("_row")
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  row                                                              Int           @id @default(autoincrement()) @map("_row")
   doc_key                                                          String?       @map("_doc_key")
   action_at                                                        DateTime?     @map("_action_at") @db.Timestamptz(6)
   created_at                                                       DateTime?     @map("_created_at") @db.Timestamptz(6)
   goods_id                                                         Int?          @map("_goods_id")
-  company_id                                                       BigInt?       @map("_company_id")
+  company_id                                                       Int?          @map("_company_id")
   sale_person_id                                                   String?       @map("_sale_person_id") @db.Uuid
   recorded_by                                                      String?       @map("_recorded_by") @db.Uuid
   issues                                                           String[]      @default([]) @map("_issues")
@@ -6266,7 +6288,7 @@ model assett_import_staging {
   warranty_years                                                   Int?          @map("_warranty_years")
   goods_id_manual                                                  Int?          @map("_goods_id_manual")
   location_id                                                      Int?          @map("_location_id")
-  missing_event_id                                                 BigInt?       @map("_missing_event_id")
+  missing_event_id                                                 Int?          @map("_missing_event_id")
   assett                                                           assett?       @relation(fields: [assett_id], references: [id], onUpdate: NoAction)
   assett_goods_assett_import_staging_goods_idToassett_goods        assett_goods? @relation("assett_import_staging_goods_idToassett_goods", fields: [goods_id], references: [id], onUpdate: NoAction)
   assett_goods_assett_import_staging_goods_id_manualToassett_goods assett_goods? @relation("assett_import_staging_goods_id_manualToassett_goods", fields: [goods_id_manual], references: [id], onUpdate: NoAction)
@@ -6290,7 +6312,7 @@ model assett_warranty_import_staging {
   Recorder                                                                  String?
   Create_PM                                                                 String?
   Doc_wa_PM                                                                 String?       @map("Doc_wa&PM")
-  row                                                                       BigInt        @id @default(autoincrement()) @map("_row")
+  row                                                                       Int           @id @default(autoincrement()) @map("_row")
   sn_main                                                                   String?       @map("_sn_main")
   sn_extra                                                                  String?       @map("_sn_extra")
   ls_suffix                                                                 Boolean?      @map("_ls_suffix")
@@ -6309,6 +6331,64 @@ model assett_warranty_import_staging {
   assett_goods_assett_warranty_import_staging_goods_idToassett_goods        assett_goods? @relation("assett_warranty_import_staging_goods_idToassett_goods", fields: [goods_id], references: [id], onUpdate: NoAction)
   assett_goods_assett_warranty_import_staging_goods_id_manualToassett_goods assett_goods? @relation("assett_warranty_import_staging_goods_id_manualToassett_goods", fields: [goods_id_manual], references: [id], onUpdate: NoAction)
 
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model assett_goods_list_cache {
+  goods_id              Int          @id
+  companies_id          BigInt?
+  last_assett_id        Int?
+  last_doc_type         String?
+  last_doc_status       String?
+  last_doc_no           String?
+  last_customer         String?
+  last_customer_company String?
+  location_name         String?
+  search_text           String?
+  updated_at            DateTime     @default(now()) @db.Timestamptz(6)
+  assett_goods          assett_goods @relation(fields: [goods_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([last_doc_status], map: "assett_goods_list_cache_status_idx")
+  @@index([last_doc_type], map: "assett_goods_list_cache_type_idx")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model doc_groups {
+  id          Int      @id @default(autoincrement())
+  code        String?  @unique
+  doc_numbers String[]
+  note        String?
+  created_by  String?  @default(dbgenerated("auth.uid()")) @db.Uuid
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model spare_part_requests {
+  id                                                                            Int                 @id @default(autoincrement())
+  spare_part_id                                                                 Int
+  qty                                                                           Int
+  from_location_id                                                              Int
+  to_location_id                                                                Int
+  note                                                                          String?
+  status                                                                        String              @default("pending")
+  requested_by                                                                  String              @default(dbgenerated("auth.uid()")) @db.Uuid
+  requested_at                                                                  DateTime            @default(now()) @db.Timestamptz(6)
+  decided_by                                                                    String?             @db.Uuid
+  decided_at                                                                    DateTime?           @db.Timestamptz(6)
+  reject_reason                                                                 String?
+  transfer_group_id                                                             String?             @db.Uuid
+  warehouse_locations_spare_part_requests_from_location_idTowarehouse_locations warehouse_locations @relation("spare_part_requests_from_location_idTowarehouse_locations", fields: [from_location_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  spare_parts                                                                   spare_parts         @relation(fields: [spare_part_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  warehouse_locations_spare_part_requests_to_location_idTowarehouse_locations   warehouse_locations @relation("spare_part_requests_to_location_idTowarehouse_locations", fields: [to_location_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([requested_by])
+  @@index([status, requested_at(sort: Desc)], map: "spare_part_requests_status_idx")
   @@schema("public")
 }
 
@@ -6739,6 +6819,49 @@ view vw_product_order_information {
   url_image         String?
   online_price      Float?
   product_option_id Int?
+
+  @@schema("3nconnect")
+}
+
+view assett_goods_list_v {
+  id                    Int?
+  name                  String?
+  sn_no                 String?
+  catalog_no            String?
+  brand                 String?
+  type                  String?
+  created_at            DateTime? @db.Timestamptz(6)
+  companies_id          BigInt?
+  owner_customeruser_id String?   @db.Uuid
+  location_id           Int?
+  placement_assett_id   Int?
+  is_used               Boolean?
+  missing_at            DateTime? @db.Timestamptz(6)
+  where_state           String?
+  last_doc_type         String?
+  last_doc_status       String?
+  last_doc_no           String?
+  last_customer         String?
+  last_customer_company String?
+  holder_key            String?
+  type_label            String?
+  sn_broken             Boolean?
+  search_text           String?
+
+  @@schema("public")
+}
+
+view vw_order_billing_voucher_usage {
+  order_billing_id  Int?
+  gift_voucher_code String?
+  gift_voucher_id   Int?
+  url_image         String?
+  voucher_name      String?
+  gift_voucher_type String?
+  discount_type     String?
+  min_purchase      Float?
+  max_discount      Float?
+  percent_discount  Float?
 
   @@schema("3nconnect")
 }

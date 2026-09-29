@@ -1473,14 +1473,25 @@ export const ecommerceCustomerRoute = new Elysia({
               });
             }
 
-            if (detail.voucher_usage.length > 0) {
+            for (const voucher of detail.voucher_usage) {
               await tx.order_billing_voucher_usage.createMany({
-                data: detail.voucher_usage.map((voucher) => ({
+                data: {
                   order_billing_id: createdOrder.id,
                   gift_voucher_code: voucher.gift_voucher_code,
                   promotion_id: voucher.promotion_id,
                   usaged_at: toDateTime(voucher.usaged_at),
-                }))
+                },
+              });
+
+              await tx.customervoucher.updateMany({
+                where: {
+                  voucherid: voucher.gift_voucher_code || '-',
+                  customer_id: detail.buyer_customeruser_id
+                },
+                data: {
+                  used: true,
+                  used_at: new Date(detail.created_at)
+                }
               })
             }
 
@@ -1745,9 +1756,22 @@ export const ecommerceCustomerRoute = new Elysia({
             }
           })
 
+          const voucherUsage = await prisma.vw_order_billing_voucher_usage.findMany({
+            where : {
+              order_billing_id: order.id
+            },
+            select: {
+              discount_type: true,
+              min_purchase: true,
+              max_discount: true,
+              percent_discount: true,
+            }
+          })
+
           return { 
             ...order,
-            product_order_information
+            product_order_information,
+            voucherUsage
           }
         })
       )

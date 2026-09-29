@@ -6904,6 +6904,18 @@ export const ecommerceRoute = new Elysia({
           return {...resProducts}
         })
 
+        const voucherUsage = await prisma.vw_order_billing_voucher_usage.findMany({
+          where : {
+            order_billing_id: response.id
+          },
+          select: {
+            discount_type: true,
+            min_purchase: true,
+            max_discount: true,
+            percent_discount: true,
+          }
+        })
+
         const result = {
           id: response.id,
           order_no: response.docid,
@@ -6932,6 +6944,7 @@ export const ecommerceRoute = new Elysia({
           shipping_address_info: resShippingAddress,
           invoice_address_info: resInvoiceAddress,
           order_items_info: await Promise.all(orderItemsInfo),
+          gift_voucher : voucherUsage
         }
 
         return result
