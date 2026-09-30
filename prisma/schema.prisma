@@ -1662,9 +1662,15 @@ model bill_tracking {
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   note               String?
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // สิ่งที่แนบมา String? @map("สิ่งที่แนบมา")
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
@@ -1698,6 +1704,9 @@ model bill_tracking {
   enroll_date        String? @map("enroll date")
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // พนักงานขาย String? @map("พนักงานขาย")
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
@@ -4258,6 +4267,9 @@ model public_users {
   assett_assett_recorded_byTousers                                 assett[]                             @relation("assett_recorded_byTousers")
   assett_assett_sale_person_idTousers                              assett[]                             @relation("assett_sale_person_idTousers")
   assett_attachments                                               assett_attachments[]
+  assett_document_emails                                           assett_document_emails[]
+  assett_signatures_assett_signatures_captured_byTousers           assett_signatures[]                  @relation("assett_signatures_captured_byTousers")
+  assett_signatures_assett_signatures_voided_byTousers             assett_signatures[]                  @relation("assett_signatures_voided_byTousers")
   assett_waranty                                                   assett_waranty[]
   ces_status                                                       ces_status[]
   chat_participants                                                chat_participants[]
@@ -6275,6 +6287,9 @@ model assett_import_staging {
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   row                                                              Int           @id @default(autoincrement()) @map("_row")
   doc_key                                                          String?       @map("_doc_key")
   action_at                                                        DateTime?     @map("_action_at") @db.Timestamptz(6)
@@ -6411,6 +6426,52 @@ model assett_goods_transfers {
   @@index([created_at(sort: Desc)], map: "assett_goods_transfers_created_idx")
   @@index([assett_goods_id, created_at(sort: Desc)], map: "assett_goods_transfers_goods_idx")
   @@index([transfer_group_id], map: "assett_goods_transfers_group_idx")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model assett_document_emails {
+  id         BigInt        @id @default(autoincrement())
+  assett_id  BigInt
+  to_emails  String[]
+  pdf_path   String
+  pdf_sha256 String?
+  message    String?
+  status     String        @default("sent")
+  error      String?
+  sent_by    String?       @db.Uuid
+  sent_at    DateTime      @default(now()) @db.Timestamptz(6)
+  users      public_users? @relation(fields: [sent_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([assett_id, sent_at(sort: Desc)], map: "assett_document_emails_assett_idx")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model assett_signatures {
+  id                                         BigInt        @id @default(autoincrement())
+  assett_id                                  BigInt
+  slot                                       Int
+  role                                       String
+  signer_name                                String
+  signer_email                               String?
+  signature_path                             String
+  signed_at                                  DateTime      @default(now()) @db.Timestamptz(6)
+  captured_by                                String?       @default(dbgenerated("_my_user_id()")) @db.Uuid
+  device                                     String?
+  lat                                        Float?
+  lng                                        Float?
+  doc_hash                                   String?
+  voided_at                                  DateTime?     @db.Timestamptz(6)
+  voided_by                                  String?       @db.Uuid
+  void_reason                                String?
+  users_assett_signatures_captured_byTousers public_users? @relation("assett_signatures_captured_byTousers", fields: [captured_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_assett_signatures_voided_byTousers   public_users? @relation("assett_signatures_voided_byTousers", fields: [voided_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([assett_id, slot], map: "assett_signatures_active_slot_uq", where: raw("(voided_at IS NULL)"))
+  @@index([assett_id], map: "assett_signatures_assett_idx")
   @@schema("public")
 }
 
