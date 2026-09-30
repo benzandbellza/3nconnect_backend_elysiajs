@@ -6909,6 +6909,11 @@ export const ecommerceRoute = new Elysia({
             order_billing_id: response.id
           },
           select: {
+            gift_voucher_id: true,
+            url_image: true,
+            gift_voucher_code: true,
+            voucher_name: true,
+            gift_voucher_type: true,
             discount_type: true,
             min_purchase: true,
             max_discount: true,
@@ -7572,6 +7577,26 @@ export const ecommerceRoute = new Elysia({
             }
           });
 
+          const is_remove_voucher = body.gift_voucher.is_remove;
+          if(is_remove_voucher){
+            await prisma.order_billing_voucher_usage.deleteMany({
+              where: {
+                order_billing_id: body.gift_voucher.order_billing_id
+              }
+            });
+
+            await prisma.customervoucher.updateMany({
+              where: {
+                customer_id: updatedOrder.customeruser_id,
+                voucherid: body.gift_voucher.gift_voucher_code,
+              },
+              data: {
+                used: false,
+                used_at: null,
+              }
+            })
+          }
+
           return {
             id: updatedOrder.id,
             order_uuid: updatedOrder.order_uuid,
@@ -7608,6 +7633,11 @@ export const ecommerceRoute = new Elysia({
         shipping_address_id: t.Number(),
         invoice_address_id: t.Number(),
         payment_invoice_no: t.Optional(t.Nullable(t.String())),
+        gift_voucher: t.Object({
+          is_remove: t.Boolean(),
+          order_billing_id: t.Number(),
+          gift_voucher_code: t.String(),
+        }),
         billing_items: t.Array(
           t.Object({
             product_option_id: t.Number(),

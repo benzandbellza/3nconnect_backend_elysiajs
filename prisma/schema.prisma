@@ -1661,9 +1661,11 @@ model bill_tracking {
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   note               String?
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // สิ่งที่แนบมา String? @map("สิ่งที่แนบมา")
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
@@ -1696,6 +1698,7 @@ model bill_tracking {
   enroll_date        String? @map("enroll date")
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   // พนักงานขาย String? @map("พนักงานขาย")
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
@@ -4516,12 +4519,13 @@ model aecsales {
 }
 
 model assett_goods_docs {
-  id              Int          @id @default(autoincrement())
-  created_at      DateTime     @default(now()) @db.Timestamptz(6)
-  assett_goods_id Int
-  assett_id       Int
-  assett          assett       @relation(fields: [assett_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "assett_goods_docs_assett_fkey")
-  assett_goods    assett_goods @relation(fields: [assett_goods_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "assett_goods_docs_goods_fkey")
+  id               Int          @id @default(autoincrement())
+  created_at       DateTime     @default(now()) @db.Timestamptz(6)
+  assett_goods_id  Int
+  assett_id        Int
+  from_location_id BigInt?
+  assett           assett       @relation(fields: [assett_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "assett_goods_docs_assett_fkey")
+  assett_goods     assett_goods @relation(fields: [assett_goods_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "assett_goods_docs_goods_fkey")
 
   @@unique([assett_goods_id, assett_id], map: "assett_goods_docs_unique")
   @@index([assett_id], map: "idx_assett_goods_docs_assett_id")
@@ -6270,6 +6274,7 @@ model assett_import_staging {
   // สร้างเมื่อ String? @map("สร้างเมื่อ")
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
+  /// This field was commented out because of an invalid name. Please provide a valid one that matches [a-zA-Z][a-zA-Z0-9_]*
   row                                                              Int           @id @default(autoincrement()) @map("_row")
   doc_key                                                          String?       @map("_doc_key")
   action_at                                                        DateTime?     @map("_action_at") @db.Timestamptz(6)
@@ -6389,6 +6394,23 @@ model spare_part_requests {
 
   @@index([requested_by])
   @@index([status, requested_at(sort: Desc)], map: "spare_part_requests_status_idx")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model assett_goods_transfers {
+  id                BigInt   @id @default(autoincrement())
+  assett_goods_id   BigInt
+  from_location_id  BigInt?
+  to_location_id    BigInt
+  transfer_group_id String   @db.Uuid
+  note              String?
+  created_by        String?  @default(dbgenerated("auth.uid()")) @db.Uuid
+  created_at        DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([created_at(sort: Desc)], map: "assett_goods_transfers_created_idx")
+  @@index([assett_goods_id, created_at(sort: Desc)], map: "assett_goods_transfers_goods_idx")
+  @@index([transfer_group_id], map: "assett_goods_transfers_group_idx")
   @@schema("public")
 }
 
